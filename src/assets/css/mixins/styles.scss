@@ -1,0 +1,53 @@
+
+@mixin text-gradient(
+  $gradient:
+    linear-gradient(var(--text-secondary) 20%, var(--text-primary) 100%)
+) {
+  background: $gradient;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@mixin ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+@mixin clamp($line: 3) {
+  display: -webkit-box;
+  -webkit-line-clamp: $line;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin light-blur {
+  content: "";
+  background: linear-gradient(
+    to right,
+    hsl(var(--color-h), var(--color-s), var(--color-l-1)),
+    hsl(var(--color-h), var(--color-s), var(--color-l-2)),
+    hsl(var(--color-h), var(--color-s), var(--color-l-3))
+  );
+  position: absolute;
+  inset: 5%;
+  filter: blur(15px);
+  pointer-events: none;
+}
+
+@mixin translate-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@mixin no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

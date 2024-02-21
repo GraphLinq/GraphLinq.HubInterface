@@ -1,0 +1,92 @@
+@import "../../assets/css/mixins/medias.scss";
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 80px;
+    padding: 0 24px;
+
+    &-logo {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+    }
+
+    &-left, &-right {
+        display: flex;
+    }
+
+    &-left {
+        gap: 40px;
+    }
+
+    &-right {
+        justify-content: flex-end;
+    }
+
+    &-currencies {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        @include max($desktop) {
+            display: none;
+        }
+
+        &-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--c-lavender);
+
+            path {
+                fill: var(--c-lavender);
+            }
+        }
+    }
+
+    &-nav {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 80px;
+
+        @include max($tablet) {
+            position: fixed;
+            bottom: 0;
+        }
+
+        a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--c-lavender);
+            padding: 12px 20px;
+            border-radius: 100px;
+            white-space: nowrap;
+            transition: .2s color ease-out;
+
+            path {
+                fill: var(--c-lavender);
+                transition: .2s fill ease-out;
+            }
+
+            &:hover {
+                color: var(--c-white);
+
+                path {
+                    fill: var(--c-white);
+                }
+            }
+
+            &.active {
+                color: var(--c-white);
+                background-color: var(--c-martinique);
+            }
+        }
+    }
+}
