@@ -4,7 +4,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 80px;
+    height: var(--header-height);
     padding: 0 24px;
 
     &-logo {
@@ -23,6 +23,7 @@
 
     &-right {
         justify-content: flex-end;
+        gap: 16px;
     }
 
     &-currencies {
@@ -39,6 +40,7 @@
             align-items: center;
             gap: 8px;
             color: var(--c-lavender);
+            font-weight: 600;
 
             path {
                 fill: var(--c-lavender);
@@ -67,6 +69,7 @@
             color: var(--c-lavender);
             padding: 12px 20px;
             border-radius: 100px;
+            font-weight: 600;
             white-space: nowrap;
             transition: .2s color ease-out;
 

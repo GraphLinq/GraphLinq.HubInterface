@@ -1,0 +1,33 @@
+.pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 100px;
+    border: 1px solid var(--c-martinique);
+    color: var(--c-white);
+    transition: transform .2s ease-out;
+
+    &-icon {
+        path {
+            fill: var(--c-white);
+        }
+    }
+
+    &-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+
+        span {
+            & + span {
+              color: var(--c-lavender);
+            }
+          }
+    }
+
+    &:focus {
+        transform: scale(.95);
+    }
+}

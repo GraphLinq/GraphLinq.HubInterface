@@ -2,21 +2,27 @@ import "./_header.scss";
 import Bridge from "@assets/icons/bridge.svg?react";
 import ChainStatus from "@assets/icons/chain.svg?react";
 import CoinInfo from "@assets/icons/coin.svg?react";
+import Connect from "@assets/icons/connect-wallet.svg?react";
 import Dashboard from "@assets/icons/dashboard.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import LogoName from "@assets/icons/logo-name.svg?react";
 import Logo from "@assets/icons/logo.svg?react";
-import Connect from "@assets/icons/connect-wallet.svg?react";
-import { formatNumberToDollars } from "@utils/number";
-import { useWeb3React } from "@web3-react/core";
-import { Link, NavLink } from "react-router-dom";
+import Wallet from "@assets/icons/wallet.svg?react";
 import Button from "@components/Button";
+import Pill from "@components/Pill";
+import { formatNumberToDollars } from "@utils/number";
+import { formatEthereumAddress } from "@utils/string";
+import { useWeb3React } from "@web3-react/core";
+import { useState } from "react";
+import { Link, NavLink } from "react-router-dom";
+
 import {
   tryActivateConnector,
   getConnection,
   ConnectionType,
 } from "../../libs/connections";
+
 
 function Header() {
   const { account } = useWeb3React();
@@ -61,6 +67,8 @@ function Header() {
     );
   };
 
+  const [tokenAmount] = useState(0);
+
   return (
     <header className="header">
       <div className="header-left">
@@ -89,7 +97,12 @@ function Header() {
 
       <div className="header-right">
         {account ? (
-          <>{account}</>
+          <>
+            <Pill icon={<GLQToken />} onClick={() => {}}>
+              {tokenAmount.toFixed(2)}
+            </Pill>
+            <Pill icon={<Wallet />}>{formatEthereumAddress(account)}</Pill>
+          </>
         ) : (
           <Button onClick={handleConnect} icon={<Connect />}>
             Connect Wallet

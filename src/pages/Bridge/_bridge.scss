@@ -2,4 +2,25 @@
 @import "../../assets/css/mixins/medias";
 
 .bridge {
+    &-swap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 24px;
+
+        .select {
+            flex-grow: 1;
+        }
+
+        &-switch {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background-color: var(--c-mulled-wine);
+            border-radius: 50%;
+        }
+    }
 }

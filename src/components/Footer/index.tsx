@@ -1,12 +1,7 @@
-import "./_footer.scss"
-
+import "./_footer.scss";
 
 function Footer() {
-  return (
-    <footer>
-      footer
-    </footer>
-  )
+  return <footer></footer>;
 }
 
-export default Footer
+export default Footer;
