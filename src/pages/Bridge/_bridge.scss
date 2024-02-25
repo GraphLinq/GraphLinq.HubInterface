@@ -2,25 +2,79 @@
 @import "../../assets/css/mixins/medias";
 
 .bridge {
+  &-swap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+
+    .select, .pill {
+      flex-grow: 1;
+    }
+
+    &-switch {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background-color: var(--c-mulled-wine);
+      border-radius: 50%;
+    }
+  }
+
+  &-amount {
+    margin-top: 32px;
+
+    &-subtitle {
+      color: var(--c-lavender);
+    }
+    &-value {
+      display: flex;
+      gap: 12px;
+      color: var(--c-lavender);
+      font-weight: 600;
+      font-size: 36px;
+
+      span {
+        color: var(--c-white);
+      }
+    }
     &-swap {
+      display: flex;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--c-lavender);
+      margin-top: 16px;
+
+      &-input {
+        flex-grow: 1;
+      }
+
+      &-actions {
         display: flex;
-        align-items: center;
         gap: 8px;
-        margin-top: 24px;
 
-        .select {
-            flex-grow: 1;
+        .button {
+            height: 100%;
+            padding: 0 20px;
+            background: var(--c-martinique);
         }
+      }
+    }
 
-        &-switch {
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            background-color: var(--c-mulled-wine);
-            border-radius: 50%;
+    &-submit {
+        margin-top: 32px;
+
+        .button {
+            width: 100%;
         }
     }
+  }
+
+  &-warn {
+    color: var(--c-lavender);
+    text-align: center;
+  }
 }

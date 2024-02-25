@@ -11,12 +11,13 @@ import Logo from "@assets/icons/logo.svg?react";
 import Wallet from "@assets/icons/wallet.svg?react";
 import Button from "@components/Button";
 import Pill from "@components/Pill";
+import { WGLQ_TOKEN } from "@constants/index";
 import { formatNumberToDollars } from "@utils/number";
 import { formatEthereumAddress } from "@utils/string";
 import { useWeb3React } from "@web3-react/core";
-import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 
+import useTokenBalance from "../../composables/useTokenBalance";
 import {
   tryActivateConnector,
   getConnection,
@@ -26,6 +27,7 @@ import {
 
 function Header() {
   const { account } = useWeb3React();
+  const GLQBalance = useTokenBalance('native');
 
   const currencies = [
     {
@@ -67,8 +69,6 @@ function Header() {
     );
   };
 
-  const [tokenAmount] = useState(0);
-
   return (
     <header className="header">
       <div className="header-left">
@@ -77,8 +77,8 @@ function Header() {
           <LogoName />
         </Link>
         <div className="header-currencies">
-          {currencies.map((currency) => (
-            <div className="header-currencies-item">
+          {currencies.map((currency, i) => (
+            <div className="header-currencies-item" key={i}>
               {currency.icon}
               <span>{formatNumberToDollars(currency.value)}</span>
             </div>
@@ -87,8 +87,8 @@ function Header() {
       </div>
 
       <div className="header-nav">
-        {nav.map((item) => (
-          <NavLink to={item.url}>
+        {nav.map((item, i) => (
+          <NavLink to={item.url} key={i}>
             {item.icon}
             <span>{item.label}</span>
           </NavLink>
@@ -99,7 +99,7 @@ function Header() {
         {account ? (
           <>
             <Pill icon={<GLQToken />} onClick={() => {}}>
-              {tokenAmount.toFixed(2)}
+              {GLQBalance || '...'}
             </Pill>
             <Pill icon={<Wallet />}>{formatEthereumAddress(account)}</Pill>
           </>

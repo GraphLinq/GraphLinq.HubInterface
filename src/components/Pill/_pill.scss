@@ -27,7 +27,7 @@
           }
     }
 
-    &:focus {
+    &[data-focus]:active {
         transform: scale(.95);
     }
 }

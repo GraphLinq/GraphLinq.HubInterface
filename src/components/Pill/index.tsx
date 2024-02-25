@@ -11,7 +11,7 @@ interface PillProps {
 const Pill: React.FC<PillProps> = ({ onClick, children, icon }) => {
   if (onClick) {
     return (
-      <button onClick={onClick} className="pill">
+      <button onClick={onClick} className="pill" data-focus>
         {icon && <span className="pill-icon">{icon}</span>}
         <span className="pill-label">{children}</span>
         <span className="pill-plus"><Plus/></span>

@@ -17,6 +17,7 @@ const Select: React.FC<SelectProps> = ({ options, onChange }) => {
     if (onChange) {
       onChange(index);
     }
+    setOpen(false);
   };
 
   return (
@@ -29,7 +30,11 @@ const Select: React.FC<SelectProps> = ({ options, onChange }) => {
       </div>
       <div className="select-options">
         {options.map((opt, i) => (
-          <div className="select-option" onClick={() => handleOptionClick(i)}>
+          <div
+            className="select-option"
+            key={i}
+            onClick={() => handleOptionClick(i)}
+          >
             {opt}
             {activeIndex === i && <Check />}
           </div>

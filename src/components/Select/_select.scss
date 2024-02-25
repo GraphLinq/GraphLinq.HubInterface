@@ -1,9 +1,9 @@
 .select {
   position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 8px;
-
   border-radius: 100px;
   border: 1px solid var(--c-martinique);
   color: var(--c-white);
