@@ -23,11 +23,12 @@ import {
   getConnection,
   ConnectionType,
 } from "../../libs/connections";
+import { MAINNET_CHAIN_ID } from "@utils/chains";
 
 
 function Header() {
-  const { account } = useWeb3React();
-  const GLQBalance = useTokenBalance('native');
+  const { account, chainId } = useWeb3React();
+  const GLQBalance = useTokenBalance(chainId === MAINNET_CHAIN_ID ? WGLQ_TOKEN.address.mainnet : 'native');
 
   const currencies = [
     {

@@ -11,6 +11,10 @@
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "^3.7.2",
+    "@ethersproject/address": "^5.7.0",
+    "@ethersproject/bignumber": "^5.7.0",
+    "@ethersproject/constants": "^5.7.0",
+    "@ethersproject/contracts": "^5.7.0",
     "@gsap/react": "^2.0.2",
     "@splinetool/react-spline": "^2.2.6",
     "@splinetool/runtime": "^1.0.17",

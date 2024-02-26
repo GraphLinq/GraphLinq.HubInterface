@@ -33,14 +33,15 @@ const mainChains: ChainNamed[] = [
   { chainId: 4, name: "Rinkeby Testnet" },
   { chainId: 5, name: "Goerli Testnet" },
   { chainId: 614, name: "GLQ Mainnet" },
+  { chainId: 11155111, name: "Sepolia Testnet" },
 ];
 
 function getChainName(chainId: number): string {
   const chain = mainChains.find((c) => c.chainId === chainId);
-  return chain ? chain.name : "Chaîne inconnue";
+  return chain ? chain.name : "Unknown chain";
 }
 
-const MAINNET_CHAIN_ID = 1;
+const MAINNET_CHAIN_ID = 11155111;
 const GLQ_CHAIN_ID = 614;
 
 export { getChainName, MAINNET_CHAIN_ID,  GLQ_CHAIN_ID };

@@ -1,49 +1,97 @@
 import "./_bridge.scss";
-import BTCToken from "@assets/icons/btc-icon.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
-import USDTToken from "@assets/icons/usdt-icon.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import Pill from "@components/Pill";
 import Select from "@components/Select";
-import { CURRENCIES, SITE_NAME } from "@constants/index";
+import {
+  MAINNET_CURRENCIES,
+  GLQCHAIN_CURRENCIES,
+  SITE_NAME,
+  MAINNET_EXPLORER,
+  GLQ_EXPLORER,
+} from "@constants/index";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
 import { useWeb3React } from "@web3-react/core";
+import { parseUnits } from "ethers";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 
+import {
+  useEVMBridgeContract,
+  useEVMBridgeERC20MinterContract,
+  useEVMBridgeNativeContract,
+  useTokenContract,
+} from "../../composables/useContract";
 import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
+import { switchNetwork } from "../../libs/connections";
 
 const tokenIcons = {
+  GLQ: <GLQToken />,
   WGLQ: <GLQToken />,
+  ETH: <ETHToken />,
   WETH: <ETHToken />,
 };
 
 function BridgePage() {
-  const { chainId } = useWeb3React();
+  const { chainId, account } = useWeb3React();
   const [switchToGraphLinqMainnet, switchToMainnet] = useNetwork();
 
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const explorer =
+    chainId === MAINNET_CHAIN_ID ? MAINNET_EXPLORER : GLQ_EXPLORER;
+
+  const resetFeedback = () => {
+    setError("");
+    setPending("");
+    setSuccess("");
+  };
+
   const [activeOption, setActiveOption] = useState(0);
-  const currencyOptions = CURRENCIES.map((currency) => {
+  const currencyOptions = (
+    chainId === MAINNET_CHAIN_ID ? MAINNET_CURRENCIES : GLQCHAIN_CURRENCIES
+  ).map((currency) => {
     currency.icon = tokenIcons[currency.name];
     return currency;
   });
+  const activeCurrency = currencyOptions[activeOption];
 
   const tokenBalance = useTokenBalance(
-    currencyOptions[activeOption].address[chainId === 1 ? "mainnet" : "glq"]
+    activeCurrency.address[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
   );
 
-    const handleSelectChange = (active: number) => {
-      setActiveOption(active)
-      setAmount(0)
-    }
+  const activeTokenContract = useTokenContract(
+    activeCurrency.address[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
+  );
+  const activeEVMBridgeContract = useEVMBridgeContract(
+    activeCurrency.bridge &&
+      activeCurrency.bridge[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
+  );
+  const activeEVMBridgeNativeContract = useEVMBridgeNativeContract(
+    activeCurrency.bridge &&
+      activeCurrency.bridge[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
+  );
+  const activeEVMBridgeERC20MinterContract = useEVMBridgeERC20MinterContract(
+    activeCurrency.bridge &&
+      activeCurrency.bridge[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
+  );
+
+  const handleSelectChange = (active: number) => {
+    resetFeedback();
+    setActiveOption(active);
+    setAmount(0);
+  };
 
   const handleSwitchNetwork = () => {
-    if (chainId === 1) {
+    resetFeedback();
+    if (chainId === MAINNET_CHAIN_ID) {
       switchToGraphLinqMainnet();
     } else {
       switchToMainnet();
@@ -51,6 +99,88 @@ function BridgePage() {
   };
 
   const [amount, setAmount] = useState(0);
+
+  const handleSend = async () => {
+    resetFeedback();
+
+    if (amount <= 0) {
+      setError(
+        `Invalid amount to send on the contract: ${amount} ${activeCurrency.name}`
+      );
+      return;
+    }
+
+    let bridgeContract;
+    if (chainId === MAINNET_CHAIN_ID) {
+      if (activeCurrency.address.mainnet === "native") {
+        bridgeContract = activeEVMBridgeNativeContract;
+      } else {
+        bridgeContract = activeEVMBridgeContract;
+      }
+    } else {
+      bridgeContract = activeEVMBridgeERC20MinterContract;
+    }
+
+    if (bridgeContract) {
+      const bridgeCost = await bridgeContract.getFeesInETH();
+
+      let allowance = "0";
+      if (activeCurrency.address.mainnet !== "native" && activeTokenContract) {
+        const requiredAmount = amount + parseFloat(bridgeCost);
+        allowance = await activeTokenContract.allowance(
+          account,
+          bridgeContract.address
+        );
+
+        const allowanceDecimal = parseFloat(allowance);
+
+        if (allowanceDecimal < requiredAmount) {
+          const difference = requiredAmount - allowanceDecimal;
+
+          setPending(
+            "Allowance pending, please allow the use of your token balance for the contract..."
+          );
+          const approveTx = await activeTokenContract.approve(
+            bridgeContract.address,
+            parseUnits(difference.toString(), 18)
+          );
+          setPending("Waiting for confirmations...");
+          await approveTx.wait();
+          setPending(
+            "Allowance successfully increased, waiting for deposit transaction..."
+          );
+        }
+
+        if (tokenBalance && amount > parseFloat(tokenBalance)) {
+          setPending("");
+          setError(
+            `You only have ${tokenBalance} ${activeCurrency.name} in your wallet.`
+          );
+          return;
+        }
+
+        setPending(
+          "Pending, check your wallet extension to execute the chain transaction..."
+        );
+
+        const resultTx = await bridgeContract.initTransfer(
+          parseUnits(amount.toString(), 18),
+          activeCurrency.chainDestination[
+            chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"
+          ],
+          account,
+          { value: bridgeCost }
+        );
+
+        setPending("Waiting for confirmations...");
+
+        const txReceipt = await resultTx.wait();
+        if (txReceipt.status === 1) {
+          setSuccess(txReceipt.transactionHash);
+        }
+      }
+    }
+  };
 
   return (
     <>
@@ -61,7 +191,7 @@ function BridgePage() {
         <div className="main-card">
           <div className="main-card-title">Bridge</div>
           <div className="main-card-desc">
-            {chainId === 1 ? (
+            {chainId === MAINNET_CHAIN_ID ? (
               <>
                 Transfer assets from <b>Ethereum</b> to <b>Graphlinq Chain</b>.
               </>
@@ -90,8 +220,8 @@ function BridgePage() {
               <Swap onClick={handleSwitchNetwork} />
             </div>
             <Pill>
-              {currencyOptions[activeOption].icon}
-              <span>{currencyOptions[activeOption].name}</span>
+              {activeCurrency.icon}
+              <span>{activeCurrency.mirror}</span>
               {chainId && (
                 <span>
                   {getChainName(
@@ -108,15 +238,16 @@ function BridgePage() {
             <div className="bridge-amount-subtitle">Available</div>
             <div className="bridge-amount-value">
               <span>{tokenBalance}</span>
-              {currencyOptions[activeOption].name}
+              {activeCurrency.name}
             </div>
             <div className="bridge-amount-swap">
               <div className="bridge-amount-swap-input">
                 <InputNumber
-                  icon={currencyOptions[activeOption].icon}
-                  currencyText={currencyOptions[activeOption].name}
+                  icon={activeCurrency.icon}
+                  currencyText={activeCurrency.name}
                   value={amount}
-                  onChange={() => {}}
+                  max={tokenBalance ? parseFloat(tokenBalance) : 0}
+                  onChange={(value) => setAmount(value)}
                 />
               </div>
               <div className="bridge-amount-swap-actions">
@@ -150,8 +281,30 @@ function BridgePage() {
               </div>
             </div>
             <div className="bridge-amount-submit">
-              <Button>Send</Button>
+              <Button onClick={handleSend}>Send</Button>
             </div>
+            {error && (
+              <Alert type="error">
+                <i className="fal fa-times-circle"></i>
+                <p>{error}</p>
+              </Alert>
+            )}
+            {!success && pending && (
+              <Alert type="warning">
+                <p>{pending}</p>
+              </Alert>
+            )}
+            {success && (
+              <Alert type="success">
+                <p>
+                  <b>Successfully completed !</b>
+                  <br />
+                  <small>
+                    Transaction hash : {success}
+                  </small>
+                </p>
+              </Alert>
+            )}
           </div>
         </div>
         <div className="bridge-warn">

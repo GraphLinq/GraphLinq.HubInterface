@@ -10,6 +10,11 @@ function useTokenBalance(tokenAddress: string) {
     const fetchBalance = async () => {
       if (!account || !provider || !chainId) return;
 
+      if (tokenAddress === '') {
+        setBalance("0.0");
+        return;
+      }
+
       try {
         let tokenBalance;
         if (tokenAddress === "native") {
@@ -24,7 +29,7 @@ function useTokenBalance(tokenAddress: string) {
         }
 
         if (typeof tokenBalance !== "bigint" && tokenBalance.isZero()) {
-          setBalance("0.00");
+          setBalance("0.0");
         } else {
           const formattedBalance = formatUnits(tokenBalance.toString(), 18);
           setBalance(formattedBalance);
