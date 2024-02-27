@@ -25,10 +25,11 @@ import {
 } from "../../libs/connections";
 import { MAINNET_CHAIN_ID } from "@utils/chains";
 
-
 function Header() {
   const { account, chainId } = useWeb3React();
-  const GLQBalance = useTokenBalance(chainId === MAINNET_CHAIN_ID ? WGLQ_TOKEN.address.mainnet : 'native');
+  const {balance: GLQBalance} = useTokenBalance(
+    chainId === MAINNET_CHAIN_ID ? WGLQ_TOKEN.address.mainnet : "native"
+  );
 
   const currencies = [
     {
@@ -99,9 +100,11 @@ function Header() {
       <div className="header-right">
         {account ? (
           <>
-            <Pill icon={<GLQToken />} onClick={() => {}}>
-              {GLQBalance || '...'}
-            </Pill>
+            {GLQBalance && (
+              <Pill icon={<GLQToken />} onClick={() => {}}>
+                {parseFloat(GLQBalance).toFixed(5) || "..."}
+              </Pill>
+            )}
             <Pill icon={<Wallet />}>{formatEthereumAddress(account)}</Pill>
           </>
         ) : (

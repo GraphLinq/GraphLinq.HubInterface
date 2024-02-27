@@ -6,43 +6,43 @@ function useTokenBalance(tokenAddress: string) {
   const { account, provider, chainId } = useWeb3React();
   const [balance, setBalance] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchBalance = async () => {
-      if (!account || !provider || !chainId) return;
+  const fetchBalance = async () => {
+    if (!account || !provider || !chainId) return;
 
-      if (tokenAddress === '') {
+    if (tokenAddress === "") {
+      setBalance("0.0");
+      return;
+    }
+
+    try {
+      let tokenBalance;
+      if (tokenAddress === "native") {
+        tokenBalance = await provider.getBalance(account);
+      } else {
+        const tokenContract = new Contract(
+          tokenAddress,
+          ["function balanceOf(address) view returns (uint)"],
+          provider
+        );
+        tokenBalance = await tokenContract.balanceOf(account);
+      }
+
+      if (typeof tokenBalance !== "bigint" && tokenBalance.isZero()) {
         setBalance("0.0");
-        return;
+      } else {
+        const formattedBalance = formatUnits(tokenBalance.toString(), 18);
+        setBalance(formattedBalance);
       }
+    } catch (error) {
+      console.error("Error getting token balance.", error);
+    }
+  };
 
-      try {
-        let tokenBalance;
-        if (tokenAddress === "native") {
-          tokenBalance = await provider.getBalance(account);
-        } else {
-          const tokenContract = new Contract(
-            tokenAddress,
-            ["function balanceOf(address) view returns (uint)"],
-            provider
-          );
-          tokenBalance = await tokenContract.balanceOf(account);
-        }
-
-        if (typeof tokenBalance !== "bigint" && tokenBalance.isZero()) {
-          setBalance("0.0");
-        } else {
-          const formattedBalance = formatUnits(tokenBalance.toString(), 18);
-          setBalance(formattedBalance);
-        }
-      } catch (error) {
-        console.error("Error getting token balance.", error);
-      }
-    };
-
+  useEffect(() => {
     fetchBalance();
   }, [account, provider, tokenAddress]);
 
-  return balance;
+  return { balance, fetchBalance };
 }
 
 export default useTokenBalance;

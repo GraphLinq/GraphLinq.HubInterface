@@ -1,8 +1,9 @@
 /* Commons */
 export const SITE_NAME = "GLQ Hub";
 export const TOKEN_NAME = "GLQ";
-export const MAINNET_EXPLORER = "https://etherscan.io"
-export const GLQ_EXPLORER = "https://explorer.graphlinq.io"
+export const MAINNET_EXPLORER = "https://etherscan.io";
+export const GLQ_EXPLORER = "https://explorer.graphlinq.io";
+export const BRIDGE_API_URL = "https://api-bridge.graphlinq.io/api/v1";
 
 /* Bridges */
 export const MAINNET_BRIDGE_OUT_ETH =

@@ -28,12 +28,9 @@ interface ChainNamed {
 }
 
 const mainChains: ChainNamed[] = [
-  { chainId: 1, name: "Ethereum Mainnet" },
-  { chainId: 3, name: "Ropsten Testnet" },
-  { chainId: 4, name: "Rinkeby Testnet" },
-  { chainId: 5, name: "Goerli Testnet" },
-  { chainId: 614, name: "GLQ Mainnet" },
-  { chainId: 11155111, name: "Sepolia Testnet" },
+  { chainId: 1, name: "Ethereum" },
+  { chainId: 614, name: "GLQ Chain" },
+  { chainId: 11155111, name: "Sepolia" },
 ];
 
 function getChainName(chainId: number): string {

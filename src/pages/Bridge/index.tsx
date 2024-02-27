@@ -16,8 +16,8 @@ import {
 } from "@constants/index";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
 import { useWeb3React } from "@web3-react/core";
-import { parseUnits } from "ethers";
-import { useState } from "react";
+import { parseUnits, hexlify } from "ethers";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
 import {
@@ -29,6 +29,9 @@ import {
 import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import { switchNetwork } from "../../libs/connections";
+import { useQuery } from "@tanstack/react-query";
+import { getTrackingInformation } from "../../queries/api";
+import { ExecutionState } from "../../model/tracking";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -38,15 +41,13 @@ const tokenIcons = {
 };
 
 function BridgePage() {
-  const { chainId, account } = useWeb3React();
+  const { chainId, account, provider } = useWeb3React();
   const [switchToGraphLinqMainnet, switchToMainnet] = useNetwork();
 
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
   const [success, setSuccess] = useState("");
-
-  const explorer =
-    chainId === MAINNET_CHAIN_ID ? MAINNET_EXPLORER : GLQ_EXPLORER;
+  const [tracking, setTracking] = useState(false);
 
   const resetFeedback = () => {
     setError("");
@@ -63,7 +64,7 @@ function BridgePage() {
   });
   const activeCurrency = currencyOptions[activeOption];
 
-  const tokenBalance = useTokenBalance(
+  const { balance: tokenBalance, fetchBalance } = useTokenBalance(
     activeCurrency.address[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
   );
 
@@ -110,10 +111,32 @@ function BridgePage() {
       return;
     }
 
+
     let bridgeContract;
     if (chainId === MAINNET_CHAIN_ID) {
       if (activeCurrency.address.mainnet === "native") {
         bridgeContract = activeEVMBridgeNativeContract;
+
+        if (!provider || !bridgeContract) {
+          return;
+        }
+
+        const valueToSend = parseUnits(amount.toString(), 18);
+        try {
+          const signer = provider.getSigner();
+          const tx = await signer.sendTransaction({
+            to: bridgeContract.address,
+            value: valueToSend,
+            gasLimit: 42000
+          });
+          setPending("Waiting for confirmations...");
+          await tx.wait();
+          setPending("Transaction in progress, it should take ~10min...");
+        } catch (error: any) {
+          resetFeedback();
+          setError(error.toString());
+        }
+        return;
       } else {
         bridgeContract = activeEVMBridgeContract;
       }
@@ -122,65 +145,100 @@ function BridgePage() {
     }
 
     if (bridgeContract) {
-      const bridgeCost = await bridgeContract.getFeesInETH();
+      try {
+        const bridgeCost = await bridgeContract.getFeesInETH();
 
-      let allowance = "0";
-      if (activeCurrency.address.mainnet !== "native" && activeTokenContract) {
-        const requiredAmount = amount + parseFloat(bridgeCost);
-        allowance = await activeTokenContract.allowance(
-          account,
-          bridgeContract.address
-        );
+        let allowance = "0";
+        if (
+          activeCurrency.address.mainnet !== "native" &&
+          activeTokenContract
+        ) {
+          const requiredAmount = amount + parseFloat(bridgeCost);
+          allowance = await activeTokenContract.allowance(
+            account,
+            bridgeContract.address
+          );
 
-        const allowanceDecimal = parseFloat(allowance);
+          const allowanceDecimal = parseFloat(allowance);
 
-        if (allowanceDecimal < requiredAmount) {
-          const difference = requiredAmount - allowanceDecimal;
+          if (allowanceDecimal < requiredAmount) {
+            const difference = requiredAmount - allowanceDecimal;
+
+            setPending(
+              "Allowance pending, please allow the use of your token balance for the contract..."
+            );
+            const approveTx = await activeTokenContract.approve(
+              bridgeContract.address,
+              parseUnits(difference.toString(), 18)
+            );
+            setPending("Waiting for confirmations...");
+            await approveTx.wait();
+            setPending(
+              "Allowance successfully increased, waiting for deposit transaction..."
+            );
+          }
+
+          if (tokenBalance && amount > parseFloat(tokenBalance)) {
+            setPending("");
+            setError(
+              `You only have ${tokenBalance} ${activeCurrency.name} in your wallet.`
+            );
+            return;
+          }
 
           setPending(
-            "Allowance pending, please allow the use of your token balance for the contract..."
+            "Pending, check your wallet extension to execute the chain transaction..."
           );
-          const approveTx = await activeTokenContract.approve(
-            bridgeContract.address,
-            parseUnits(difference.toString(), 18)
+
+          const resultTx = await bridgeContract.initTransfer(
+            parseUnits(amount.toString(), 18),
+            activeCurrency.chainDestination[
+              chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"
+            ],
+            account,
+            { value: bridgeCost }
           );
+
           setPending("Waiting for confirmations...");
-          await approveTx.wait();
-          setPending(
-            "Allowance successfully increased, waiting for deposit transaction..."
-          );
+
+          const txReceipt = await resultTx.wait();
+          if (txReceipt.status === 1) {
+            setTracking(true);
+          }
+
+          setPending("Transaction in progress, it should take ~10min...");
+          fetchBalance();
         }
-
-        if (tokenBalance && amount > parseFloat(tokenBalance)) {
-          setPending("");
-          setError(
-            `You only have ${tokenBalance} ${activeCurrency.name} in your wallet.`
-          );
-          return;
-        }
-
-        setPending(
-          "Pending, check your wallet extension to execute the chain transaction..."
-        );
-
-        const resultTx = await bridgeContract.initTransfer(
-          parseUnits(amount.toString(), 18),
-          activeCurrency.chainDestination[
-            chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"
-          ],
-          account,
-          { value: bridgeCost }
-        );
-
-        setPending("Waiting for confirmations...");
-
-        const txReceipt = await resultTx.wait();
-        if (txReceipt.status === 1) {
-          setSuccess(txReceipt.transactionHash);
-        }
+      } catch (error: any) {
+        resetFeedback();
+        setError(error.toString());
       }
     }
   };
+
+  const qTrackingInformation = useQuery({
+    queryKey: ["trackingInformation"],
+    queryFn: () => getTrackingInformation(account!),
+    refetchInterval: 30000,
+    enabled: !!account && tracking,
+  });
+
+  useEffect(() => {
+    const info = qTrackingInformation.data && qTrackingInformation.data[0];
+    if (info) {
+      if (
+        info.executionState === ExecutionState.ERROR ||
+        info.executionState === ExecutionState.UNKNOWN_DESTINATION
+      ) {
+        setError("An error occured, please contact us for more information.");
+        setTracking(false);
+      }
+      if (info.executionState === ExecutionState.EXECUTED) {
+        setSuccess("Transfer complete.");
+        setTracking(false);
+      }
+    }
+  }, [qTrackingInformation.data]);
 
   return (
     <>
@@ -203,7 +261,7 @@ function BridgePage() {
           </div>
           {chainId && (
             <Alert type="info">
-              You're currently on <b>{getChainName(chainId)}</b>.
+              You're currently on <b>{getChainName(chainId)}</b> network.
             </Alert>
           )}
           <div className="bridge-swap">
@@ -285,7 +343,6 @@ function BridgePage() {
             </div>
             {error && (
               <Alert type="error">
-                <i className="fal fa-times-circle"></i>
                 <p>{error}</p>
               </Alert>
             )}
@@ -298,10 +355,6 @@ function BridgePage() {
               <Alert type="success">
                 <p>
                   <b>Successfully completed !</b>
-                  <br />
-                  <small>
-                    Transaction hash : {success}
-                  </small>
                 </p>
               </Alert>
             )}
