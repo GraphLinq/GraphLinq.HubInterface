@@ -111,32 +111,10 @@ function BridgePage() {
       return;
     }
 
-
     let bridgeContract;
     if (chainId === MAINNET_CHAIN_ID) {
       if (activeCurrency.address.mainnet === "native") {
         bridgeContract = activeEVMBridgeNativeContract;
-
-        if (!provider || !bridgeContract) {
-          return;
-        }
-
-        const valueToSend = parseUnits(amount.toString(), 18);
-        try {
-          const signer = provider.getSigner();
-          const tx = await signer.sendTransaction({
-            to: bridgeContract.address,
-            value: valueToSend,
-            gasLimit: 42000
-          });
-          setPending("Waiting for confirmations...");
-          await tx.wait();
-          setPending("Transaction in progress, it should take ~10min...");
-        } catch (error: any) {
-          resetFeedback();
-          setError(error.toString());
-        }
-        return;
       } else {
         bridgeContract = activeEVMBridgeContract;
       }
@@ -177,38 +155,47 @@ function BridgePage() {
               "Allowance successfully increased, waiting for deposit transaction..."
             );
           }
-
-          if (tokenBalance && amount > parseFloat(tokenBalance)) {
-            setPending("");
-            setError(
-              `You only have ${tokenBalance} ${activeCurrency.name} in your wallet.`
-            );
-            return;
-          }
-
-          setPending(
-            "Pending, check your wallet extension to execute the chain transaction..."
-          );
-
-          const resultTx = await bridgeContract.initTransfer(
-            parseUnits(amount.toString(), 18),
-            activeCurrency.chainDestination[
-              chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"
-            ],
-            account,
-            { value: bridgeCost }
-          );
-
-          setPending("Waiting for confirmations...");
-
-          const txReceipt = await resultTx.wait();
-          if (txReceipt.status === 1) {
-            setTracking(true);
-          }
-
-          setPending("Transaction in progress, it should take ~10min...");
-          fetchBalance();
         }
+
+        if (tokenBalance && amount > parseFloat(tokenBalance)) {
+          setPending("");
+          setError(
+            `You only have ${tokenBalance} ${activeCurrency.name} in your wallet.`
+          );
+          return;
+        }
+
+        setPending(
+          "Pending, check your wallet extension to execute the chain transaction..."
+        );
+
+        console.log(
+          parseUnits(amount.toString(), 18),
+          activeCurrency.chainDestination[
+            chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"
+          ],
+          account,
+          { value: bridgeCost }
+        );
+
+        const resultTx = await bridgeContract.initTransfer(
+          parseUnits(amount.toString(), 18),
+          activeCurrency.chainDestination[
+            chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"
+          ],
+          { value: bridgeCost }
+        );
+
+
+        setPending("Waiting for confirmations...");
+
+        const txReceipt = await resultTx.wait();
+        if (txReceipt.status === 1) {
+          setTracking(true);
+        }
+
+        setPending("Transaction in progress, it should take ~10min...");
+        fetchBalance();
       } catch (error: any) {
         resetFeedback();
         setError(error.toString());
