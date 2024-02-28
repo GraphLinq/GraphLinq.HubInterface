@@ -16,7 +16,7 @@ import {
 } from "@constants/index";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
 import { useWeb3React } from "@web3-react/core";
-import { parseUnits, hexlify } from "ethers";
+import { parseUnits, hexlify, parseEther } from "ethers";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
@@ -47,7 +47,7 @@ function BridgePage() {
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
   const [success, setSuccess] = useState("");
-  const [tracking, setTracking] = useState(false);
+  const [tracking, setTracking] = useState(null);
 
   const resetFeedback = () => {
     setError("");
@@ -137,17 +137,15 @@ function BridgePage() {
             bridgeContract.address
           );
 
-          const allowanceDecimal = parseFloat(allowance);
-
+          const allowanceDecimal = parseFloat(allowance) / 1000000000000000000;
+          
           if (allowanceDecimal < requiredAmount) {
-            const difference = requiredAmount - allowanceDecimal;
-
             setPending(
               "Allowance pending, please allow the use of your token balance for the contract..."
             );
             const approveTx = await activeTokenContract.approve(
               bridgeContract.address,
-              parseUnits(difference.toString(), 18)
+              parseEther(requiredAmount.toString())
             );
             setPending("Waiting for confirmations...");
             await approveTx.wait();
@@ -169,29 +167,30 @@ function BridgePage() {
           "Pending, check your wallet extension to execute the chain transaction..."
         );
 
-        console.log(
-          parseUnits(amount.toString(), 18),
+        const value = activeCurrency.address.mainnet === 'native' ? (
+          parseEther(amount.toString()) + parseEther(bridgeCost.toString())
+        ).toString() : parseFloat(bridgeCost);
+
+        const resultTx = await bridgeContract.initTransfer(
+          parseEther(amount.toString()).toString(),
           activeCurrency.chainDestination[
             chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"
           ],
           account,
-          { value: bridgeCost }
+          {
+            value: value,
+          }
         );
-
-        const resultTx = await bridgeContract.initTransfer(
-          parseUnits(amount.toString(), 18),
-          activeCurrency.chainDestination[
-            chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"
-          ],
-          { value: bridgeCost }
-        );
-
 
         setPending("Waiting for confirmations...");
 
         const txReceipt = await resultTx.wait();
         if (txReceipt.status === 1) {
-          setTracking(true);
+          const transfers = await bridgeContract.getLastsTransfers(1);
+
+          if (transfers[0] && transfers[0][0]) {
+            setTracking(transfers[0][0]);
+          }
         }
 
         setPending("Transaction in progress, it should take ~10min...");
@@ -207,22 +206,24 @@ function BridgePage() {
     queryKey: ["trackingInformation"],
     queryFn: () => getTrackingInformation(account!),
     refetchInterval: 30000,
-    enabled: !!account && tracking,
+    enabled: !!account && !!tracking,
   });
 
   useEffect(() => {
-    const info = qTrackingInformation.data && qTrackingInformation.data[0];
+    const info =
+      qTrackingInformation.data &&
+      qTrackingInformation.data.find((transfer) => transfer.hash === tracking);
     if (info) {
       if (
         info.executionState === ExecutionState.ERROR ||
         info.executionState === ExecutionState.UNKNOWN_DESTINATION
       ) {
         setError("An error occured, please contact us for more information.");
-        setTracking(false);
+        setTracking(null);
       }
       if (info.executionState === ExecutionState.EXECUTED) {
         setSuccess("Transfer complete.");
-        setTracking(false);
+        setTracking(null);
       }
     }
   }, [qTrackingInformation.data]);
