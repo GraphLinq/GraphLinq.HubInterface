@@ -4,6 +4,7 @@
   --ff-base: 'Gilroy', sans-serif;
 
   --header-height: 80px;
+  --header-nav-mobile: 80px;
 
   --c-white: #ffffff;
   --c-lavender: #897FAC;
@@ -11,4 +12,8 @@
   --c-mulled-wine: #4E4962;
   --c-cinder: #0E0C11;
   --c-bastille: #1B1621;
+
+  @include max($mobile-s) {
+    --header-height: 72px;
+  }
 }

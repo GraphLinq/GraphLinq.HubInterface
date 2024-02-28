@@ -138,7 +138,7 @@ function BridgePage() {
           );
 
           const allowanceDecimal = parseFloat(allowance) / 1000000000000000000;
-          
+
           if (allowanceDecimal < requiredAmount) {
             setPending(
               "Allowance pending, please allow the use of your token balance for the contract..."
@@ -167,9 +167,13 @@ function BridgePage() {
           "Pending, check your wallet extension to execute the chain transaction..."
         );
 
-        const value = activeCurrency.address.mainnet === 'native' ? (
-          parseEther(amount.toString()) + parseEther(bridgeCost.toString())
-        ).toString() : parseFloat(bridgeCost);
+        const value =
+          activeCurrency.address.mainnet === "native"
+            ? (
+                parseEther(amount.toString()) +
+                parseEther(bridgeCost.toString())
+              ).toString()
+            : parseFloat(bridgeCost);
 
         const resultTx = await bridgeContract.initTransfer(
           parseEther(amount.toString()).toString(),
@@ -236,117 +240,129 @@ function BridgePage() {
       <div className="main-page bridge">
         <div className="main-card">
           <div className="main-card-title">Bridge</div>
-          <div className="main-card-desc">
-            {chainId === MAINNET_CHAIN_ID ? (
-              <>
-                Transfer assets from <b>Ethereum</b> to <b>Graphlinq Chain</b>.
-              </>
-            ) : (
-              <>
-                Transfer assets from <b>Graphlinq Chain</b> to <b>Ethereum</b>.
-              </>
-            )}
-          </div>
-          {chainId && (
-            <Alert type="info">
-              You're currently on <b>{getChainName(chainId)}</b> network.
-            </Alert>
-          )}
-          <div className="bridge-swap">
-            <Select
-              options={currencyOptions.map((opt) => (
-                <>
-                  {opt.icon} <span>{opt.name}</span>
-                  {chainId && <span>{getChainName(chainId)}</span>}
-                </>
-              ))}
-              onChange={(active) => handleSelectChange(active)}
-            />
-            <div className="bridge-swap-switch">
-              <Swap onClick={handleSwitchNetwork} />
-            </div>
-            <Pill>
-              {activeCurrency.icon}
-              <span>{activeCurrency.mirror}</span>
+          {!account ? (
+            <>
+              <div className="main-card-notlogged">
+                Please login to transfer assets.
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="main-card-desc">
+                {chainId === MAINNET_CHAIN_ID ? (
+                  <>
+                    Transfer assets from <b>Ethereum</b> to{" "}
+                    <b>Graphlinq Chain</b>.
+                  </>
+                ) : (
+                  <>
+                    Transfer assets from <b>Graphlinq Chain</b> to{" "}
+                    <b>Ethereum</b>.
+                  </>
+                )}
+              </div>
               {chainId && (
-                <span>
-                  {getChainName(
-                    chainId === MAINNET_CHAIN_ID
-                      ? GLQ_CHAIN_ID
-                      : MAINNET_CHAIN_ID
-                  )}
-                </span>
+                <Alert type="info">
+                  You're currently on <b>{getChainName(chainId)}</b> network.
+                </Alert>
               )}
-            </Pill>
-          </div>
-
-          <div className="bridge-amount">
-            <div className="bridge-amount-subtitle">Available</div>
-            <div className="bridge-amount-value">
-              <span>{tokenBalance}</span>
-              {activeCurrency.name}
-            </div>
-            <div className="bridge-amount-swap">
-              <div className="bridge-amount-swap-input">
-                <InputNumber
-                  icon={activeCurrency.icon}
-                  currencyText={activeCurrency.name}
-                  value={amount}
-                  max={tokenBalance ? parseFloat(tokenBalance) : 0}
-                  onChange={(value) => setAmount(value)}
+              <div className="bridge-swap">
+                <Select
+                  options={currencyOptions.map((opt) => (
+                    <>
+                      {opt.icon} <span>{opt.name}</span>
+                      {chainId && <span>{getChainName(chainId)}</span>}
+                    </>
+                  ))}
+                  onChange={(active) => handleSelectChange(active)}
                 />
+                <div className="bridge-swap-switch">
+                  <Swap onClick={handleSwitchNetwork} />
+                </div>
+                <Pill>
+                  {activeCurrency.icon}
+                  <span>{activeCurrency.mirror}</span>
+                  {chainId && (
+                    <span>
+                      {getChainName(
+                        chainId === MAINNET_CHAIN_ID
+                          ? GLQ_CHAIN_ID
+                          : MAINNET_CHAIN_ID
+                      )}
+                    </span>
+                  )}
+                </Pill>
               </div>
-              <div className="bridge-amount-swap-actions">
-                <Button
-                  onClick={() => {
-                    if (tokenBalance) {
-                      setAmount(parseFloat(tokenBalance) / 4);
-                    }
-                  }}
-                >
-                  25%
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (tokenBalance) {
-                      setAmount(parseFloat(tokenBalance) / 2);
-                    }
-                  }}
-                >
-                  50%
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (tokenBalance) {
-                      setAmount(parseFloat(tokenBalance));
-                    }
-                  }}
-                >
-                  MAX
-                </Button>
+
+              <div className="bridge-amount">
+                <div className="bridge-amount-subtitle">Available</div>
+                <div className="bridge-amount-value">
+                  <span>{tokenBalance}</span>
+                  {activeCurrency.name}
+                </div>
+                <div className="bridge-amount-swap">
+                  <div className="bridge-amount-swap-input">
+                    <InputNumber
+                      icon={activeCurrency.icon}
+                      currencyText={activeCurrency.name}
+                      value={amount}
+                      max={tokenBalance ? parseFloat(tokenBalance) : 0}
+                      onChange={(value) => setAmount(value)}
+                    />
+                  </div>
+                  <div className="bridge-amount-swap-actions">
+                    <Button
+                      onClick={() => {
+                        if (tokenBalance) {
+                          setAmount(parseFloat(tokenBalance) / 4);
+                        }
+                      }}
+                    >
+                      25%
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        if (tokenBalance) {
+                          setAmount(parseFloat(tokenBalance) / 2);
+                        }
+                      }}
+                    >
+                      50%
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        if (tokenBalance) {
+                          setAmount(parseFloat(tokenBalance));
+                        }
+                      }}
+                    >
+                      MAX
+                    </Button>
+                  </div>
+                </div>
+                <div className="bridge-amount-submit">
+                  <Button onClick={handleSend}>Send</Button>
+                </div>
+                {error && (
+                  <Alert type="error">
+                    <p>{error}</p>
+                  </Alert>
+                )}
+                {!success && pending && (
+                  <Alert type="warning">
+                    <p>{pending}</p>
+                  </Alert>
+                )}
+                {success && (
+                  <Alert type="success">
+                    <p>
+                      <b>Successfully completed !</b>
+                    </p>
+                  </Alert>
+                )}
               </div>
-            </div>
-            <div className="bridge-amount-submit">
-              <Button onClick={handleSend}>Send</Button>
-            </div>
-            {error && (
-              <Alert type="error">
-                <p>{error}</p>
-              </Alert>
-            )}
-            {!success && pending && (
-              <Alert type="warning">
-                <p>{pending}</p>
-              </Alert>
-            )}
-            {success && (
-              <Alert type="success">
-                <p>
-                  <b>Successfully completed !</b>
-                </p>
-              </Alert>
-            )}
-          </div>
+            </>
+          )}
         </div>
         <div className="bridge-warn">
           Your claim amount available could be taking delays (max ~72h)

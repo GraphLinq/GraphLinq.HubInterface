@@ -6,11 +6,43 @@
     justify-content: space-between;
     height: var(--header-height);
     padding: 0 24px;
+    gap: 24px;
+
+    @include max($desktop-s) {
+        padding: 0 16px;
+        gap: 16px;
+      }
 
     &-logo {
         display: flex;
         align-items: center;
         gap: 24px;
+
+        svg {
+            &:first-of-type {
+                @include max($mobile-s) {
+                    width: 24px;
+
+                }
+            }
+            &:last-of-type {
+                
+                @include max($desktop-s) {
+                    display: none;
+
+                }
+                @include max($tablet) {
+                    display: block;
+
+                }
+                @include max($mobile-s) {
+                    display: none;
+
+                }
+            }
+        }
+
+
     }
 
     &-left, &-right {
@@ -24,6 +56,10 @@
     &-right {
         justify-content: flex-end;
         gap: 16px;
+
+        @include max($mobile-s) {
+            gap: 8px;
+          }
     }
 
     &-currencies {
@@ -57,9 +93,28 @@
         gap: 4px;
         height: 80px;
 
+        @include max($desktop) {
+            position: initial;
+            transform: none;
+            margin-right: auto;
+        }
+
         @include max($tablet) {
             position: fixed;
+            z-index: 10;
             bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-nav-mobile);
+            background-color: #150524;
+            transform: none;
+            justify-content: center;
+        }
+
+        @include max($mobile) {
+            padding: 0 16px;
+            justify-content: space-around;
+            gap: 10px;
         }
 
         a {
@@ -72,6 +127,12 @@
             font-weight: 600;
             white-space: nowrap;
             transition: .2s color ease-out;
+
+            @include max($mobile) {
+                flex-direction: column;
+                padding: 0;
+                gap: 4px;
+            }
 
             path {
                 fill: var(--c-lavender);
@@ -89,6 +150,22 @@
             &.active {
                 color: var(--c-white);
                 background-color: var(--c-martinique);
+
+                @include max($mobile) {
+                    background-color: transparent;
+                }
+
+                path {
+                    @include max($mobile) {
+                        fill: var(--c-white);
+                    }
+                }
+            }
+
+            span {
+                @include max($mobile) {
+                    font-size: 10px;
+                }
             }
         }
     }

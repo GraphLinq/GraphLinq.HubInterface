@@ -1,3 +1,5 @@
+@import "../../assets/css/mixins/medias.scss";
+
 .pill {
     display: flex;
     align-items: center;
@@ -8,7 +10,19 @@
     color: var(--c-white);
     transition: transform .2s ease-out;
 
+    @include max($mobile-s) {
+        padding: 4px 8px;
+        gap: 4px;
+      }
+
     &-icon {
+        font-size: 0;
+
+        svg {
+            @include max($mobile-s) {
+                height: 18px;
+              }
+        }
         path {
             fill: var(--c-white);
         }
@@ -19,6 +33,10 @@
         align-items: center;
         gap: 8px;
         font-weight: 600;
+
+        @include max($mobile-s) {
+            font-size: 14px;
+          }
 
         span {
             & + span {

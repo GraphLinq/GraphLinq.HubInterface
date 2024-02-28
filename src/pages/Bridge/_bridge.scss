@@ -8,8 +8,17 @@
     gap: 8px;
     margin-top: 24px;
 
+    @include max($mobile-s) {
+      flex-direction: column;
+      gap: 0;
+    }
+
     .select, .pill {
       flex: 1;
+
+      @include max($mobile-s) {
+        width: 100%;
+      }
     }
 
     &-switch {
@@ -21,6 +30,12 @@
       height: 48px;
       background-color: var(--c-mulled-wine);
       border-radius: 50%;
+    
+      @include max($mobile-s) {
+        margin: -8px 0;
+        position: relative;
+        z-index: 1;
+      }
     }
   }
 
@@ -48,6 +63,10 @@
       color: var(--c-lavender);
       margin-top: 16px;
 
+      @include max($mobile-s) {
+        flex-direction: column;
+      }
+
       &-input {
         flex-grow: 1;
       }
@@ -60,6 +79,10 @@
             height: 100%;
             padding: 0 20px;
             background: var(--c-martinique);
+
+            @include max($mobile-s) {
+              padding: 8px 20px;
+            }
         }
       }
     }

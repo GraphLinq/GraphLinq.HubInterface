@@ -1,8 +1,9 @@
 $desktop-l: 1920px;
 $desktop: 1540px;
+$desktop-s: 1300px;
 $tablet: 1024px;
 $mobile: 768px;
-$mobile-s: 420px;
+$mobile-s: 620px;
 
 @mixin max($width) {
   @media screen and (max-width: $width) {
