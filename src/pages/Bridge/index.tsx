@@ -11,12 +11,12 @@ import {
   MAINNET_CURRENCIES,
   GLQCHAIN_CURRENCIES,
   SITE_NAME,
-  MAINNET_EXPLORER,
   GLQ_EXPLORER,
+  MAINNET_EXPLORER,
 } from "@constants/index";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
 import { useWeb3React } from "@web3-react/core";
-import { parseUnits, hexlify, parseEther } from "ethers";
+import { formatEther, parseEther } from "ethers";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
@@ -28,10 +28,11 @@ import {
 } from "../../composables/useContract";
 import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
-import { switchNetwork } from "../../libs/connections";
 import { useQuery } from "@tanstack/react-query";
 import { getTrackingInformation } from "../../queries/api";
-import { ExecutionState } from "../../model/tracking";
+import { ExecutionState, TrackingInformation } from "../../model/tracking";
+import { Contract } from "@ethersproject/contracts";
+import useExchangeRates from "../../composables/useExchangeRates";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -40,14 +41,25 @@ const tokenIcons = {
   WETH: <ETHToken />,
 };
 
+let bridgeCost: number | null = null;
+
 function BridgePage() {
   const { chainId, account } = useWeb3React();
   const [switchToGraphLinqMainnet, switchToMainnet] = useNetwork();
+  const { calculatePrice } = useExchangeRates();
+
+  const [formDisabled, setFormDisabled] = useState(false);
 
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
   const [success, setSuccess] = useState("");
-  const [tracking, setTracking] = useState(null);
+  const [tracking, setTracking] = useState<TrackingInformation | string | null>(
+    null
+  );
+
+  const trackingExplorer = `${
+    chainId === MAINNET_CHAIN_ID ? GLQ_EXPLORER : MAINNET_EXPLORER
+  }/tx/${tracking && typeof tracking !== "string" && tracking.bridge_tx}`;
 
   const resetFeedback = () => {
     setError("");
@@ -84,6 +96,36 @@ function BridgePage() {
       activeCurrency.bridge[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
   );
 
+  let bridgeContract: Contract | null;
+  if (chainId === MAINNET_CHAIN_ID) {
+    if (activeCurrency.address.mainnet === "native") {
+      bridgeContract = activeEVMBridgeNativeContract;
+    } else {
+      bridgeContract = activeEVMBridgeContract;
+    }
+  } else {
+    bridgeContract = activeEVMBridgeERC20MinterContract;
+  }
+
+  useEffect(() => {
+    if (bridgeContract) {
+      console.log('ici');
+      const fetchBridgeCost = async () => {
+        try {
+          if (!bridgeContract) {
+            throw Error();
+          }
+
+          bridgeCost = await bridgeContract.getFeesInETH();
+        } catch (error) {
+          console.error("Error fetching bridge cost:", error);
+        }
+      };
+
+      fetchBridgeCost();
+    }
+  }, [bridgeContract]);
+
   const handleSelectChange = (active: number) => {
     resetFeedback();
     setActiveOption(active);
@@ -111,16 +153,7 @@ function BridgePage() {
       return;
     }
 
-    let bridgeContract;
-    if (chainId === MAINNET_CHAIN_ID) {
-      if (activeCurrency.address.mainnet === "native") {
-        bridgeContract = activeEVMBridgeNativeContract;
-      } else {
-        bridgeContract = activeEVMBridgeContract;
-      }
-    } else {
-      bridgeContract = activeEVMBridgeERC20MinterContract;
-    }
+    setFormDisabled(true);
 
     if (bridgeContract) {
       try {
@@ -197,37 +230,56 @@ function BridgePage() {
           }
         }
 
-        setPending("Transaction in progress, it should take ~10min...");
+        setPending(
+          `It will take approximatively 10 minutes to execute the bridge transaction and sending ${amount.toString()} ${
+            activeCurrency.name
+          } on the ${
+            chainId === MAINNET_CHAIN_ID ? "GLQ Chain" : "Ethereum"
+          } network.`
+        );
         fetchBalance();
       } catch (error: any) {
         resetFeedback();
         setError(error.toString());
+        setFormDisabled(false);
       }
     }
   };
 
+  useEffect(() => {
+    resetFeedback();
+  }, [chainId]);
+
   const qTrackingInformation = useQuery({
     queryKey: ["trackingInformation"],
     queryFn: () => getTrackingInformation(account!),
-    refetchInterval: 30000,
+    refetchInterval: 10000,
     enabled: !!account && !!tracking,
   });
 
   useEffect(() => {
     const info =
       qTrackingInformation.data &&
-      qTrackingInformation.data.find((transfer) => transfer.hash === tracking);
+      qTrackingInformation.data.find(
+        (transfer) =>
+          tracking &&
+          transfer.hash ===
+            (typeof tracking === "string" ? tracking : tracking.hash)
+      );
     if (info) {
+      setTracking(info);
+
       if (
         info.executionState === ExecutionState.ERROR ||
         info.executionState === ExecutionState.UNKNOWN_DESTINATION
       ) {
         setError("An error occured, please contact us for more information.");
         setTracking(null);
+        setFormDisabled(false);
       }
       if (info.executionState === ExecutionState.EXECUTED) {
         setSuccess("Transfer complete.");
-        setTracking(null);
+        setFormDisabled(false);
       }
     }
   }, [qTrackingInformation.data]);
@@ -260,6 +312,9 @@ function BridgePage() {
                     <b>Ethereum</b>.
                   </>
                 )}
+                <div className="main-card-desc-highlight">
+                  <b>Free GLQs</b> will be sent for your first bridge.
+                </div>
               </div>
               {chainId && (
                 <Alert type="info">
@@ -295,53 +350,69 @@ function BridgePage() {
               </div>
 
               <div className="bridge-amount">
-                <div className="bridge-amount-subtitle">Available</div>
-                <div className="bridge-amount-value">
-                  <span>{tokenBalance}</span>
-                  {activeCurrency.name}
-                </div>
-                <div className="bridge-amount-swap">
-                  <div className="bridge-amount-swap-input">
-                    <InputNumber
-                      icon={activeCurrency.icon}
-                      currencyText={activeCurrency.name}
-                      value={amount}
-                      max={tokenBalance ? parseFloat(tokenBalance) : 0}
-                      onChange={(value) => setAmount(value)}
-                    />
+                <div className="bridge-amount-wrap" data-disable={formDisabled}>
+                  <div className="bridge-amount-subtitle">Available</div>
+                  <div className="bridge-amount-value">
+                    {tokenBalance && (
+                      <span>{parseFloat(tokenBalance).toFixed(6)}</span>
+                    )}
+                    {activeCurrency.name}
+                    {tokenBalance && (
+                      <span>
+                        {calculatePrice(
+                          parseFloat(tokenBalance),
+                          activeCurrency.exchangeRate
+                        )}
+                      </span>
+                    )}
                   </div>
-                  <div className="bridge-amount-swap-actions">
-                    <Button
-                      onClick={() => {
-                        if (tokenBalance) {
-                          setAmount(parseFloat(tokenBalance) / 4);
-                        }
-                      }}
-                    >
-                      25%
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        if (tokenBalance) {
-                          setAmount(parseFloat(tokenBalance) / 2);
-                        }
-                      }}
-                    >
-                      50%
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        if (tokenBalance) {
-                          setAmount(parseFloat(tokenBalance));
-                        }
-                      }}
-                    >
-                      MAX
-                    </Button>
+                  <div className="bridge-amount-swap">
+                    <div className="bridge-amount-swap-input">
+                      <InputNumber
+                        icon={activeCurrency.icon}
+                        currencyText={activeCurrency.name}
+                        value={amount}
+                        max={tokenBalance ? parseFloat(tokenBalance) : 0}
+                        onChange={(value) => setAmount(value)}
+                      />
+                    </div>
+                    <div className="bridge-amount-swap-actions">
+                      <Button
+                        onClick={() => {
+                          if (tokenBalance) {
+                            setAmount(parseFloat(tokenBalance) / 4);
+                          }
+                        }}
+                      >
+                        25%
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          if (tokenBalance) {
+                            setAmount(parseFloat(tokenBalance) / 2);
+                          }
+                        }}
+                      >
+                        50%
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          if (tokenBalance) {
+                            setAmount(parseFloat(tokenBalance));
+                          }
+                        }}
+                      >
+                        MAX
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <div className="bridge-amount-submit">
-                  <Button onClick={handleSend}>Send</Button>
+                  <div className="bridge-amount-cost">
+                    Bridge cost :{" "}
+                    {bridgeCost ? calculatePrice(bridgeCost, "eth") : "..."}
+                  </div>
+                  <div className="bridge-amount-submit">
+                    <Button onClick={handleSend}>Send</Button>
+                  </div>
                 </div>
                 {error && (
                   <Alert type="error">
@@ -354,20 +425,49 @@ function BridgePage() {
                   </Alert>
                 )}
                 {success && (
-                  <Alert type="success">
-                    <p>
-                      <b>Successfully completed !</b>
-                    </p>
-                  </Alert>
+                  <div className="bridge-success">
+                    <Alert type="success">
+                      <p>
+                        Successfully completed,{" "}
+                        <b>
+                          {tracking &&
+                            typeof tracking !== "string" &&
+                            formatEther(tracking.quantity).toString()}{" "}
+                          {activeCurrency.name}
+                        </b>{" "}
+                        has been bridged to your wallet on the{" "}
+                        <b>
+                          {chainId === MAINNET_CHAIN_ID
+                            ? "GLQ Chain"
+                            : "Ethereum"}{" "}
+                          network
+                        </b>
+                        , just switch back network to see your tokens!
+                      </p>
+                      {tracking && typeof tracking !== "string" && (
+                        <p className="small" style={{ marginTop: 8 }}>
+                          <a href={trackingExplorer} target="_blank">
+                            <small>Tx hash: {tracking.bridge_tx}</small>
+                          </a>
+                        </p>
+                      )}
+                    </Alert>
+                    <Button onClick={handleSwitchNetwork}>
+                      Switch to{" "}
+                      {chainId === MAINNET_CHAIN_ID ? "GLQ Chain" : "Ethereum"}{" "}
+                      network
+                    </Button>
+                  </div>
                 )}
               </div>
             </>
           )}
         </div>
         <div className="bridge-warn">
-          Your claim amount available could be taking delays (max ~72h)
+          Your bridged tokens will be automatically sent in less then 20 minutes
+          on the other chain.
           <br />
-          Please wait & come back later if you don't see them!
+          The same wallet will be used to transfer the coins.
         </div>
       </div>
     </>

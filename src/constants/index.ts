@@ -36,6 +36,7 @@ type Token = {
     mainnet: string;
     glq: string;
   };
+  exchangeRate: 'eth' | 'glq'
 };
 
 export const GLQ_TOKEN: Token = {
@@ -50,7 +51,8 @@ export const GLQ_TOKEN: Token = {
   chainDestination: {
     glq: "WGLQ_ETH",
     mainnet: "WGLQ_GLQCHAIN"
-  }
+  },
+  exchangeRate: 'glq'
 };
 
 export const WGLQ_TOKEN: Token = {
@@ -69,7 +71,8 @@ export const WGLQ_TOKEN: Token = {
   chainDestination: {
     glq: "WGLQ_ETH",
     mainnet: "WGLQ_GLQCHAIN"
-  }
+  },
+  exchangeRate: 'glq'
 };
 
 export const ETH_TOKEN: Token = {
@@ -88,7 +91,8 @@ export const ETH_TOKEN: Token = {
   chainDestination: {
     glq: "ETH_ETH",
     mainnet: "WETH_GLQCHAIN"
-  }
+  },
+  exchangeRate: 'eth'
 };
 
 export const WETH_TOKEN: Token = {
@@ -107,7 +111,8 @@ export const WETH_TOKEN: Token = {
   chainDestination: {
     glq: "ETH_ETH",
     mainnet: "WETH_GLQCHAIN"
-  }
+  },
+  exchangeRate: 'eth'
 };
 
 export const MAINNET_CURRENCIES = [ETH_TOKEN, WGLQ_TOKEN];

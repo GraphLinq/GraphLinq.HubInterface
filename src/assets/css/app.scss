@@ -80,5 +80,10 @@ body {
 
   &-desc {
     font-size: 18px;
+
+    &-highlight {
+      color: var(--c-lavender);
+      margin-top: 8px;
+    }
   }
 }

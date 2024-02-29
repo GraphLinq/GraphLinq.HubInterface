@@ -13,7 +13,8 @@
       gap: 0;
     }
 
-    .select, .pill {
+    .select,
+    .pill {
       flex: 1;
 
       @include max($mobile-s) {
@@ -30,7 +31,7 @@
       height: 48px;
       background-color: var(--c-mulled-wine);
       border-radius: 50%;
-    
+
       @include max($mobile-s) {
         margin: -8px 0;
         position: relative;
@@ -42,11 +43,28 @@
   &-amount {
     margin-top: 32px;
 
+    &-wrap {
+      margin-bottom: 24px;
+
+      &[data-disable="true"] {
+        position: relative;
+        opacity: 0.5;
+
+        &:before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 10;
+        }
+      }
+    }
+
     &-subtitle {
       color: var(--c-lavender);
     }
     &-value {
       display: flex;
+      align-items: baseline;
       gap: 12px;
       color: var(--c-lavender);
       font-weight: 600;
@@ -54,6 +72,11 @@
 
       span {
         color: var(--c-white);
+        
+        &:last-of-type {
+          font-size: 20px;
+          opacity: 0.5;
+        }
       }
     }
     &-swap {
@@ -76,30 +99,43 @@
         gap: 8px;
 
         .button {
-            height: 100%;
-            padding: 0 20px;
-            background: var(--c-martinique);
+          height: 100%;
+          padding: 0 20px;
+          background: var(--c-martinique);
 
-            @include max($mobile-s) {
-              padding: 8px 20px;
-            }
+          @include max($mobile-s) {
+            padding: 8px 20px;
+          }
         }
       }
     }
 
+    &-cost {
+      display: flex;
+      justify-content: center;
+      margin-top: 32px;
+      color: var(--c-lavender);
+    }
+
     &-submit {
-        margin-top: 32px;
+      margin-top: 8px;
 
-        .button {
-            width: 100%;
-        }
+      .button {
+        width: 100%;
+      }
 
-        & + .alert {
-          margin-top: 24px;
-        }
+      & + .alert {
+        margin-top: 24px;
+      }
     }
   }
-
+  &-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+  }
   &-warn {
     color: var(--c-lavender);
     text-align: center;

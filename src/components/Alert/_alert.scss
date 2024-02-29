@@ -6,7 +6,19 @@
     border-radius: 24px;
     color: var(--c-white);
     overflow: auto;
+    background: linear-gradient(270deg, #1573e6 -0.49%, #0f57ae 99.51%);
     transition: transform .2s ease-out;
+
+    &-label {
+        .small {
+            font-size: 14px;
+        }
+
+        a {
+            display: block;
+            text-decoration: underline;
+        }
+    }
 
     path {
         fill: var(--c-white);
@@ -17,14 +29,14 @@
     }
     
     &[data-type="success"] {
-        background: linear-gradient(270deg, #8ee623 -0.49%, #6eb21b 99.51%);
+        background: linear-gradient(270deg, #1573e6 -0.49%, #0f57ae 99.51%);
     }
     
     &[data-type="warning"] {
-        background: linear-gradient(270deg, #e6b223 -0.49%, #a47b0b 99.51%);
+        background: linear-gradient(270deg, #A569FF -0.49%, #914df7 99.51%);
     }
     
     &[data-type="error"] {
-        background: linear-gradient(270deg, #e64723 -0.49%, #a2270c 99.51%);
+        background: linear-gradient(270deg, #FF69C3 -0.49%, #f74eb4 99.51%);
     }
 }

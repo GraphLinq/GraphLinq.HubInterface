@@ -12,11 +12,13 @@ interface InputNumberProps {
 const InputNumber: React.FC<InputNumberProps> = ({ icon, currencyText, max, value, onChange }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = parseFloat(e.target.value);
+    let newValue = e.target.value !== '' ? parseFloat(e.target.value) : 0;
 
     if (newValue > max) {
       newValue = max;
     }
+
+    e.target.value = newValue.toString();
 
     if (!isNaN(newValue) && onChange) {
       onChange(newValue);

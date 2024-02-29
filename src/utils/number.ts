@@ -1,8 +1,8 @@
-const formatNumberToDollars = (number: number) => {
+const formatNumberToDollars = (number: number, digits = 5) => {
   return number.toLocaleString("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: 5,
+    minimumFractionDigits: digits,
   });
 };
 

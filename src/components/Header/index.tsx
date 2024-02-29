@@ -108,7 +108,7 @@ function Header() {
           <>
             {GLQBalance && (
               <Pill icon={<GLQToken />} onClick={() => {}}>
-                {parseFloat(GLQBalance).toFixed(5) || "..."}
+                {parseFloat(GLQBalance).toFixed(6) || "..."}
               </Pill>
             )}
             <Pill icon={<Wallet />}>{formatEthereumAddress(account)}</Pill>

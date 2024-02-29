@@ -1,6 +1,7 @@
 export interface TrackingInformation {
     blockNumber: number;
     blockTimestamp: string;
+    bridge_tx: string;
     coin: string;
     data: string;
     executionState: number;
