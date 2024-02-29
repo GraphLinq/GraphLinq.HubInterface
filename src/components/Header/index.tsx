@@ -1,4 +1,5 @@
 import "./_header.scss";
+import Swap from "@assets/icons/swap-coin.svg?react";
 import Bridge from "@assets/icons/bridge.svg?react";
 import ChainStatus from "@assets/icons/chain.svg?react";
 import CoinInfo from "@assets/icons/coin.svg?react";
@@ -62,6 +63,11 @@ function Header() {
       icon: <Bridge />,
       label: "Bridge",
       url: "/bridge",
+    },
+    {
+      icon: <Swap />,
+      label: "Swap",
+      url: "/swap",
     },
   ];
 

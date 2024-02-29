@@ -27,11 +27,11 @@
             }
             &:last-of-type {
                 
-                @include max($desktop-s) {
+                @include max($desktop) {
                     display: none;
 
                 }
-                @include max($tablet) {
+                @include max($desktop-s) {
                     display: block;
 
                 }
@@ -67,7 +67,7 @@
         align-items: center;
         gap: 16px;
 
-        @include max($desktop) {
+        @include max($desktop-xl) {
             display: none;
         }
 
@@ -93,13 +93,13 @@
         gap: 4px;
         height: 80px;
 
-        @include max($desktop) {
+        @include max($desktop-l) {
             position: initial;
             transform: none;
             margin-right: auto;
         }
 
-        @include max($tablet) {
+        @include max($desktop-s) {
             position: fixed;
             z-index: 10;
             bottom: 0;
@@ -112,9 +112,8 @@
         }
 
         @include max($mobile) {
-            padding: 0 16px;
             justify-content: space-around;
-            gap: 10px;
+            gap: 0;
         }
 
         a {
