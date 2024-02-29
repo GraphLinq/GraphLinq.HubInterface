@@ -41,7 +41,7 @@ const tokenIcons = {
 };
 
 function BridgePage() {
-  const { chainId, account, provider } = useWeb3React();
+  const { chainId, account } = useWeb3React();
   const [switchToGraphLinqMainnet, switchToMainnet] = useNetwork();
 
   const [error, setError] = useState("");

@@ -1,0 +1,124 @@
+@import "../../assets/css/mixins/styles";
+@import "../../assets/css/mixins/medias";
+
+.swap {
+  &-amount {
+    margin-top: 32px;
+
+    &-subtitle {
+      color: var(--c-lavender);
+    }
+    &-value {
+      display: flex;
+      gap: 12px;
+      color: var(--c-lavender);
+      font-weight: 600;
+      font-size: 36px;
+
+      span {
+        color: var(--c-white);
+      }
+    }
+    &-swap {
+      display: flex;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--c-lavender);
+      margin-top: 16px;
+
+      @include max($mobile-s) {
+        flex-direction: column;
+      }
+
+      &-input {
+        flex-grow: 1;
+      }
+
+      &-actions {
+        display: flex;
+        gap: 8px;
+
+        .button {
+          height: 100%;
+          padding: 0 20px;
+          background: var(--c-martinique);
+
+          @include max($mobile-s) {
+            padding: 8px 20px;
+          }
+        }
+      }
+    }
+  }
+
+  &-choices {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap:32px;
+
+    &-switch {
+      position: absolute;
+      top: calc(50% + 12px);
+      left: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background-color: var(--c-mulled-wine);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  &-choice {
+    &-label {
+      font-size: 16px;
+      line-height: 20px;
+    }
+    &-input {
+      display: flex;
+      align-items: center;
+      margin-top: 8px;
+      border-radius: 100px;
+      border: 1px solid var(--c-martinique);
+      color: var(--c-white);
+      padding: 8px 8px 8px 20px;
+
+      input {
+        width: auto;
+        height: 32px;
+        background-color: transparent;
+      }
+
+      &-price {
+        flex-grow: 1;
+        color: var(--c-lavender);
+      }
+
+      .select {
+        margin-left: auto;
+        border: 0;
+
+        &-current {
+          background-color: var(--c-martinique);
+          border-radius: 100px;
+          padding: 4px 4px 4px 10px;
+        }
+      }
+    }
+  }
+
+  &-submit {
+    margin-top: 32px;
+
+    .button {
+      width: 100%;
+    }
+
+    & + .alert {
+      margin-top: 24px;
+    }
+  }
+}

@@ -1,6 +1,5 @@
 .select {
   position: relative;
-  z-index: 1;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -21,6 +20,7 @@
       }
     }
   }
+
   &-arrow {
     margin-left: auto;
     transform: rotate(180deg);
@@ -33,15 +33,18 @@
   &-options {
     display: none;
     position: absolute;
+    z-index: 3;
     top: calc(100% + 8px);
-    left: 0;
+    left: 50%;
     width: 100%;
+    min-width: 200px;
     max-height: 200px;
     padding: 8px 0;
     border: 1px solid var(--c-martinique);
     overflow: auto;
     border-radius: 24px;
     background-color: var(--c-cinder);
+    transform: translateX(-50%);
 
     [data-open="true"] & {
       display: block;

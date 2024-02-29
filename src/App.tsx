@@ -11,6 +11,7 @@ import {
 } from "react-router-dom"
 import HomePage from '@pages/Home'
 import BridgePage from '@pages/Bridge'
+import SwapPage from "@pages/Swap"
 
 
 function App() {
@@ -43,6 +44,10 @@ function App() {
         {
           path: "/bridge",
           element: <BridgePage />
+        },
+        {
+          path: "/swap",
+          element: <SwapPage />
         },
       ]
     }
