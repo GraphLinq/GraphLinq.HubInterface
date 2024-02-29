@@ -25,9 +25,11 @@ import {
   getConnection,
   ConnectionType,
 } from "../../libs/connections";
+import useExchangeRates from "../../composables/useExchangeRates";
 
 function Header() {
   const { account, chainId } = useWeb3React();
+  const { glq, eth } = useExchangeRates();
   const {balance: GLQBalance} = useTokenBalance(
     chainId === MAINNET_CHAIN_ID ? WGLQ_TOKEN.address.mainnet : "native"
   );
@@ -35,11 +37,11 @@ function Header() {
   const currencies = [
     {
       icon: <GLQToken />,
-      value: 0.589,
+      value: glq,
     },
     {
       icon: <ETHToken />,
-      value: 2.659,
+      value: eth,
     },
   ];
 
@@ -88,7 +90,7 @@ function Header() {
           {currencies.map((currency, i) => (
             <div className="header-currencies-item" key={i}>
               {currency.icon}
-              <span>{formatNumberToDollars(currency.value)}</span>
+              {currency.value && <span>{formatNumberToDollars(currency.value, 4)}</span>}
             </div>
           ))}
         </div>

@@ -145,6 +145,10 @@ function BridgePage() {
   const [amount, setAmount] = useState(0);
 
   const handleSend = async () => {
+    if (formDisabled) {
+      return;
+    }
+
     resetFeedback();
 
     if (amount <= 0) {
