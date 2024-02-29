@@ -14,6 +14,8 @@ import {
   GLQ_EXPLORER,
   MAINNET_EXPLORER,
 } from "@constants/index";
+import { Contract } from "@ethersproject/contracts";
+import { useQuery } from "@tanstack/react-query";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
 import { useWeb3React } from "@web3-react/core";
 import { formatEther, parseEther } from "ethers";
@@ -26,13 +28,13 @@ import {
   useEVMBridgeNativeContract,
   useTokenContract,
 } from "../../composables/useContract";
+import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
-import { useQuery } from "@tanstack/react-query";
-import { getTrackingInformation } from "../../queries/api";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
-import { Contract } from "@ethersproject/contracts";
-import useExchangeRates from "../../composables/useExchangeRates";
+import { getTrackingInformation } from "../../queries/api";
+
+
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -109,7 +111,6 @@ function BridgePage() {
 
   useEffect(() => {
     if (bridgeContract) {
-      console.log('ici');
       const fetchBridgeCost = async () => {
         try {
           if (!bridgeContract) {

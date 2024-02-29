@@ -3,20 +3,20 @@ import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
 import Alert from "@components/Alert";
+import Button from "@components/Button";
+import Select from "@components/Select";
 import {
   MAINNET_CURRENCIES,
   GLQCHAIN_CURRENCIES,
   SITE_NAME,
 } from "@constants/index";
 import { MAINNET_CHAIN_ID } from "@utils/chains";
+import { formatNumberToDollars } from "@utils/number";
 import { useWeb3React } from "@web3-react/core";
 import { ChangeEvent, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
 import useTokenBalance from "../../composables/useTokenBalance";
-import Button from "@components/Button";
-import { formatNumberToDollars } from "@utils/number";
-import Select from "@components/Select";
 
 const tokenIcons = {
   GLQ: <GLQToken />,

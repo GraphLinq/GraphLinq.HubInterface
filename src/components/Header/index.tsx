@@ -1,5 +1,4 @@
 import "./_header.scss";
-import Swap from "@assets/icons/swap-coin.svg?react";
 import Bridge from "@assets/icons/bridge.svg?react";
 import ChainStatus from "@assets/icons/chain.svg?react";
 import CoinInfo from "@assets/icons/coin.svg?react";
@@ -9,10 +8,12 @@ import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import LogoName from "@assets/icons/logo-name.svg?react";
 import Logo from "@assets/icons/logo.svg?react";
+import Swap from "@assets/icons/swap-coin.svg?react";
 import Wallet from "@assets/icons/wallet.svg?react";
 import Button from "@components/Button";
 import Pill from "@components/Pill";
 import { WGLQ_TOKEN } from "@constants/index";
+import { MAINNET_CHAIN_ID } from "@utils/chains";
 import { formatNumberToDollars } from "@utils/number";
 import { formatEthereumAddress } from "@utils/string";
 import { useWeb3React } from "@web3-react/core";
@@ -24,7 +25,6 @@ import {
   getConnection,
   ConnectionType,
 } from "../../libs/connections";
-import { MAINNET_CHAIN_ID } from "@utils/chains";
 
 function Header() {
   const { account, chainId } = useWeb3React();
