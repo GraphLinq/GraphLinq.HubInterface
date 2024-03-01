@@ -2,6 +2,7 @@ import "./_swap.scss";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
+import Arrow from "@assets/icons/arrow.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
 import Select from "@components/Select";
@@ -17,6 +18,7 @@ import { ChangeEvent, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
 import useTokenBalance from "../../composables/useTokenBalance";
+import useExchangeRates from "../../composables/useExchangeRates";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -27,11 +29,13 @@ const tokenIcons = {
 
 function SwapPage() {
   const { chainId, account } = useWeb3React();
+  const { calculatePrice } = useExchangeRates();
 
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
   const [success, setSuccess] = useState("");
   const [tracking, setTracking] = useState(null);
+  const [summaryOpen, setSummaryOpen] = useState(true);
 
   const resetFeedback = () => {
     setError("");
@@ -47,7 +51,9 @@ function SwapPage() {
     currency.icon = tokenIcons[currency.name];
     return currency;
   });
-  const tradeCurrencyOptions = ownCurrencyOptions.filter((_, i) => i !== ownCurrencyOption);
+  const tradeCurrencyOptions = ownCurrencyOptions.filter(
+    (_, i) => i !== ownCurrencyOption
+  );
 
   const ownCurrency = ownCurrencyOptions[ownCurrencyOption];
   const tradeCurrency = tradeCurrencyOptions[tradeCurrencyOption];
@@ -69,10 +75,13 @@ function SwapPage() {
   const [ownCurrencyPrice, setOwnCurrencyPrice] = useState(0);
   const [tradeCurrencyPrice, setTradeCurrencyPrice] = useState(0);
 
-  const handleCurrencySelectChange = (active: number, currency: 'own' | 'trade') => {
+  const handleCurrencySelectChange = (
+    active: number,
+    currency: "own" | "trade"
+  ) => {
     resetFeedback();
 
-    if (currency === 'own') {
+    if (currency === "own") {
       setOwnCurrencyOption(active);
       setOwnCurrencyAmount(0);
     } else {
@@ -81,14 +90,17 @@ function SwapPage() {
     }
   };
 
-  const handleCurrencyAmountChange = (evt: ChangeEvent<HTMLInputElement>, currency: 'own' | 'trade') => {
+  const handleCurrencyAmountChange = (
+    evt: ChangeEvent<HTMLInputElement>,
+    currency: "own" | "trade"
+  ) => {
     const newValue: number = parseFloat(evt.target.value);
-    if (currency === 'own') {
+    if (currency === "own") {
       setOwnCurrencyAmount(newValue);
     } else {
       setTradeCurrencyAmount(newValue);
     }
-  }
+  };
 
   const handleChange = async () => {
     resetFeedback();
@@ -117,7 +129,7 @@ function SwapPage() {
               <div className="swap-amount">
                 <div className="swap-amount-subtitle">Available</div>
                 <div className="swap-amount-value">
-                  <span>{ownCurrencyBalance}</span>
+                  {ownCurrencyBalance && <span>{parseFloat(ownCurrencyBalance).toFixed(6)}</span>}
                   {ownCurrency.name}
                 </div>
               </div>
@@ -134,7 +146,9 @@ function SwapPage() {
                             ? parseFloat(ownCurrencyBalance)
                             : 0
                         }
-                        onChange={(evt) => handleCurrencyAmountChange(evt, 'own')}
+                        onChange={(evt) =>
+                          handleCurrencyAmountChange(evt, "own")
+                        }
                       />
                     </div>
                     <div className="swap-choice-input-price">
@@ -147,7 +161,7 @@ function SwapPage() {
                         </>
                       ))}
                       onChange={(active) =>
-                        handleCurrencySelectChange(active, 'own')
+                        handleCurrencySelectChange(active, "own")
                       }
                     />
                   </div>
@@ -167,7 +181,9 @@ function SwapPage() {
                             ? parseFloat(tradeCurrencyBalance)
                             : 0
                         }
-                        onChange={(evt) => handleCurrencyAmountChange(evt, 'trade')}
+                        onChange={(evt) =>
+                          handleCurrencyAmountChange(evt, "trade")
+                        }
                       />
                     </div>
                     <div className="swap-choice-input-price">
@@ -180,9 +196,37 @@ function SwapPage() {
                         </>
                       ))}
                       onChange={(active) =>
-                        handleCurrencySelectChange(active, 'trade')
+                        handleCurrencySelectChange(active, "trade")
                       }
                     />
+                  </div>
+                </div>
+              </div>
+              <div className="swap-summary" data-open={summaryOpen}>
+                <div
+                  className="swap-summary-header"
+                  onClick={() => setSummaryOpen(!summaryOpen)}
+                >
+                  <div className="swap-summary-header-info">
+                    <span>1 {ownCurrency.name}</span>
+                    <span>=</span>
+                    <span>? {tradeCurrency.name}</span>
+                    <span>{calculatePrice(1, ownCurrency.exchangeRate)}</span>
+                  </div>
+                  <Arrow />
+                </div>
+                <div className="swap-summary-details">
+                  <div className="swap-summary-detail">
+                    <span>Max slippage</span>
+                    <span>?%</span>
+                  </div>
+                  <div className="swap-summary-detail">
+                    <span>Fee</span>
+                    <span>{formatNumberToDollars(0)}</span>
+                  </div>
+                  <div className="swap-summary-detail">
+                    <span>Network cost</span>
+                    <span>{formatNumberToDollars(0)}</span>
                   </div>
                 </div>
               </div>
