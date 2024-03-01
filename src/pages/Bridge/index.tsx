@@ -33,6 +33,7 @@ import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
+import { formatNumberToFixed } from "@utils/number";
 
 
 
@@ -98,16 +99,19 @@ function BridgePage() {
       activeCurrency.bridge[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
   );
 
-  let bridgeContract: Contract | null;
-  if (chainId === MAINNET_CHAIN_ID) {
-    if (activeCurrency.address.mainnet === "native") {
-      bridgeContract = activeEVMBridgeNativeContract;
+  let bridgeContract: Contract | null = null;
+  if (chainId) {
+    if (chainId === MAINNET_CHAIN_ID) {
+      if (activeCurrency.address.mainnet === "native") {
+        bridgeContract = activeEVMBridgeNativeContract;
+      } else {
+        bridgeContract = activeEVMBridgeContract;
+      }
     } else {
-      bridgeContract = activeEVMBridgeContract;
+      bridgeContract = activeEVMBridgeERC20MinterContract;
     }
-  } else {
-    bridgeContract = activeEVMBridgeERC20MinterContract;
   }
+
 
   useEffect(() => {
     if (bridgeContract) {
@@ -359,7 +363,7 @@ function BridgePage() {
                   <div className="bridge-amount-subtitle">Available</div>
                   <div className="bridge-amount-value">
                     {tokenBalance && (
-                      <span>{parseFloat(tokenBalance).toFixed(6)}</span>
+                      <span>{formatNumberToFixed(parseFloat(tokenBalance), 6)}</span>
                     )}
                     {activeCurrency.name}
                     {tokenBalance && (

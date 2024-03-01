@@ -12,7 +12,7 @@ import {
   SITE_NAME,
 } from "@constants/index";
 import { MAINNET_CHAIN_ID } from "@utils/chains";
-import { formatNumberToDollars } from "@utils/number";
+import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { useWeb3React } from "@web3-react/core";
 import { ChangeEvent, useState } from "react";
 import { Helmet } from "react-helmet-async";
@@ -129,7 +129,7 @@ function SwapPage() {
               <div className="swap-amount">
                 <div className="swap-amount-subtitle">Available</div>
                 <div className="swap-amount-value">
-                  {ownCurrencyBalance && <span>{parseFloat(ownCurrencyBalance).toFixed(6)}</span>}
+                  {ownCurrencyBalance && <span>{formatNumberToFixed(parseFloat(ownCurrencyBalance), 6)}</span>}
                   {ownCurrency.name}
                 </div>
               </div>
@@ -152,7 +152,7 @@ function SwapPage() {
                       />
                     </div>
                     <div className="swap-choice-input-price">
-                      {formatNumberToDollars(ownCurrencyPrice)}
+                      {formatNumberToDollars(ownCurrencyPrice, 2)}
                     </div>
                     <Select
                       options={ownCurrencyOptions.map((opt) => (
@@ -187,7 +187,7 @@ function SwapPage() {
                       />
                     </div>
                     <div className="swap-choice-input-price">
-                      {formatNumberToDollars(tradeCurrencyPrice)}
+                      {formatNumberToDollars(tradeCurrencyPrice, 2)}
                     </div>
                     <Select
                       options={tradeCurrencyOptions.map((opt) => (

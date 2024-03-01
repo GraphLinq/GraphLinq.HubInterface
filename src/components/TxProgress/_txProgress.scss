@@ -1,0 +1,20 @@
+.txProgress {
+    position: absolute;
+    top: var(--header-height);
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0 24px;
+
+    .alert {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .underline {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+}
