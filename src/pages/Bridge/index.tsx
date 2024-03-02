@@ -119,7 +119,7 @@ function BridgePage() {
 
           bridgeCost = await bridgeContract.getFeesInETH();
         } catch (error) {
-          console.error("Error fetching bridge cost:", error);
+          console.error("Error fetching bridge fee:", error);
         }
       };
 
@@ -412,7 +412,7 @@ function BridgePage() {
                     </div>
                   </div>
                   <div className="bridge-amount-cost">
-                    Bridge cost :{" "}
+                    Bridge fee :{" "}
                     {bridgeCost ? calculatePrice(bridgeCost, "eth") : "..."}
                   </div>
                   <div className="bridge-amount-submit">
