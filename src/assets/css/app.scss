@@ -10,20 +10,18 @@ html,
 body {
   overscroll-behavior-y: none;
   scroll-behavior: smooth;
+}
+
+body {
   font-family: var(--ff-base);
   font-size: 16px;
   line-height: 1.4;
   font-weight: 500;
   background: url(../img/bg.png) no-repeat center/cover;
   background-blend-mode: saturation, normal;
-  // height: 100%;
-  // min-height: 100vh;
   color: var(--c-white);
-
-  @include max($mobile) {
-    height: auto;
-    padding-bottom: var(--header-nav-mobile);
-  }
+  padding-top: var(--header-height);
+  padding-bottom: var(--header-nav-mobile);
 }
 
 * {
@@ -46,10 +44,10 @@ body {
   justify-content: center;
   flex-direction: column;
   gap: 24px;
-  height: calc(100vh - var(--header-height));
+  min-height: calc(100vh - var(--header-height) - var(--header-nav-mobile));
 
   @include max($mobile) {
-    height: auto;
+    min-height: auto;
   }
 }
 
@@ -85,5 +83,11 @@ body {
       color: var(--c-lavender);
       margin-top: 8px;
     }
+  }
+
+  &-wrongnetwork {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
   }
 }

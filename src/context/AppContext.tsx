@@ -2,18 +2,22 @@ import {
   createContext,
   useContext,
   ReactNode,
+  useState,
 } from "react"
 
 interface AppContextProps {
+  isWaitingTxData: boolean
+  setWaitingTxData: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined)
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
+  const [isWaitingTxData, setWaitingTxData] = useState<AppContextProps["isWaitingTxData"]>(false)
 
   return (
     <AppContext.Provider
-      value={{  }}
+      value={{ isWaitingTxData, setWaitingTxData }}
     >
       {children}
     </AppContext.Provider>

@@ -1,171 +1,175 @@
 @import "../../assets/css/mixins/medias.scss";
 
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+  padding: 0 24px;
+  gap: 24px;
+  transition: .3s background-color ease-out;
+
+  &.scrolled {
+    background-color: #150524;
+  }
+
+  @include max($desktop-s) {
+    padding: 0 16px;
+    gap: 16px;
+  }
+
+  &-logo {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: var(--header-height);
-    padding: 0 24px;
     gap: 24px;
 
+    svg {
+      &:first-of-type {
+        @include max($mobile-s) {
+          width: 24px;
+        }
+      }
+      &:last-of-type {
+        @include max($desktop) {
+          display: none;
+        }
+        @include max($desktop-s) {
+          display: block;
+        }
+        @include max($mobile-s) {
+          display: none;
+        }
+      }
+    }
+  }
+
+  &-left,
+  &-right {
+    display: flex;
+  }
+
+  &-left {
+    gap: 40px;
+  }
+
+  &-right {
+    justify-content: flex-end;
+    gap: 16px;
+
+    @include max($mobile-s) {
+      gap: 8px;
+    }
+  }
+
+  &-currencies {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    @include max($desktop-xl) {
+      display: none;
+    }
+
+    &-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--c-lavender);
+      font-weight: 600;
+
+      path {
+        fill: var(--c-lavender);
+      }
+    }
+  }
+
+  &-nav {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 80px;
+
+    @include max($desktop-l) {
+      position: initial;
+      transform: none;
+      margin-right: auto;
+    }
+
     @include max($desktop-s) {
-        padding: 0 16px;
-        gap: 16px;
+      position: fixed;
+      z-index: 10;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: var(--header-nav-mobile);
+      background-color: #150524;
+      transform: none;
+      justify-content: center;
+    }
+
+    @include max($mobile) {
+      justify-content: space-around;
+      gap: 0;
+    }
+
+    a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--c-lavender);
+      padding: 12px 20px;
+      border-radius: 100px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: 0.2s color ease-out;
+
+      @include max($mobile) {
+        flex-direction: column;
+        padding: 0;
+        gap: 4px;
       }
 
-    &-logo {
-        display: flex;
-        align-items: center;
-        gap: 24px;
+      path {
+        fill: var(--c-lavender);
+        transition: 0.2s fill ease-out;
+      }
 
-        svg {
-            &:first-of-type {
-                @include max($mobile-s) {
-                    width: 24px;
+      &:hover {
+        color: var(--c-white);
 
-                }
-            }
-            &:last-of-type {
-                
-                @include max($desktop) {
-                    display: none;
-
-                }
-                @include max($desktop-s) {
-                    display: block;
-
-                }
-                @include max($mobile-s) {
-                    display: none;
-
-                }
-            }
+        path {
+          fill: var(--c-white);
         }
+      }
 
-
-    }
-
-    &-left, &-right {
-        display: flex;
-    }
-
-    &-left {
-        gap: 40px;
-    }
-
-    &-right {
-        justify-content: flex-end;
-        gap: 16px;
-
-        @include max($mobile-s) {
-            gap: 8px;
-          }
-    }
-
-    &-currencies {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-
-        @include max($desktop-xl) {
-            display: none;
-        }
-
-        &-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--c-lavender);
-            font-weight: 600;
-
-            path {
-                fill: var(--c-lavender);
-            }
-        }
-    }
-
-    &-nav {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        height: 80px;
-
-        @include max($desktop-l) {
-            position: initial;
-            transform: none;
-            margin-right: auto;
-        }
-
-        @include max($desktop-s) {
-            position: fixed;
-            z-index: 10;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: var(--header-nav-mobile);
-            background-color: #150524;
-            transform: none;
-            justify-content: center;
-        }
+      &.active {
+        color: var(--c-white);
+        background-color: var(--c-martinique);
 
         @include max($mobile) {
-            justify-content: space-around;
-            gap: 0;
+          background-color: transparent;
         }
 
-        a {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--c-lavender);
-            padding: 12px 20px;
-            border-radius: 100px;
-            font-weight: 600;
-            white-space: nowrap;
-            transition: .2s color ease-out;
-
-            @include max($mobile) {
-                flex-direction: column;
-                padding: 0;
-                gap: 4px;
-            }
-
-            path {
-                fill: var(--c-lavender);
-                transition: .2s fill ease-out;
-            }
-
-            &:hover {
-                color: var(--c-white);
-
-                path {
-                    fill: var(--c-white);
-                }
-            }
-
-            &.active {
-                color: var(--c-white);
-                background-color: var(--c-martinique);
-
-                @include max($mobile) {
-                    background-color: transparent;
-                }
-
-                path {
-                    @include max($mobile) {
-                        fill: var(--c-white);
-                    }
-                }
-            }
-
-            span {
-                @include max($mobile) {
-                    font-size: 10px;
-                }
-            }
+        path {
+          @include max($mobile) {
+            fill: var(--c-white);
+          }
         }
+      }
+
+      span {
+        @include max($mobile) {
+          font-size: 10px;
+        }
+      }
     }
+  }
 }

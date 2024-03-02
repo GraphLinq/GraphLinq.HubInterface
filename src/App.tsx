@@ -12,6 +12,7 @@ import {
 import HomePage from '@pages/Home'
 import BridgePage from '@pages/Bridge'
 import SwapPage from "@pages/Swap"
+import TxProgress from "@components/TxProgress"
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
       <AppContextProvider>
             <QueryClientProvider client={queryClient}>
               <Header />
+              <TxProgress/>
               <main className='main'>
                 <Outlet />
               </main>

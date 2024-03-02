@@ -14,7 +14,7 @@ import Button from "@components/Button";
 import Pill from "@components/Pill";
 import { WGLQ_TOKEN } from "@constants/index";
 import { MAINNET_CHAIN_ID } from "@utils/chains";
-import { formatNumberToDollars } from "@utils/number";
+import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { formatEthereumAddress } from "@utils/string";
 import { useWeb3React } from "@web3-react/core";
 import { Link, NavLink } from "react-router-dom";
@@ -26,12 +26,15 @@ import {
   ConnectionType,
 } from "../../libs/connections";
 import useExchangeRates from "../../composables/useExchangeRates";
+import { useEffect, useState } from "react";
+import useChains from "../../composables/useChains";
 
 function Header() {
-  const { account, chainId } = useWeb3React();
+  const { account } = useWeb3React();
+  const { isMainnet } = useChains();
   const { glq, eth } = useExchangeRates();
   const {balance: GLQBalance} = useTokenBalance(
-    chainId === MAINNET_CHAIN_ID ? WGLQ_TOKEN.address.mainnet : "native"
+    isMainnet ? WGLQ_TOKEN.address.mainnet : "native"
   );
 
   const currencies = [
@@ -79,8 +82,25 @@ function Header() {
     );
   };
 
+  const [scroll, setScroll] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 0) {
+        setScroll(true);
+      } else {
+        setScroll(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
-    <header className="header">
+    <header className={`header ${scroll ? 'scrolled' : ''}`}>
       <div className="header-left">
         <Link to={"/"} className="header-logo">
           <Logo />
@@ -110,7 +130,7 @@ function Header() {
           <>
             {GLQBalance && (
               <Pill icon={<GLQToken />} onClick={() => {}}>
-                {parseFloat(GLQBalance).toFixed(6) || "..."}
+                {formatNumberToFixed(parseFloat(GLQBalance), 6) || "..."}
               </Pill>
             )}
             <Pill icon={<Wallet />}>{formatEthereumAddress(account)}</Pill>
