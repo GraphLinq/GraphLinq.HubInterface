@@ -1,7 +1,7 @@
 import { abi as SWAP_ROUTER_ABI } from '@intrinsic-network/swap-router-contracts/artifacts/contracts/SwapRouter02.sol/SwapRouter02.json';
 import { abi as QuoterV2ABI } from '@uniswap/v3-periphery/artifacts/contracts/lens/QuoterV2.sol/QuoterV2.json';
 import { JsonRpcProvider, Wallet, Contract, formatEther, parseEther } from 'ethers';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const providerUrl = 'https://glq-dataseed.graphlinq.io';
 const privateKey = '';
@@ -10,45 +10,13 @@ const QUOTER_ADDRESS = '0x287a7beF47684D388fa56BFaB859501f9e515B9D';
 const fee = 10000; // 1% pool fee
 
 const useUniswap = () => {
-  const [provider, setProvider] = useState<JsonRpcProvider | null>(null);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [swapRouter, setSwapRouter] = useState<Contract | null>(null);
-  const [quoter, setQuoter] = useState<Contract | null>(null);
-
-  useEffect(() => {
-    const initializeProvider = () => {
-      const providerInstance = new JsonRpcProvider(providerUrl);
-      setProvider(providerInstance);
-    };
-
-    const initializeWallet = () => {
-      if (provider && privateKey) {
-        const walletInstance = new Wallet(privateKey, provider);
-        setWallet(walletInstance);
-      }
-    };
-
-    const initializeSwapRouter = () => {
-      if (wallet) {
-        const swapRouterInstance = new Contract(SWAP_ROUTER_ADDRESS, SWAP_ROUTER_ABI, wallet);
-        setSwapRouter(swapRouterInstance);
-      }
-    };
-
-    const initializeQuoter = () => {
-      if (wallet) {
-        const quoterInstance = new Contract(QUOTER_ADDRESS, QuoterV2ABI, wallet);
-        setQuoter(quoterInstance);
-      }
-    };
-
-    initializeProvider();
-    initializeWallet();
-    initializeSwapRouter();
-    initializeQuoter();
-  }, [privateKey, provider, wallet]);
+  const [provider] = useState<JsonRpcProvider>(new JsonRpcProvider(providerUrl));
+  const [wallet] = useState<Wallet | null>(() => privateKey ? new Wallet(privateKey, provider) : null);
+  const [swapRouter] = useState<Contract | null>(() => wallet ? new Contract(SWAP_ROUTER_ADDRESS, SWAP_ROUTER_ABI, wallet) : null);
+  const [quoter] = useState<Contract | null>(() => wallet ? new Contract(QUOTER_ADDRESS, QuoterV2ABI, wallet) : null);
 
   const quoteSwap = async (inputToken: string, outputToken: string, amountIn: number): Promise<string | null> => {
+    console.log("quoteSwap", quoter);
     if (!quoter) return null;
 
     try {
