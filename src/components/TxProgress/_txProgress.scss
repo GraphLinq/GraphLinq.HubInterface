@@ -1,21 +1,30 @@
+@import "../../assets/css/mixins/medias.scss";
+
 .txProgress {
-    position: absolute;
-    top: var(--header-height);
-    left: 50%;
-    transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  padding: 0 24px;
+  margin-bottom: 24px;
+
+  @include max($mobile) {
+    width: 100%;
+    padding: 0 16px;
+  }
+
+  .alert {
     max-width: 100%;
-    min-width: 60vw;
-    display: flex;
+    min-width: 680px;
     justify-content: center;
-    padding: 0 24px;
+    text-align: center;
 
-    .alert {
-        justify-content: center;
-        text-align: center;
+    @include max($mobile) {
+      width: 100%;
+      min-width: initial;
     }
+  }
 
-    .underline {
-        text-decoration: underline;
-        cursor: pointer;
-    }
+  .underline {
+    text-decoration: underline;
+    cursor: pointer;
+  }
 }

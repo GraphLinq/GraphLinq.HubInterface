@@ -1,5 +1,8 @@
 import "./_txProgress.scss";
+import Alert from "@components/Alert";
+import { useAppContext } from "@context/AppContext";
 import { useQuery } from "@tanstack/react-query";
+import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID } from "@utils/chains";
 import { useWeb3React } from "@web3-react/core";
 import { formatEther } from "ethers";
 import { useEffect, useState } from "react";
@@ -7,9 +10,6 @@ import { useEffect, useState } from "react";
 import useNetwork from "../../composables/useNetwork";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
-import Alert from "@components/Alert";
-import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID } from "@utils/chains";
-import { useAppContext } from "@context/AppContext";
 
 const TxProgress = () => {
   const { chainId, account } = useWeb3React();

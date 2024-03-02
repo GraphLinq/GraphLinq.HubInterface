@@ -20,7 +20,12 @@ body {
   background: url(../img/bg.png) no-repeat center/cover;
   background-blend-mode: saturation, normal;
   color: var(--c-white);
-  padding-top: calc(var(--header-height) + 40px);
+  min-height: 100vh;
+  padding-top: var(--header-height);
+
+  @include max($desktop-s) {
+    padding-bottom: var(--header-nav-mobile);
+  }
 }
 
 * {
@@ -43,18 +48,13 @@ body {
   justify-content: center;
   flex-direction: column;
   gap: 24px;
-  min-height: calc(100vh - var(--header-height) - 40px);
-
-  @include max($mobile) {
-    min-height: auto;
-  }
 }
 
 .main-card {
   width: 680px;
   padding: 40px;
   border-radius: 20px;
-  background-color: rgba(#0C0B0F, 0.4);
+  background-color: rgba(#0c0b0f, 0.4);
   max-width: 100%;
 
   @include max($mobile) {
@@ -64,7 +64,6 @@ body {
   @include max($mobile-s) {
     padding: 16px;
   }
-
 
   > * + * {
     margin-top: 16px;

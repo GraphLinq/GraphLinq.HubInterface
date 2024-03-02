@@ -12,7 +12,7 @@
   height: var(--header-height);
   padding: 0 24px;
   gap: 24px;
-  transition: .3s background-color ease-out;
+  transition: 0.3s background-color ease-out;
 
   &.scrolled {
     background-color: #150524;

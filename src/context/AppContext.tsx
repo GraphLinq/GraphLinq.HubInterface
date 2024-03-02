@@ -13,7 +13,7 @@ interface AppContextProps {
 const AppContext = createContext<AppContextProps | undefined>(undefined)
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
-  const [isWaitingTxData, setWaitingTxData] = useState<AppContextProps["isWaitingTxData"]>(false)
+  const [isWaitingTxData, setWaitingTxData] = useState<AppContextProps["isWaitingTxData"]>(true)
 
   return (
     <AppContext.Provider
