@@ -257,11 +257,11 @@ function SwapPage() {
                       </div>
                       <div className="swap-summary-detail">
                         <span>Fee</span>
-                        <span>{formatNumberToDollars(0)}</span>
+                        <span>{formatNumberToDollars(0, 2)}</span>
                       </div>
                       <div className="swap-summary-detail">
                         <span>Network cost</span>
-                        <span>{formatNumberToDollars(0)}</span>
+                        <span>{formatNumberToDollars(0, 2)}</span>
                       </div>
                     </div>
                   </div>
