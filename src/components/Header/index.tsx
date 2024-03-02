@@ -27,12 +27,14 @@ import {
 } from "../../libs/connections";
 import useExchangeRates from "../../composables/useExchangeRates";
 import { useEffect, useState } from "react";
+import useChains from "../../composables/useChains";
 
 function Header() {
-  const { account, chainId } = useWeb3React();
+  const { account } = useWeb3React();
+  const { isMainnet } = useChains();
   const { glq, eth } = useExchangeRates();
   const {balance: GLQBalance} = useTokenBalance(
-    chainId === MAINNET_CHAIN_ID ? WGLQ_TOKEN.address.mainnet : "native"
+    isMainnet ? WGLQ_TOKEN.address.mainnet : "native"
   );
 
   const currencies = [

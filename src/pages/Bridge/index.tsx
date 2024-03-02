@@ -35,6 +35,7 @@ import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
 import { formatNumberToFixed } from "@utils/number";
 import { useAppContext } from "@context/AppContext";
+import useChains from "../../composables/useChains";
 
 
 
@@ -49,6 +50,7 @@ let bridgeCost: number | null = null;
 
 function BridgePage() {
   const { chainId, account } = useWeb3React();
+  const { isMainnet } = useChains();
   const [switchToGraphLinqMainnet, switchToMainnet] = useNetwork();
   const { calculatePrice } = useExchangeRates();
   const { setWaitingTxData } = useAppContext();
@@ -63,7 +65,7 @@ function BridgePage() {
   );
 
   const trackingExplorer = `${
-    chainId === MAINNET_CHAIN_ID ? GLQ_EXPLORER : MAINNET_EXPLORER
+    isMainnet ? GLQ_EXPLORER : MAINNET_EXPLORER
   }/tx/${tracking && typeof tracking !== "string" && tracking.bridge_tx}`;
 
   const resetFeedback = () => {
@@ -74,7 +76,7 @@ function BridgePage() {
 
   const [activeOption, setActiveOption] = useState(0);
   const currencyOptions = (
-    chainId === MAINNET_CHAIN_ID ? MAINNET_CURRENCIES : GLQCHAIN_CURRENCIES
+    isMainnet ? MAINNET_CURRENCIES : GLQCHAIN_CURRENCIES
   ).map((currency) => {
     currency.icon = tokenIcons[currency.name];
     return currency;
@@ -82,28 +84,28 @@ function BridgePage() {
   const activeCurrency = currencyOptions[activeOption];
 
   const { balance: tokenBalance, fetchBalance } = useTokenBalance(
-    activeCurrency.address[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
+    activeCurrency.address[isMainnet ? "mainnet" : "glq"]
   );
 
   const activeTokenContract = useTokenContract(
-    activeCurrency.address[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
+    activeCurrency.address[isMainnet ? "mainnet" : "glq"]
   );
   const activeEVMBridgeContract = useEVMBridgeContract(
     activeCurrency.bridge &&
-      activeCurrency.bridge[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
+      activeCurrency.bridge[isMainnet ? "mainnet" : "glq"]
   );
   const activeEVMBridgeNativeContract = useEVMBridgeNativeContract(
     activeCurrency.bridge &&
-      activeCurrency.bridge[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
+      activeCurrency.bridge[isMainnet ? "mainnet" : "glq"]
   );
   const activeEVMBridgeERC20MinterContract = useEVMBridgeERC20MinterContract(
     activeCurrency.bridge &&
-      activeCurrency.bridge[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
+      activeCurrency.bridge[isMainnet ? "mainnet" : "glq"]
   );
 
   let bridgeContract: Contract | null = null;
   if (chainId) {
-    if (chainId === MAINNET_CHAIN_ID) {
+    if (isMainnet) {
       if (activeCurrency.address.mainnet === "native") {
         bridgeContract = activeEVMBridgeNativeContract;
       } else {
@@ -141,7 +143,7 @@ function BridgePage() {
 
   const handleSwitchNetwork = () => {
     resetFeedback();
-    if (chainId === MAINNET_CHAIN_ID) {
+    if (isMainnet) {
       switchToGraphLinqMainnet();
     } else {
       switchToMainnet();
@@ -181,7 +183,7 @@ function BridgePage() {
             bridgeContract.address
           );
 
-          const allowanceDecimal = parseFloat(allowance) / 1000000000000000000;
+          const allowanceDecimal = parseFloat(formatEther(allowance.toString()));
 
           if (allowanceDecimal < requiredAmount) {
             setPending(
@@ -222,7 +224,7 @@ function BridgePage() {
         const resultTx = await bridgeContract.initTransfer(
           parseEther(amount.toString()).toString(),
           activeCurrency.chainDestination[
-            chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"
+            isMainnet ? "mainnet" : "glq"
           ],
           account,
           {
@@ -245,7 +247,7 @@ function BridgePage() {
           `It will take approximatively 10 minutes to execute the bridge transaction and sending ${amount.toString()} ${
             activeCurrency.name
           } on the ${
-            chainId === MAINNET_CHAIN_ID ? "GLQ Chain" : "Ethereum"
+            isMainnet ? "GLQ Chain" : "Ethereum"
           } network.`
         );
         fetchBalance();
@@ -313,7 +315,7 @@ function BridgePage() {
           ) : (
             <>
               <div className="main-card-desc">
-                {chainId === MAINNET_CHAIN_ID ? (
+                {isMainnet ? (
                   <>
                     Transfer assets from <b>Ethereum</b> to{" "}
                     <b>Graphlinq Chain</b>.
@@ -352,7 +354,7 @@ function BridgePage() {
                   {chainId && (
                     <span>
                       {getChainName(
-                        chainId === MAINNET_CHAIN_ID
+                        isMainnet
                           ? GLQ_CHAIN_ID
                           : MAINNET_CHAIN_ID
                       )}
@@ -449,7 +451,7 @@ function BridgePage() {
                         </b>{" "}
                         has been bridged to your wallet on the{" "}
                         <b>
-                          {chainId === MAINNET_CHAIN_ID
+                          {isMainnet
                             ? "GLQ Chain"
                             : "Ethereum"}{" "}
                           network
@@ -466,7 +468,7 @@ function BridgePage() {
                     </Alert>
                     <Button onClick={handleSwitchNetwork}>
                       Switch to{" "}
-                      {chainId === MAINNET_CHAIN_ID ? "GLQ Chain" : "Ethereum"}{" "}
+                      {isMainnet ? "GLQ Chain" : "Ethereum"}{" "}
                       network
                     </Button>
                   </div>

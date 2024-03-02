@@ -11,7 +11,7 @@ import {
   GLQCHAIN_CURRENCIES,
   SITE_NAME,
 } from "@constants/index";
-import { MAINNET_CHAIN_ID } from "@utils/chains";
+import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID } from "@utils/chains";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { useWeb3React } from "@web3-react/core";
 import { ChangeEvent, useState } from "react";
@@ -19,6 +19,8 @@ import { Helmet } from "react-helmet-async";
 
 import useTokenBalance from "../../composables/useTokenBalance";
 import useExchangeRates from "../../composables/useExchangeRates";
+import useNetwork from "../../composables/useNetwork";
+import useChains from "../../composables/useChains";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -28,8 +30,10 @@ const tokenIcons = {
 };
 
 function SwapPage() {
-  const { chainId, account } = useWeb3React();
+  const { account } = useWeb3React();
   const { calculatePrice } = useExchangeRates();
+  const [switchToGraphLinqMainnet] = useNetwork();
+  const { isGLQChain, isMainnet } = useChains();
 
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
@@ -46,7 +50,7 @@ function SwapPage() {
   const [ownCurrencyOption, setOwnCurrencyOption] = useState(0);
   const [tradeCurrencyOption, setTradeCurrencyOption] = useState(0);
   const ownCurrencyOptions = (
-    chainId === MAINNET_CHAIN_ID ? MAINNET_CURRENCIES : GLQCHAIN_CURRENCIES
+    isMainnet ? MAINNET_CURRENCIES : GLQCHAIN_CURRENCIES
   ).map((currency) => {
     currency.icon = tokenIcons[currency.name];
     return currency;
@@ -60,13 +64,13 @@ function SwapPage() {
 
   const { balance: ownCurrencyBalance, fetchBalance: fetchOwnCurrencyBalance } =
     useTokenBalance(
-      ownCurrency.address[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
+      ownCurrency.address[isMainnet ? "mainnet" : "glq"]
     );
   const {
     balance: tradeCurrencyBalance,
     fetchBalance: fetchTradeCurrencyBalance,
   } = useTokenBalance(
-    tradeCurrency.address[chainId === MAINNET_CHAIN_ID ? "mainnet" : "glq"]
+    tradeCurrency.address[isMainnet ? "mainnet" : "glq"]
   );
 
   const [ownCurrencyAmount, setOwnCurrencyAmount] = useState(0);
@@ -126,7 +130,9 @@ function SwapPage() {
             </>
           ) : (
             <>
-              <div className="swap-amount">
+              {isGLQChain ? (
+                <>
+                <div className="swap-amount">
                 <div className="swap-amount-subtitle">Available</div>
                 <div className="swap-amount-value">
                   {ownCurrencyBalance && <span>{formatNumberToFixed(parseFloat(ownCurrencyBalance), 6)}</span>}
@@ -249,6 +255,17 @@ function SwapPage() {
                     <b>Successfully completed !</b>
                   </p>
                 </Alert>
+              )}
+                </>
+              ) : (
+                <>
+                              <div className="main-card-wrongnetwork">
+                Please switch to GLQ Chain network to swap assets.
+                <Button onClick={switchToGraphLinqMainnet}>
+                      Switch to GLQ Chain network
+                    </Button>
+              </div>
+                </>
               )}
             </>
           )}
