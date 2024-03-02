@@ -34,6 +34,7 @@ import useTokenBalance from "../../composables/useTokenBalance";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
 import { formatNumberToFixed } from "@utils/number";
+import { useAppContext } from "@context/AppContext";
 
 
 
@@ -50,6 +51,7 @@ function BridgePage() {
   const { chainId, account } = useWeb3React();
   const [switchToGraphLinqMainnet, switchToMainnet] = useNetwork();
   const { calculatePrice } = useExchangeRates();
+  const { setWaitingTxData } = useAppContext();
 
   const [formDisabled, setFormDisabled] = useState(false);
 
@@ -247,6 +249,7 @@ function BridgePage() {
           } network.`
         );
         fetchBalance();
+        setWaitingTxData(true);
       } catch (error: any) {
         resetFeedback();
         setError(error.toString());

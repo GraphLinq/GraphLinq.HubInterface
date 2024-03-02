@@ -9,10 +9,12 @@ import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
 import Alert from "@components/Alert";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID } from "@utils/chains";
+import { useAppContext } from "@context/AppContext";
 
 const TxProgress = () => {
   const { chainId, account } = useWeb3React();
   const [switchToGraphLinqMainnet, switchToMainnet] = useNetwork();
+  const { isWaitingTxData, setWaitingTxData } = useAppContext();
 
   const [trackingInfo, setTrackingInfo] = useState<TrackingInformation | null>(
     null
@@ -46,10 +48,23 @@ const TxProgress = () => {
 
     if (info) {
       setTrackingInfo(info);
+      setWaitingTxData(false);
     }
   }, [qTrackingInformation.data]);
 
   if (!trackingInfo) {
+    if (isWaitingTxData) {
+      return (
+        <div className="txProgress">
+        {isWaitingTxData && (
+          <Alert type="warning">
+            Waiting for tx data...
+          </Alert>
+        )}
+        </div>
+      )
+    }
+
     return;
   }
 
@@ -71,7 +86,7 @@ const TxProgress = () => {
   };
 
   return (
-    <div className="txProgress" data-state={trackingInfo.executionState}>
+    <div className="txProgress">
       {trackingInfo.executionState === ExecutionState.PENDING && (
         <Alert type="warning">
           Your transfer of{" "}
