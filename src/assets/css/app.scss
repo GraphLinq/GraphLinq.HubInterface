@@ -20,8 +20,7 @@ body {
   background: url(../img/bg.png) no-repeat center/cover;
   background-blend-mode: saturation, normal;
   color: var(--c-white);
-  padding-top: var(--header-height);
-  padding-bottom: var(--header-nav-mobile);
+  padding-top: calc(var(--header-height) + 40px);
 }
 
 * {
@@ -44,7 +43,7 @@ body {
   justify-content: center;
   flex-direction: column;
   gap: 24px;
-  min-height: calc(100vh - var(--header-height) - var(--header-nav-mobile));
+  min-height: calc(100vh - var(--header-height) - 40px);
 
   @include max($mobile) {
     min-height: auto;
