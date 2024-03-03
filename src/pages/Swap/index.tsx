@@ -392,16 +392,14 @@ function SwapPage() {
                         for{" "}
                         <b>
                           {quoteAmount} {tradeCurrency.name}
-                        </b>
+                        </b>{" "}
                         is now successfully completed.
                       </p>
-                      {tracking && typeof tracking !== "string" && (
-                        <p className="small" style={{ marginTop: 8 }}>
-                          <a href={trackingExplorer} target="_blank">
-                            <small>Tx hash: {success}</small>
-                          </a>
-                        </p>
-                      )}
+                      <p className="small" style={{ marginTop: 8 }}>
+                        <a href={trackingExplorer} target="_blank">
+                          <small>Tx hash: {success}</small>
+                        </a>
+                      </p>
                     </Alert>
                   )}
                 </>
