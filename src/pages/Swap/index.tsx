@@ -387,7 +387,7 @@ function SwapPage() {
                       <p>
                         Your swap of{" "}
                         <b>
-                          {ownCurrencyAmount} {ownCurrency.name}
+                          {formatNumberToFixed(ownCurrencyAmount, 6)} {ownCurrency.name}
                         </b>{" "}
                         for{" "}
                         <b>
