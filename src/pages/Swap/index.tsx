@@ -10,6 +10,8 @@ import {
   MAINNET_CURRENCIES,
   GLQCHAIN_CURRENCIES,
   SITE_NAME,
+  GLQCHAIN_SWAP_ROUTER_ADDRESS,
+  GLQ_EXPLORER,
 } from "@constants/index";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { useWeb3React } from "@web3-react/core";
@@ -21,6 +23,8 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import useUniswap from "../../composables/useUniswap";
+import { useTokenContract } from "../../composables/useContract";
+import { ethers } from "ethers";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -45,23 +49,44 @@ function SwapPage() {
   const [baseQuoteAmount, setBaseQuoteAmount] = useState<string | null>("0");
   const [quoteAmount, setQuoteAmount] = useState<string | null>("0");
 
+  const [loadingQuote, setLoadingQuote] = useState(false);
+
+  let quoteQueue = Promise.resolve();
+
   const getQuote = async () => {
-    if (!ownCurrency) return;
-    const base = await quoteSwap(
-      ownCurrency.address[isMainnet ? "mainnet" : "glq"],
-      tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
-      1
-    );
-    setBaseQuoteAmount(base);
+    setLoadingQuote(true);
 
-    if (!ownCurrencyAmount) return;
-
-    const result = await quoteSwap(
-      ownCurrency.address[isMainnet ? "mainnet" : "glq"],
-      tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
-      ownCurrencyAmount
-    );
-    setQuoteAmount(result);
+    const quotePromise = new Promise(async (resolve, reject) => {
+      try {
+        if (!ownCurrency) return;
+  
+        const base = await quoteSwap(
+          ownCurrency.address[isMainnet ? "mainnet" : "glq"],
+          tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
+          1
+        );
+        setBaseQuoteAmount(base);
+  
+        if (!ownCurrencyAmount) return;
+  
+        const result = await quoteSwap(
+          ownCurrency.address[isMainnet ? "mainnet" : "glq"],
+          tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
+          ownCurrencyAmount
+        );
+        setQuoteAmount(result);
+        
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      } finally {
+        setLoadingQuote(false);
+      }
+    });
+  
+    quoteQueue = quoteQueue.then(() => quotePromise);
+  
+    return quotePromise;
   };
 
   const resetFeedback = () => {
@@ -90,10 +115,10 @@ function SwapPage() {
   );
 
   const [ownCurrencyAmount, setOwnCurrencyAmount] = useState(0);
-  const [tradeCurrencyAmount, setTradeCurrencyAmount] = useState(0);
 
-  const [ownCurrencyPrice, setOwnCurrencyPrice] = useState(0);
-  const [tradeCurrencyPrice, setTradeCurrencyPrice] = useState(0);
+  const activeTokenContract = useTokenContract(
+    ownCurrency.address[isMainnet ? "mainnet" : "glq"]
+  );
 
   const handleCurrencySelectChange = (
     active: number,
@@ -108,7 +133,6 @@ function SwapPage() {
     }
 
     setOwnCurrencyAmount(0);
-    setTradeCurrencyAmount(0);
     setQuoteAmount("0");
   };
 
@@ -127,16 +151,69 @@ function SwapPage() {
   };
 
   const handleSend = async () => {
-    if (!quoteAmount || !account) return;
+    if (!quoteAmount || !account || loadingQuote) return;
 
     resetFeedback();
 
-    await executeSwap(
+    if (ownCurrencyAmount <= 0) {
+      setError(
+        `Invalid amount to swap : ${ownCurrencyAmount} ${ownCurrency.name}`
+      );
+      return;
+    }
+
+    let allowance = "0";
+    allowance = await activeTokenContract.allowance(
+      account,
+      GLQCHAIN_SWAP_ROUTER_ADDRESS
+    );
+
+    const allowanceDecimal = parseFloat(
+      ethers.utils.formatEther(allowance.toString())
+    );
+
+    if (allowanceDecimal < ownCurrencyAmount) {
+      setPending(
+        "Allowance pending, please allow the use of your token balance for the contract..."
+      );
+      const approveTx = await activeTokenContract.approve(
+        GLQCHAIN_SWAP_ROUTER_ADDRESS,
+        ethers.utils.parseEther(ownCurrencyAmount.toString())
+      );
+      setPending("Waiting for confirmations...");
+      await approveTx.wait();
+      setPending(
+        "Allowance successfully increased, waiting for swap transaction..."
+      );
+    }
+
+    if (
+      ownCurrencyBalance &&
+      ownCurrencyAmount > parseFloat(ownCurrencyBalance)
+    ) {
+      setPending("");
+      setError(
+        `You only have ${ownCurrencyBalance} ${ownCurrency.name} in your wallet.`
+      );
+      return;
+    }
+
+    setPending(
+      "Pending, check your wallet extension to execute the chain transaction..."
+    );
+
+    const tx = await executeSwap(
       ownCurrency.address[isMainnet ? "mainnet" : "glq"],
       tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
       ownCurrencyAmount,
       account
     );
+
+    setPending("Waiting for confirmations...");
+
+    const receipt = await tx.wait();
+
+    setSuccess(receipt.transactionHash);
   };
 
   useEffect(() => {
@@ -144,6 +221,8 @@ function SwapPage() {
       getQuote();
     }
   }, [account, ownCurrency, ownCurrencyAmount]);
+
+  const trackingExplorer = `${GLQ_EXPLORER}/tx/${success}`;
 
   return (
     <>
@@ -216,7 +295,7 @@ function SwapPage() {
                     </div>
                     <div className="swap-choice">
                       <div className="swap-choice-label">You receive</div>
-                      <div className="swap-choice-input">
+                      <div className="swap-choice-input" data-disabled={loadingQuote}>
                         <div className="swap-choice-input-wrapper">
                           <input
                             type="number"
@@ -267,7 +346,10 @@ function SwapPage() {
                           {tradeCurrency.name}
                         </span>
                         <span className="color">
-                          {calculatePrice(baseQuoteAmount ? parseFloat(baseQuoteAmount) : 0, tradeCurrency.exchangeRate)}
+                          {calculatePrice(
+                            baseQuoteAmount ? parseFloat(baseQuoteAmount) : 0,
+                            tradeCurrency.exchangeRate
+                          )}
                         </span>
                       </div>
                       <Arrow />
@@ -288,7 +370,7 @@ function SwapPage() {
                     </div>
                   </div>
                   <div className="swap-submit">
-                    <Button onClick={handleSend}>Send</Button>
+                    <Button onClick={handleSend} disabled={loadingQuote}>Send</Button>
                   </div>
                   {error && (
                     <Alert type="error">
@@ -303,8 +385,23 @@ function SwapPage() {
                   {success && (
                     <Alert type="success">
                       <p>
-                        <b>Successfully completed !</b>
+                        Your swap of{" "}
+                        <b>
+                          {ownCurrencyAmount} {ownCurrency.name}
+                        </b>{" "}
+                        for{" "}
+                        <b>
+                          {quoteAmount} {tradeCurrency.name}
+                        </b>
+                        is now successfully completed.
                       </p>
+                      {tracking && typeof tracking !== "string" && (
+                        <p className="small" style={{ marginTop: 8 }}>
+                          <a href={trackingExplorer} target="_blank">
+                            <small>Tx hash: {success}</small>
+                          </a>
+                        </p>
+                      )}
                     </Alert>
                   )}
                 </>

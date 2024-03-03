@@ -5,6 +5,10 @@ export const MAINNET_EXPLORER = "https://etherscan.io";
 export const GLQ_EXPLORER = "https://explorer.graphlinq.io";
 export const BRIDGE_API_URL = "https://api-bridge.graphlinq.io/api/v1";
 
+/* Swap */
+export const GLQCHAIN_SWAP_QUOTER_ADDRESS = "0x287a7beF47684D388fa56BFaB859501f9e515B9D"
+export const GLQCHAIN_SWAP_ROUTER_ADDRESS = "0x47AB4F709b5C250026C4DA83cde56fc2C81a311c"
+
 /* Bridges */
 export const MAINNET_BRIDGE_OUT_ETH =
   "0x64f3Ed55b8CaE69b27905288a597A66f122f7965"; // Sepolia

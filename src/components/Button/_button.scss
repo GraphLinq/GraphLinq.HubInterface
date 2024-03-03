@@ -16,4 +16,16 @@
     &:active {
         transform: scale(.95);
     }
+    
+    &[data-disabled="true"] {
+        position: relative;
+        opacity: 0.5;
+
+        &:before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 10;
+        }
+      }
 }

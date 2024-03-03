@@ -363,7 +363,7 @@ function BridgePage() {
               </div>
 
               <div className="bridge-amount">
-                <div className="bridge-amount-wrap" data-disable={formDisabled}>
+                <div className="bridge-amount-wrap" data-disabled={formDisabled}>
                   <div className="bridge-amount-subtitle">Available</div>
                   <div className="bridge-amount-value">
                     {tokenBalance && (
@@ -445,7 +445,7 @@ function BridgePage() {
                         <b>
                           {tracking &&
                             typeof tracking !== "string" &&
-                            formatEther(tracking.quantity).toString()}{" "}
+                            ethers.utils.formatEther(tracking.quantity).toString()}{" "}
                           {activeCurrency.name}
                         </b>{" "}
                         has been bridged to your wallet on the{" "}
