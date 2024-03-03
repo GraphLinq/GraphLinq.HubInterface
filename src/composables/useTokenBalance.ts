@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
-import { Contract, formatUnits } from "ethers";
+import { Contract } from "ethers";
+import { ethers } from "ethers";
 
 function useTokenBalance(tokenAddress: string) {
   const { account, provider, chainId } = useWeb3React();
@@ -30,7 +31,7 @@ function useTokenBalance(tokenAddress: string) {
       if (typeof tokenBalance !== "bigint" && tokenBalance.isZero()) {
         setBalance("0.0");
       } else {
-        const formattedBalance = formatUnits(tokenBalance.toString(), 18);
+        const formattedBalance = ethers.utils.formatUnits(tokenBalance.toString(), 18);
         setBalance(formattedBalance);
       }
     } catch (error) {

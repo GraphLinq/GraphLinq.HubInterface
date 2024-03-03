@@ -18,7 +18,7 @@ import { Contract } from "@ethersproject/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
 import { useWeb3React } from "@web3-react/core";
-import { formatEther, parseEther } from "ethers";
+import { ethers } from "ethers"
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
@@ -183,7 +183,7 @@ function BridgePage() {
             bridgeContract.address
           );
 
-          const allowanceDecimal = parseFloat(formatEther(allowance.toString()));
+          const allowanceDecimal = parseFloat(ethers.utils.formatEther(allowance.toString()));
 
           if (allowanceDecimal < requiredAmount) {
             setPending(
@@ -191,7 +191,7 @@ function BridgePage() {
             );
             const approveTx = await activeTokenContract.approve(
               bridgeContract.address,
-              parseEther(requiredAmount.toString())
+              ethers.utils.parseEther(requiredAmount.toString())
             );
             setPending("Waiting for confirmations...");
             await approveTx.wait();
@@ -216,13 +216,12 @@ function BridgePage() {
         const value =
           activeCurrency.address.mainnet === "native"
             ? (
-                parseEther(amount.toString()) +
-                parseEther(bridgeCost.toString())
+              ethers.utils.parseEther(amount + bridgeCost)
               ).toString()
             : parseFloat(bridgeCost);
 
         const resultTx = await bridgeContract.initTransfer(
-          parseEther(amount.toString()).toString(),
+          ethers.utils.parseEther(amount.toString()).toString(),
           activeCurrency.chainDestination[
             isMainnet ? "mainnet" : "glq"
           ],
