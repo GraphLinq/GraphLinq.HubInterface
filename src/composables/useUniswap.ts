@@ -13,6 +13,7 @@ const useUniswap = () => {
   const quoter: Contract = new Contract(GLQCHAIN_SWAP_QUOTER_ADDRESS, QuoterV2ABI, provider?.getSigner(account));
 
   const quoteSwap = async (inputToken: string, outputToken: string, amountIn: number): Promise<string | null> => {
+    console.log(account);
     if (!quoter || !account) return null;
 
     try {
