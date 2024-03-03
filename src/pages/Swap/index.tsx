@@ -15,16 +15,17 @@ import {
 } from "@constants/index";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { useWeb3React } from "@web3-react/core";
+import { ethers } from "ethers";
 import { ChangeEvent, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
 import useChains from "../../composables/useChains";
+import { useTokenContract } from "../../composables/useContract";
 import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import useUniswap from "../../composables/useUniswap";
-import { useTokenContract } from "../../composables/useContract";
-import { ethers } from "ethers";
+import InputRadioGroup from "@components/InputRadioGroup";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -33,23 +34,42 @@ const tokenIcons = {
   WETH: <ETHToken />,
 };
 
+const slippageOptions = [
+  {
+    label: "0.5%",
+    value: "5",
+  },
+  {
+    label: "1%",
+    value: "10",
+  },
+  {
+    label: "2%",
+    value: "20",
+  },
+  {
+    label: "3%",
+    value: "30",
+  },
+];
+
 function SwapPage() {
   const { account } = useWeb3React();
   const { calculatePrice } = useExchangeRates();
   const [switchToGraphLinqMainnet] = useNetwork();
   const { isGLQChain, isMainnet } = useChains();
-  const { quoteSwap, executeSwap } = useUniswap();
+  const { quoteSwap, executeSwap, feeInPercent } = useUniswap();
 
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
   const [success, setSuccess] = useState("");
-  const [tracking, setTracking] = useState(null);
   const [summaryOpen, setSummaryOpen] = useState(true);
 
   const [baseQuoteAmount, setBaseQuoteAmount] = useState<string | null>("0");
   const [quoteAmount, setQuoteAmount] = useState<string | null>("0");
-
   const [loadingQuote, setLoadingQuote] = useState(false);
+
+  const [maxSlippage, setMaxSlippage] = useState(slippageOptions[0].value);
 
   let quoteQueue = Promise.resolve();
 
@@ -59,23 +79,23 @@ function SwapPage() {
     const quotePromise = new Promise(async (resolve, reject) => {
       try {
         if (!ownCurrency) return;
-  
+
         const base = await quoteSwap(
           ownCurrency.address[isMainnet ? "mainnet" : "glq"],
           tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
           1
         );
         setBaseQuoteAmount(base);
-  
+
         if (!ownCurrencyAmount) return;
-  
+
         const result = await quoteSwap(
           ownCurrency.address[isMainnet ? "mainnet" : "glq"],
           tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
           ownCurrencyAmount
         );
         setQuoteAmount(result);
-        
+
         resolve(result);
       } catch (error) {
         reject(error);
@@ -83,9 +103,9 @@ function SwapPage() {
         setLoadingQuote(false);
       }
     });
-  
+
     quoteQueue = quoteQueue.then(() => quotePromise);
-  
+
     return quotePromise;
   };
 
@@ -151,7 +171,8 @@ function SwapPage() {
   };
 
   const handleSend = async () => {
-    if (!quoteAmount || !account || loadingQuote) return;
+    if (!quoteAmount || !account || loadingQuote || !activeTokenContract)
+      return;
 
     resetFeedback();
 
@@ -206,7 +227,9 @@ function SwapPage() {
       ownCurrency.address[isMainnet ? "mainnet" : "glq"],
       tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
       ownCurrencyAmount,
-      account
+      account,
+      quoteAmount,
+      maxSlippage
     );
 
     setPending("Waiting for confirmations...");
@@ -295,7 +318,10 @@ function SwapPage() {
                     </div>
                     <div className="swap-choice">
                       <div className="swap-choice-label">You receive</div>
-                      <div className="swap-choice-input" data-disabled={loadingQuote}>
+                      <div
+                        className="swap-choice-input"
+                        data-disabled={loadingQuote}
+                      >
                         <div className="swap-choice-input-wrapper">
                           <input
                             type="number"
@@ -357,20 +383,24 @@ function SwapPage() {
                     <div className="swap-summary-details">
                       <div className="swap-summary-detail">
                         <span>Max slippage</span>
-                        <span>?%</span>
+                        <span className="bridge-amount-swap-actions">
+                          <InputRadioGroup
+                            options={slippageOptions}
+                            onChange={(val) => setMaxSlippage(val)}
+                            defaultOption={maxSlippage}
+                          />
+                        </span>
                       </div>
                       <div className="swap-summary-detail">
-                        <span>Fee</span>
-                        <span>{formatNumberToDollars(0, 2)}</span>
-                      </div>
-                      <div className="swap-summary-detail">
-                        <span>Network cost</span>
-                        <span>{formatNumberToDollars(0, 2)}</span>
+                        <span>Fee + Network cost</span>
+                        <span>~{feeInPercent}%</span>
                       </div>
                     </div>
                   </div>
                   <div className="swap-submit">
-                    <Button onClick={handleSend} disabled={loadingQuote}>Send</Button>
+                    <Button onClick={handleSend} disabled={loadingQuote}>
+                      Send
+                    </Button>
                   </div>
                   {error && (
                     <Alert type="error">
@@ -387,11 +417,16 @@ function SwapPage() {
                       <p>
                         Your swap of{" "}
                         <b>
-                          {formatNumberToFixed(ownCurrencyAmount, 6)} {ownCurrency.name}
+                          {formatNumberToFixed(ownCurrencyAmount, 6)}{" "}
+                          {ownCurrency.name}
                         </b>{" "}
                         for{" "}
                         <b>
-                          {quoteAmount} {tradeCurrency.name}
+                          {formatNumberToFixed(
+                            quoteAmount ? parseFloat(quoteAmount) : 0,
+                            6
+                          )}{" "}
+                          {tradeCurrency.name}
                         </b>{" "}
                         is now successfully completed.
                       </p>

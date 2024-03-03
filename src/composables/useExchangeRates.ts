@@ -1,9 +1,10 @@
-import { formatNumberToDollars } from '@utils/number';
-import { useState, useEffect } from 'react';
-import useUniswap from './useUniswap';
-import { WETH_TOKEN, WGLQ_TOKEN } from '@constants/index';
-import useChains from './useChains';
-import { useWeb3React } from '@web3-react/core';
+import { WETH_TOKEN, WGLQ_TOKEN } from "@constants/index";
+import { formatNumberToDollars } from "@utils/number";
+import { useWeb3React } from "@web3-react/core";
+import { useState, useEffect } from "react";
+
+import useChains from "./useChains";
+import useUniswap from "./useUniswap";
 
 interface CoinbaseExchangeRates {
   loading: boolean;
@@ -21,12 +22,14 @@ const useExchangeRates = () => {
     glq: null,
   });
   const { isMainnet } = useChains();
-  const { quoteSwap  } = useUniswap();
+  const { quoteSwap } = useUniswap();
 
   useEffect(() => {
     const fetchExchangeRates = async () => {
       try {
-        const ethResponse = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=ETH');
+        const ethResponse = await fetch(
+          "https://api.coinbase.com/v2/exchange-rates?currency=ETH"
+        );
         const ethData = await ethResponse.json();
         const ethRate = parseFloat(ethData.data.rates.USD);
 
@@ -49,7 +52,7 @@ const useExchangeRates = () => {
       } catch (error) {
         setExchangeRates({
           loading: false,
-          error: 'Failed to fetch exchange rates',
+          error: "Failed to fetch exchange rates",
           eth: null,
           glq: null,
         });
@@ -59,11 +62,11 @@ const useExchangeRates = () => {
     fetchExchangeRates();
   }, [account]);
 
-  const calculatePrice = (amount: number, currency: 'eth' | 'glq') => {
+  const calculatePrice = (amount: number, currency: "eth" | "glq") => {
     if (!exchangeRates[currency]) {
-        return;
+      return;
     }
-    return formatNumberToDollars(amount * exchangeRates[currency]!, 2);
+    return formatNumberToDollars(amount * exchangeRates[currency]!, 4);
   };
 
   return { ...exchangeRates, calculatePrice };

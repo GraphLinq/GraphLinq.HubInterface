@@ -1,0 +1,23 @@
+.inputRadioGroup {
+display: flex;
+gap: 8px;
+
+  &-label {
+    cursor: pointer;
+
+    input {
+      display: none;
+
+      &:checked + span {
+        background-color: var(--c-lavender);
+        color: var(--c-martinique);
+      }
+    }
+
+    span {
+      background-color: var(--c-martinique);
+      border-radius: 100px;
+      padding: 4px 12px;
+    }
+  }
+}
