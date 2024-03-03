@@ -9,10 +9,15 @@ interface InputNumberProps {
   onChange?: (value: number) => void;
 }
 
-const InputNumber: React.FC<InputNumberProps> = ({ icon, currencyText, max, value, onChange }) => {
-
+const InputNumber: React.FC<InputNumberProps> = ({
+  icon,
+  currencyText,
+  max,
+  value,
+  onChange,
+}) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = e.target.value !== '' ? parseFloat(e.target.value) : 0;
+    let newValue = e.target.value !== "" ? parseFloat(e.target.value) : 0;
 
     if (newValue > max) {
       newValue = max;
@@ -27,9 +32,7 @@ const InputNumber: React.FC<InputNumberProps> = ({ icon, currencyText, max, valu
 
   return (
     <div className="inputNumber">
-      <div className="inputNumber-icon">
-        {icon}
-      </div>
+      <div className="inputNumber-icon">{icon}</div>
       <input
         type="number"
         value={value}
@@ -37,9 +40,7 @@ const InputNumber: React.FC<InputNumberProps> = ({ icon, currencyText, max, valu
         onChange={handleInputChange}
         className="inputNumber-input"
       />
-      <div className="inputNumber-currency">
-        {currencyText}
-      </div>
+      <div className="inputNumber-currency">{currencyText}</div>
     </div>
   );
 };

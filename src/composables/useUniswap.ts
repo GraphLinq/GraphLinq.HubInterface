@@ -14,10 +14,10 @@ const useUniswap = () => {
   const quoter = new Contract(QUOTER_ADDRESS, QuoterV2ABI, provider?.getSigner(account));
 
   const quoteSwap = async (inputToken: string, outputToken: string, amountIn: number): Promise<string | null> => {
-    if (!quoter) return null;
+    if (!quoter || !account) return null;
 
     try {
-      const amountInFormatted = ethers.utils.parseUnits(amountIn.toString(), 'ether')
+      const amountInFormatted = ethers.utils.parseEther(amountIn.toString())
       const parameters = {
           tokenIn: inputToken,
           tokenOut: outputToken,
@@ -26,7 +26,6 @@ const useUniswap = () => {
           sqrtPriceLimitX96: "0"
       };
       const amountOut = await quoter.callStatic.quoteExactInputSingle(parameters);
-      console.log(amountOut)
       return ethers.utils.formatEther(amountOut[0]);
     } catch (error) {
       console.error('Failed to quote swap:', error);

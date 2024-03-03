@@ -42,10 +42,20 @@ function SwapPage() {
   const [tracking, setTracking] = useState(null);
   const [summaryOpen, setSummaryOpen] = useState(true);
 
-  const [quoteAmount, setQuoteAmount] = useState<string | null>(null);
+  const [baseQuoteAmount, setBaseQuoteAmount] = useState<string | null>("0");
+  const [quoteAmount, setQuoteAmount] = useState<string | null>("0");
 
   const getQuote = async () => {
     if (!ownCurrency) return;
+    const base = await quoteSwap(
+      ownCurrency.address[isMainnet ? "mainnet" : "glq"],
+      tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
+      1
+    );
+    setBaseQuoteAmount(base);
+
+    if (!ownCurrencyAmount) return;
+
     const result = await quoteSwap(
       ownCurrency.address[isMainnet ? "mainnet" : "glq"],
       tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
@@ -75,14 +85,11 @@ function SwapPage() {
   const ownCurrency = ownCurrencyOptions[ownCurrencyOption];
   const tradeCurrency = tradeCurrencyOptions[tradeCurrencyOption];
 
-  const { balance: ownCurrencyBalance, fetchBalance: fetchOwnCurrencyBalance } =
-    useTokenBalance(ownCurrency.address[isMainnet ? "mainnet" : "glq"]);
-  const {
-    balance: tradeCurrencyBalance,
-    fetchBalance: fetchTradeCurrencyBalance,
-  } = useTokenBalance(tradeCurrency.address[isMainnet ? "mainnet" : "glq"]);
+  const { balance: ownCurrencyBalance } = useTokenBalance(
+    ownCurrency.address[isMainnet ? "mainnet" : "glq"]
+  );
 
-  const [ownCurrencyAmount, setOwnCurrencyAmount] = useState(1);
+  const [ownCurrencyAmount, setOwnCurrencyAmount] = useState(0);
   const [tradeCurrencyAmount, setTradeCurrencyAmount] = useState(0);
 
   const [ownCurrencyPrice, setOwnCurrencyPrice] = useState(0);
@@ -96,22 +103,26 @@ function SwapPage() {
 
     if (currency === "own") {
       setOwnCurrencyOption(active);
-      setOwnCurrencyAmount(0);
     } else {
       setTradeCurrencyOption(active);
-      setTradeCurrencyAmount(0);
     }
+
+    setOwnCurrencyAmount(0);
+    setTradeCurrencyAmount(0);
+    setQuoteAmount("0");
   };
 
-  const handleCurrencyAmountChange = (
-    evt: ChangeEvent<HTMLInputElement>,
-    currency: "own" | "trade"
-  ) => {
-    const newValue: number = parseFloat(evt.target.value);
-    if (currency === "own") {
+  const handleCurrencyAmountChange = (evt: ChangeEvent<HTMLInputElement>) => {
+    let newValue = evt.target.value !== "" ? parseFloat(evt.target.value) : 0;
+
+    if (newValue > parseFloat(evt.target.max)) {
+      newValue = parseFloat(evt.target.max);
+    }
+
+    evt.target.value = newValue.toString();
+
+    if (!isNaN(newValue)) {
       setOwnCurrencyAmount(newValue);
-    } else {
-      setTradeCurrencyAmount(newValue);
     }
   };
 
@@ -120,7 +131,6 @@ function SwapPage() {
 
     resetFeedback();
 
-    // Exécuter le swap
     await executeSwap(
       ownCurrency.address[isMainnet ? "mainnet" : "glq"],
       tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
@@ -130,8 +140,10 @@ function SwapPage() {
   };
 
   useEffect(() => {
-    getQuote();
-  }, [ownCurrency, ownCurrencyAmount]);
+    if (account) {
+      getQuote();
+    }
+  }, [account, ownCurrency, ownCurrencyAmount]);
 
   return (
     <>
@@ -178,13 +190,14 @@ function SwapPage() {
                                 ? parseFloat(ownCurrencyBalance)
                                 : 0
                             }
-                            onChange={(evt) =>
-                              handleCurrencyAmountChange(evt, "own")
-                            }
+                            onChange={(evt) => handleCurrencyAmountChange(evt)}
                           />
                         </div>
                         <div className="swap-choice-input-price">
-                          {formatNumberToDollars(ownCurrencyPrice, 2)}
+                          {calculatePrice(
+                            ownCurrencyAmount,
+                            ownCurrency.exchangeRate
+                          )}
                         </div>
                         <Select
                           options={ownCurrencyOptions.map((opt) => (
@@ -207,20 +220,18 @@ function SwapPage() {
                         <div className="swap-choice-input-wrapper">
                           <input
                             type="number"
-                            value={tradeCurrencyAmount}
+                            value={formatNumberToFixed(
+                              quoteAmount ? parseFloat(quoteAmount) : 0,
+                              6
+                            )}
                             readOnly
-                            max={
-                              tradeCurrencyBalance
-                                ? parseFloat(tradeCurrencyBalance)
-                                : 0
-                            }
-                            onChange={(evt) =>
-                              handleCurrencyAmountChange(evt, "trade")
-                            }
                           />
                         </div>
                         <div className="swap-choice-input-price">
-                          {formatNumberToDollars(tradeCurrencyPrice, 2)}
+                          {calculatePrice(
+                            quoteAmount ? parseFloat(quoteAmount) : 0,
+                            tradeCurrency.exchangeRate
+                          )}
                         </div>
                         <Select
                           options={tradeCurrencyOptions.map((opt) => (
@@ -242,10 +253,21 @@ function SwapPage() {
                     >
                       <div className="swap-summary-header-info">
                         <span>1 {ownCurrency.name}</span>
-                        <span>=</span>
-                        <span>? {tradeCurrency.name}</span>
-                        <span>
+                        <span className="color">
                           {calculatePrice(1, ownCurrency.exchangeRate)}
+                        </span>
+                        <span className="color">=</span>
+                        <span>
+                          {baseQuoteAmount
+                            ? formatNumberToFixed(
+                                parseFloat(baseQuoteAmount),
+                                6
+                              )
+                            : 0}{" "}
+                          {tradeCurrency.name}
+                        </span>
+                        <span className="color">
+                          {calculatePrice(baseQuoteAmount ? parseFloat(baseQuoteAmount) : 0, tradeCurrency.exchangeRate)}
                         </span>
                       </div>
                       <Arrow />
