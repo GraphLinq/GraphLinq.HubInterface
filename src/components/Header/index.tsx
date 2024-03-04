@@ -1,7 +1,5 @@
 import "./_header.scss";
 import Bridge from "@assets/icons/bridge.svg?react";
-import ChainStatus from "@assets/icons/chain.svg?react";
-import CoinInfo from "@assets/icons/coin.svg?react";
 import Connect from "@assets/icons/connect-wallet.svg?react";
 import Dashboard from "@assets/icons/dashboard.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
@@ -13,21 +11,20 @@ import Wallet from "@assets/icons/wallet.svg?react";
 import Button from "@components/Button";
 import Pill from "@components/Pill";
 import { WGLQ_TOKEN } from "@constants/index";
-import { MAINNET_CHAIN_ID } from "@utils/chains";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { formatEthereumAddress } from "@utils/string";
 import { useWeb3React } from "@web3-react/core";
+import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 
+import useChains from "../../composables/useChains";
+import useExchangeRates from "../../composables/useExchangeRates";
 import useTokenBalance from "../../composables/useTokenBalance";
 import {
   tryActivateConnector,
   getConnection,
   ConnectionType,
 } from "../../libs/connections";
-import useExchangeRates from "../../composables/useExchangeRates";
-import { useEffect, useState } from "react";
-import useChains from "../../composables/useChains";
 
 function Header() {
   const { account } = useWeb3React();
@@ -54,16 +51,16 @@ function Header() {
       label: "Dashboard",
       url: "/",
     },
-    {
-      icon: <CoinInfo />,
-      label: "Coin Info",
-      url: "/coin-info",
-    },
-    {
-      icon: <ChainStatus />,
-      label: "Chain Status",
-      url: "/chain-status",
-    },
+    // {
+    //   icon: <CoinInfo />,
+    //   label: "Coin Info",
+    //   url: "/coin-info",
+    // },
+    // {
+    //   icon: <ChainStatus />,
+    //   label: "Chain Status",
+    //   url: "/chain-status",
+    // },
     {
       icon: <Bridge />,
       label: "Bridge",

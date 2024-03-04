@@ -88,18 +88,6 @@
       color: var(--c-white);
       padding: 8px 8px 8px 20px;
 
-      &[data-disabled="true"] {
-        position: relative;
-        opacity: 0.5;
-
-        &:before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          z-index: 10;
-        }
-      }
-
       .inputNumber {
         padding: 0;
         border: 0;

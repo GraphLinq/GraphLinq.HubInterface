@@ -83,7 +83,7 @@ function BridgePage() {
   });
   const activeCurrency = currencyOptions[activeOption];
 
-  const { balance: tokenBalance, fetchBalance } = useTokenBalance(
+  const { balance: tokenBalance, fetchBalance, loadingBalance } = useTokenBalance(
     activeCurrency.address[isMainnet ? "mainnet" : "glq"]
   );
 
@@ -363,7 +363,7 @@ function BridgePage() {
               </div>
 
               <div className="bridge-amount">
-                <div className="bridge-amount-wrap" data-disabled={formDisabled}>
+                <div className="bridge-amount-wrap" data-disabled={formDisabled || loadingBalance}>
                   <div className="bridge-amount-subtitle">Available</div>
                   <div className="bridge-amount-value">
                     {tokenBalance && (

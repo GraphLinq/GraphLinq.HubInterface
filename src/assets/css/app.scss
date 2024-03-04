@@ -69,6 +69,24 @@ body {
     margin-top: 16px;
   }
 
+  &-content {
+    > * + * {
+      margin-top: 16px;
+    }
+
+    &[data-disabled="true"] {
+      position: relative;
+      opacity: 0.5;
+
+      &:before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+      }
+    }
+  }
+
   &-title {
     font-size: 48px;
     font-weight: 600;

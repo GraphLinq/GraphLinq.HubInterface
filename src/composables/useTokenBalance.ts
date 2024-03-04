@@ -6,9 +6,12 @@ import { ethers } from "ethers";
 function useTokenBalance(tokenAddress: string) {
   const { account, provider, chainId } = useWeb3React();
   const [balance, setBalance] = useState<string | null>(null);
+  const [loadingBalance, setLoadingBalance] = useState(false);
 
   const fetchBalance = async () => {
     if (!account || !provider || !chainId) return;
+
+    setLoadingBalance(true);
 
     if (tokenAddress === "") {
       setBalance("0.0");
@@ -36,6 +39,8 @@ function useTokenBalance(tokenAddress: string) {
       }
     } catch (error) {
       console.error("Error getting token balance.", error);
+    } finally {
+      setLoadingBalance(false);
     }
   };
 
@@ -43,7 +48,7 @@ function useTokenBalance(tokenAddress: string) {
     fetchBalance();
   }, [account, provider, tokenAddress]);
 
-  return { balance, fetchBalance };
+  return { balance, fetchBalance, loadingBalance };
 }
 
 export default useTokenBalance;

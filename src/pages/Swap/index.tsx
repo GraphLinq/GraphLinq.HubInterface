@@ -79,7 +79,7 @@ function SwapPage() {
 
     const quotePromise = new Promise(async (resolve, reject) => {
       try {
-        if (!ownCurrency || parseFloat(ownCurrencyAmount) === 0) return;
+        if (!ownCurrency) return;
 
         const base = await quoteSwap(
           ownCurrency.address[isMainnet ? "mainnet" : "glq"],
@@ -88,7 +88,7 @@ function SwapPage() {
         );
         setBaseQuoteAmount(base);
 
-        if (!ownCurrencyAmount) return;
+        if (parseFloat(ownCurrencyAmount) === 0) return;
 
         const result = await quoteSwap(
           ownCurrency.address[isMainnet ? "mainnet" : "glq"],
@@ -131,7 +131,7 @@ function SwapPage() {
   const ownCurrency = ownCurrencyOptions[ownCurrencyOption];
   const tradeCurrency = tradeCurrencyOptions[tradeCurrencyOption];
 
-  const { balance: ownCurrencyBalance } = useTokenBalance(
+  const { balance: ownCurrencyBalance, loadingBalance } = useTokenBalance(
     ownCurrency.address[isMainnet ? "mainnet" : "glq"]
   );
 
@@ -242,213 +242,208 @@ function SwapPage() {
       <div className="main-page swap">
         <div className="main-card">
           <div className="main-card-title">Swap</div>
-          {!account ? (
-            <>
-              <div className="main-card-notlogged">
-                Please login to swap assets.
-              </div>
-            </>
-          ) : (
-            <>
-              {isGLQChain ? (
-                <>
-                  <div className="swap-amount">
-                    <div className="swap-amount-subtitle">Available</div>
-                    <div className="swap-amount-value">
-                      {ownCurrencyBalance && (
-                        <span>
-                          {formatNumberToFixed(
-                            parseFloat(ownCurrencyBalance),
-                            6
-                          )}
-                        </span>
-                      )}
-                      {ownCurrency.name}
-                    </div>
-                  </div>
-                  <div className="swap-choices">
-                    <div className="swap-choice">
-                      <div className="swap-choice-label">You pay</div>
-                      <div className="swap-choice-input">
-                        <div className="swap-choice-input-wrapper">
-                          <InputNumber
-                            value={ownCurrencyAmount}
-                            max={
-                              ownCurrencyBalance
-                                ? parseFloat(ownCurrencyBalance)
-                                : 0
-                            }
-                            onChange={(val) => setOwnCurrencyAmount(val)}
-                          />
-                          {/* <input
-                            type="number"
-                            value={ownCurrencyAmount}
-                            max={
-                              ownCurrencyBalance
-                                ? parseFloat(ownCurrencyBalance)
-                                : 0
-                            }
-                            onChange={(evt) => handleCurrencyAmountChange(evt)}
-                          /> */}
-                        </div>
-                        <div className="swap-choice-input-price">
-                          {calculatePrice(
-                            parseFloat(ownCurrencyAmount),
-                            ownCurrency.exchangeRate
-                          )}
-                        </div>
-                        <Select
-                          options={ownCurrencyOptions.map((opt) => (
-                            <>
-                              {opt.icon} <span>{opt.name}</span>
-                            </>
-                          ))}
-                          onChange={(active) =>
-                            handleCurrencySelectChange(active, "own")
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div className="swap-choices-switch">
-                      <Swap />
-                    </div>
-                    <div className="swap-choice">
-                      <div className="swap-choice-label">You receive</div>
-                      <div
-                        className="swap-choice-input"
-                        data-disabled={loadingQuote}
-                      >
-                        <div className="swap-choice-input-wrapper">
-                          <input
-                            type="number"
-                            value={formatNumberToFixed(
-                              quoteAmount ? parseFloat(quoteAmount) : 0,
+          <div
+            className="main-card-content"
+            data-disabled={loadingQuote || loadingBalance}
+          >
+            {!account ? (
+              <>
+                <div className="main-card-notlogged">
+                  Please login to swap assets.
+                </div>
+              </>
+            ) : (
+              <>
+                {isGLQChain ? (
+                  <>
+                    <div className="swap-amount">
+                      <div className="swap-amount-subtitle">Available</div>
+                      <div className="swap-amount-value">
+                        {ownCurrencyBalance && (
+                          <span>
+                            {formatNumberToFixed(
+                              parseFloat(ownCurrencyBalance),
                               6
                             )}
-                            readOnly
-                          />
-                        </div>
-                        <div className="swap-choice-input-price">
-                          {calculatePrice(
-                            quoteAmount ? parseFloat(quoteAmount) : 0,
-                            tradeCurrency.exchangeRate
-                          )}
-                        </div>
-                        <Select
-                          options={tradeCurrencyOptions.map((opt) => (
-                            <>
-                              {opt.icon} <span>{opt.name}</span>
-                            </>
-                          ))}
-                          onChange={(active) =>
-                            handleCurrencySelectChange(active, "trade")
-                          }
-                        />
+                          </span>
+                        )}
+                        {ownCurrency.name}
                       </div>
                     </div>
-                  </div>
-                  <div className="swap-summary" data-open={summaryOpen}>
-                    <div
-                      className="swap-summary-header"
-                      onClick={() => setSummaryOpen(!summaryOpen)}
-                    >
-                      <div className="swap-summary-header-info">
-                        <span>1 {ownCurrency.name}</span>
-                        <span className="color">
-                          {calculatePrice(1, ownCurrency.exchangeRate)}
-                        </span>
-                        <span className="color">=</span>
-                        <span>
-                          {baseQuoteAmount
-                            ? formatNumberToFixed(
-                                parseFloat(baseQuoteAmount),
+                    <div className="swap-choices">
+                      <div className="swap-choice">
+                        <div className="swap-choice-label">You pay</div>
+                        <div className="swap-choice-input">
+                          <div className="swap-choice-input-wrapper">
+                            <InputNumber
+                              value={ownCurrencyAmount}
+                              max={
+                                ownCurrencyBalance
+                                  ? parseFloat(ownCurrencyBalance)
+                                  : 0
+                              }
+                              onChange={(val) => setOwnCurrencyAmount(val)}
+                            />
+                          </div>
+                          <div className="swap-choice-input-price">
+                            {calculatePrice(
+                              parseFloat(ownCurrencyAmount),
+                              ownCurrency.exchangeRate
+                            )}
+                          </div>
+                          <Select
+                            options={ownCurrencyOptions.map((opt) => (
+                              <>
+                                {opt.icon} <span>{opt.name}</span>
+                              </>
+                            ))}
+                            onChange={(active) =>
+                              handleCurrencySelectChange(active, "own")
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="swap-choices-switch">
+                        <Swap />
+                      </div>
+                      <div className="swap-choice">
+                        <div className="swap-choice-label">You receive</div>
+                        <div className="swap-choice-input">
+                          <div className="swap-choice-input-wrapper">
+                            <input
+                              type="number"
+                              value={formatNumberToFixed(
+                                quoteAmount ? parseFloat(quoteAmount) : 0,
                                 6
-                              )
-                            : 0}{" "}
-                          {tradeCurrency.name}
-                        </span>
-                        <span className="color">
-                          {calculatePrice(
-                            baseQuoteAmount ? parseFloat(baseQuoteAmount) : 0,
-                            tradeCurrency.exchangeRate
-                          )}
-                        </span>
-                      </div>
-                      <Arrow />
-                    </div>
-                    <div className="swap-summary-details">
-                      <div className="swap-summary-detail">
-                        <span>Max slippage</span>
-                        <span className="bridge-amount-swap-actions">
-                          <InputRadioGroup
-                            options={slippageOptions}
-                            onChange={(val) => setMaxSlippage(val)}
-                            defaultOption={maxSlippage}
+                              )}
+                              readOnly
+                            />
+                          </div>
+                          <div className="swap-choice-input-price">
+                            {calculatePrice(
+                              quoteAmount ? parseFloat(quoteAmount) : 0,
+                              tradeCurrency.exchangeRate
+                            )}
+                          </div>
+                          <Select
+                            options={tradeCurrencyOptions.map((opt) => (
+                              <>
+                                {opt.icon} <span>{opt.name}</span>
+                              </>
+                            ))}
+                            onChange={(active) =>
+                              handleCurrencySelectChange(active, "trade")
+                            }
                           />
-                        </span>
-                      </div>
-                      <div className="swap-summary-detail">
-                        <span>Fee + Network cost</span>
-                        <span>~{feeInPercent}%</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="swap-submit">
-                    <Button onClick={handleSend} disabled={loadingQuote}>
-                      Send
-                    </Button>
-                  </div>
-                  {error && (
-                    <Alert type="error">
-                      <p>{error}</p>
-                    </Alert>
-                  )}
-                  {!success && pending && (
-                    <Alert type="warning">
-                      <p>{pending}</p>
-                    </Alert>
-                  )}
-                  {success && (
-                    <Alert type="success">
-                      <p>
-                        Your swap of{" "}
-                        <b>
-                          {formatNumberToFixed(
-                            parseFloat(ownCurrencyAmount),
-                            6
-                          )}{" "}
-                          {ownCurrency.name}
-                        </b>{" "}
-                        for{" "}
-                        <b>
-                          {formatNumberToFixed(
-                            quoteAmount ? parseFloat(quoteAmount) : 0,
-                            6
-                          )}{" "}
-                          {tradeCurrency.name}
-                        </b>{" "}
-                        is now successfully completed.
-                      </p>
-                      <p className="small" style={{ marginTop: 8 }}>
-                        <a href={trackingExplorer} target="_blank">
-                          <small>Tx hash: {success}</small>
-                        </a>
-                      </p>
-                    </Alert>
-                  )}
-                </>
-              ) : (
-                <>
-                  <div className="main-card-wrongnetwork">
-                    Please switch to GLQ Chain network to swap assets.
-                    <Button onClick={switchToGraphLinqMainnet}>
-                      Switch to GLQ Chain network
-                    </Button>
-                  </div>
-                </>
-              )}
-            </>
-          )}
+                    <div className="swap-summary" data-open={summaryOpen}>
+                      <div
+                        className="swap-summary-header"
+                        onClick={() => setSummaryOpen(!summaryOpen)}
+                      >
+                        <div className="swap-summary-header-info">
+                          <span>1 {ownCurrency.name}</span>
+                          <span className="color">
+                            {calculatePrice(1, ownCurrency.exchangeRate)}
+                          </span>
+                          <span className="color">=</span>
+                          <span>
+                            {baseQuoteAmount
+                              ? formatNumberToFixed(
+                                  parseFloat(baseQuoteAmount),
+                                  6
+                                )
+                              : 0}{" "}
+                            {tradeCurrency.name}
+                          </span>
+                          <span className="color">
+                            {calculatePrice(
+                              baseQuoteAmount ? parseFloat(baseQuoteAmount) : 0,
+                              tradeCurrency.exchangeRate
+                            )}
+                          </span>
+                        </div>
+                        <Arrow />
+                      </div>
+                      <div className="swap-summary-details">
+                        <div className="swap-summary-detail">
+                          <span>Max slippage</span>
+                          <span className="bridge-amount-swap-actions">
+                            <InputRadioGroup
+                              options={slippageOptions}
+                              onChange={(val) => setMaxSlippage(val)}
+                              defaultOption={maxSlippage}
+                            />
+                          </span>
+                        </div>
+                        <div className="swap-summary-detail">
+                          <span>Fee + Network cost</span>
+                          <span>~{feeInPercent}%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="swap-submit">
+                      <Button
+                        onClick={handleSend}
+                        disabled={loadingQuote || loadingBalance}
+                      >
+                        Send
+                      </Button>
+                    </div>
+                    {error && (
+                      <Alert type="error">
+                        <p>{error}</p>
+                      </Alert>
+                    )}
+                    {!success && pending && (
+                      <Alert type="warning">
+                        <p>{pending}</p>
+                      </Alert>
+                    )}
+                    {success && (
+                      <Alert type="success">
+                        <p>
+                          Your swap of{" "}
+                          <b>
+                            {formatNumberToFixed(
+                              parseFloat(ownCurrencyAmount),
+                              6
+                            )}{" "}
+                            {ownCurrency.name}
+                          </b>{" "}
+                          for{" "}
+                          <b>
+                            {formatNumberToFixed(
+                              quoteAmount ? parseFloat(quoteAmount) : 0,
+                              6
+                            )}{" "}
+                            {tradeCurrency.name}
+                          </b>{" "}
+                          is now successfully completed.
+                        </p>
+                        <p className="small" style={{ marginTop: 8 }}>
+                          <a href={trackingExplorer} target="_blank">
+                            <small>Tx hash: {success}</small>
+                          </a>
+                        </p>
+                      </Alert>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="main-card-wrongnetwork">
+                      Please switch to GLQ Chain network to swap assets.
+                      <Button onClick={switchToGraphLinqMainnet}>
+                        Switch to GLQ Chain network
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </>

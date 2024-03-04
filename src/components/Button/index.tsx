@@ -8,12 +8,13 @@ interface ButtonProps {
   children: React.ReactNode;
   icon?: React.ReactNode;
   disabled?: boolean;
+  target?: string;
 }
 
-const Button: React.FC<ButtonProps> = ({ link, onClick, children, icon, disabled }) => {
+const Button: React.FC<ButtonProps> = ({ link, onClick, children, icon, disabled, target }) => {
   if (link) {
     return (
-      <Link to={link} className="button" data-disabled={disabled}>
+      <Link to={link} target={target} className="button" data-disabled={disabled}>
         {icon && <span className="button-icon">{icon}</span>}
         <span className="button-label">{children}</span>
       </Link>
