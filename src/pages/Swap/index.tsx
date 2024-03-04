@@ -5,6 +5,8 @@ import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
+import InputNumber from "@components/InputNumber";
+import InputRadioGroup from "@components/InputRadioGroup";
 import Select from "@components/Select";
 import {
   MAINNET_CURRENCIES,
@@ -13,10 +15,10 @@ import {
   GLQCHAIN_SWAP_ROUTER_ADDRESS,
   GLQ_EXPLORER,
 } from "@constants/index";
-import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
+import { formatNumberToFixed } from "@utils/number";
 import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
 import useChains from "../../composables/useChains";
@@ -25,8 +27,6 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import useUniswap from "../../composables/useUniswap";
-import InputRadioGroup from "@components/InputRadioGroup";
-import InputNumber from "@components/InputNumber";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -57,7 +57,7 @@ const slippageOptions = [
 function SwapPage() {
   const { account } = useWeb3React();
   const { calculatePrice } = useExchangeRates();
-  const [switchToGraphLinqMainnet] = useNetwork();
+  const { switchToGraphLinqMainnet } = useNetwork();
   const { isGLQChain, isMainnet } = useChains();
   const { quoteSwap, executeSwap, feeInPercent } = useUniswap();
 

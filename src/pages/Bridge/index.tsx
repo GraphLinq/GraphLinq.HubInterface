@@ -14,14 +14,17 @@ import {
   GLQ_EXPLORER,
   MAINNET_EXPLORER,
 } from "@constants/index";
+import { useAppContext } from "@context/AppContext";
 import { Contract } from "@ethersproject/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
+import { formatNumberToFixed } from "@utils/number";
 import { useWeb3React } from "@web3-react/core";
-import { ethers } from "ethers"
+import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
+import useChains from "../../composables/useChains";
 import {
   useEVMBridgeContract,
   useEVMBridgeERC20MinterContract,
@@ -33,11 +36,6 @@ import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
-import { formatNumberToFixed } from "@utils/number";
-import { useAppContext } from "@context/AppContext";
-import useChains from "../../composables/useChains";
-
-
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -51,7 +49,7 @@ let bridgeCost: number | null = null;
 function BridgePage() {
   const { chainId, account } = useWeb3React();
   const { isMainnet } = useChains();
-  const [switchToGraphLinqMainnet, switchToMainnet] = useNetwork();
+  const { switchToGraphLinqMainnet, switchToMainnet } = useNetwork();
   const { calculatePrice } = useExchangeRates();
   const { setWaitingTxData } = useAppContext();
 
@@ -64,9 +62,9 @@ function BridgePage() {
     null
   );
 
-  const trackingExplorer = `${
-    isMainnet ? GLQ_EXPLORER : MAINNET_EXPLORER
-  }/tx/${tracking && typeof tracking !== "string" && tracking.bridge_tx}`;
+  const trackingExplorer = `${isMainnet ? GLQ_EXPLORER : MAINNET_EXPLORER}/tx/${
+    tracking && typeof tracking !== "string" && tracking.bridge_tx
+  }`;
 
   const resetFeedback = () => {
     setError("");
@@ -83,9 +81,11 @@ function BridgePage() {
   });
   const activeCurrency = currencyOptions[activeOption];
 
-  const { balance: tokenBalance, fetchBalance, loadingBalance } = useTokenBalance(
-    activeCurrency.address[isMainnet ? "mainnet" : "glq"]
-  );
+  const {
+    balance: tokenBalance,
+    fetchBalance,
+    loadingBalance,
+  } = useTokenBalance(activeCurrency.address[isMainnet ? "mainnet" : "glq"]);
 
   const activeTokenContract = useTokenContract(
     activeCurrency.address[isMainnet ? "mainnet" : "glq"]
@@ -115,7 +115,6 @@ function BridgePage() {
       bridgeContract = activeEVMBridgeERC20MinterContract;
     }
   }
-
 
   useEffect(() => {
     if (bridgeContract) {
@@ -150,7 +149,7 @@ function BridgePage() {
     }
   };
 
-  const [amount, setAmount] = useState('0');
+  const [amount, setAmount] = useState("0");
 
   const handleSend = async () => {
     if (formDisabled) {
@@ -183,7 +182,9 @@ function BridgePage() {
             bridgeContract.address
           );
 
-          const allowanceDecimal = parseFloat(ethers.utils.formatEther(allowance.toString()));
+          const allowanceDecimal = parseFloat(
+            ethers.utils.formatEther(allowance.toString())
+          );
 
           if (allowanceDecimal < requiredAmount) {
             setPending(
@@ -215,16 +216,12 @@ function BridgePage() {
 
         const value =
           activeCurrency.address.mainnet === "native"
-            ? (
-              ethers.utils.parseEther(amount + bridgeCost)
-              ).toString()
+            ? ethers.utils.parseEther(amount + bridgeCost).toString()
             : parseFloat(bridgeCost);
 
         const resultTx = await bridgeContract.initTransfer(
           ethers.utils.parseEther(amount.toString()).toString(),
-          activeCurrency.chainDestination[
-            isMainnet ? "mainnet" : "glq"
-          ],
+          activeCurrency.chainDestination[isMainnet ? "mainnet" : "glq"],
           account,
           {
             value: value,
@@ -245,9 +242,7 @@ function BridgePage() {
         setPending(
           `It will take approximatively 10 minutes to execute the bridge transaction and sending ${amount.toString()} ${
             activeCurrency.name
-          } on the ${
-            isMainnet ? "GLQ Chain" : "Ethereum"
-          } network.`
+          } on the ${isMainnet ? "GLQ Chain" : "Ethereum"} network.`
         );
         fetchBalance();
         setWaitingTxData(true);
@@ -353,9 +348,7 @@ function BridgePage() {
                   {chainId && (
                     <span>
                       {getChainName(
-                        isMainnet
-                          ? GLQ_CHAIN_ID
-                          : MAINNET_CHAIN_ID
+                        isMainnet ? GLQ_CHAIN_ID : MAINNET_CHAIN_ID
                       )}
                     </span>
                   )}
@@ -363,11 +356,16 @@ function BridgePage() {
               </div>
 
               <div className="bridge-amount">
-                <div className="bridge-amount-wrap" data-disabled={formDisabled || loadingBalance}>
+                <div
+                  className="bridge-amount-wrap"
+                  data-disabled={formDisabled || loadingBalance}
+                >
                   <div className="bridge-amount-subtitle">Available</div>
                   <div className="bridge-amount-value">
                     {tokenBalance && (
-                      <span>{formatNumberToFixed(parseFloat(tokenBalance), 6)}</span>
+                      <span>
+                        {formatNumberToFixed(parseFloat(tokenBalance), 6)}
+                      </span>
                     )}
                     {activeCurrency.name}
                     {tokenBalance && (
@@ -393,7 +391,9 @@ function BridgePage() {
                       <Button
                         onClick={() => {
                           if (tokenBalance) {
-                            setAmount((parseFloat(tokenBalance) / 4).toString());
+                            setAmount(
+                              (parseFloat(tokenBalance) / 4).toString()
+                            );
                           }
                         }}
                       >
@@ -402,7 +402,9 @@ function BridgePage() {
                       <Button
                         onClick={() => {
                           if (tokenBalance) {
-                            setAmount((parseFloat(tokenBalance) / 2).toString());
+                            setAmount(
+                              (parseFloat(tokenBalance) / 2).toString()
+                            );
                           }
                         }}
                       >
@@ -445,17 +447,14 @@ function BridgePage() {
                         <b>
                           {tracking &&
                             typeof tracking !== "string" &&
-                            ethers.utils.formatEther(tracking.quantity).toString()}{" "}
+                            ethers.utils
+                              .formatEther(tracking.quantity)
+                              .toString()}{" "}
                           {activeCurrency.name}
                         </b>{" "}
                         has been bridged to your wallet on the{" "}
-                        <b>
-                          {isMainnet
-                            ? "GLQ Chain"
-                            : "Ethereum"}{" "}
-                          network
-                        </b>
-                        , just switch back network to see your tokens!
+                        <b>{isMainnet ? "GLQ Chain" : "Ethereum"} network</b>,
+                        just switch back network to see your tokens!
                       </p>
                       {tracking && typeof tracking !== "string" && (
                         <p className="small" style={{ marginTop: 8 }}>
@@ -466,9 +465,7 @@ function BridgePage() {
                       )}
                     </Alert>
                     <Button onClick={handleSwitchNetwork}>
-                      Switch to{" "}
-                      {isMainnet ? "GLQ Chain" : "Ethereum"}{" "}
-                      network
+                      Switch to {isMainnet ? "GLQ Chain" : "Ethereum"} network
                     </Button>
                   </div>
                 )}

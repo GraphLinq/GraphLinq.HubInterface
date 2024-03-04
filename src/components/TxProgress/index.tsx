@@ -13,7 +13,7 @@ import { getTrackingInformation } from "../../queries/api";
 
 const TxProgress = () => {
   const { chainId, account } = useWeb3React();
-  const [switchToGraphLinqMainnet, switchToMainnet] = useNetwork();
+  const { switchToGraphLinqMainnet, switchToMainnet } = useNetwork();
   const { isWaitingTxData, setWaitingTxData } = useAppContext();
 
   const [trackingInfo, setTrackingInfo] = useState<TrackingInformation | null>(
@@ -56,13 +56,11 @@ const TxProgress = () => {
     if (isWaitingTxData) {
       return (
         <div className="txProgress">
-        {isWaitingTxData && (
-          <Alert type="warning">
-            Waiting for tx data...
-          </Alert>
-        )}
+          {isWaitingTxData && (
+            <Alert type="warning">Waiting for tx data...</Alert>
+          )}
         </div>
-      )
+      );
     }
 
     return;

@@ -38,7 +38,7 @@ function useNetwork() {
     }) : null;
   };
 
-  return [switchToGraphLinqMainnet, switchToMainnet];
+  return {switchToGraphLinqMainnet, switchToMainnet};
 }
 
 export default useNetwork;
