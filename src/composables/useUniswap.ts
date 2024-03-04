@@ -7,7 +7,6 @@ import { abi as QuoterV2ABI } from "@uniswap/v3-periphery/artifacts/contracts/le
 import { useWeb3React } from "@web3-react/core";
 import { Contract } from "ethers";
 import { ethers } from "ethers";
-import { formatEther, parseEther } from "ethers/lib/utils";
 
 const useUniswap = () => {
   const { provider, account } = useWeb3React();

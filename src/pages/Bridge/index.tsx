@@ -150,7 +150,7 @@ function BridgePage() {
     }
   };
 
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState('0');
 
   const handleSend = async () => {
     if (formDisabled) {
@@ -159,7 +159,7 @@ function BridgePage() {
 
     resetFeedback();
 
-    if (amount <= 0) {
+    if (parseFloat(amount) <= 0) {
       setError(
         `Invalid amount to send on the contract: ${amount} ${activeCurrency.name}`
       );
@@ -177,7 +177,7 @@ function BridgePage() {
           activeCurrency.address.mainnet !== "native" &&
           activeTokenContract
         ) {
-          const requiredAmount = amount + parseFloat(bridgeCost);
+          const requiredAmount = parseFloat(amount) + parseFloat(bridgeCost);
           allowance = await activeTokenContract.allowance(
             account,
             bridgeContract.address
@@ -201,7 +201,7 @@ function BridgePage() {
           }
         }
 
-        if (tokenBalance && amount > parseFloat(tokenBalance)) {
+        if (tokenBalance && parseFloat(amount) > parseFloat(tokenBalance)) {
           setPending("");
           setError(
             `You only have ${tokenBalance} ${activeCurrency.name} in your wallet.`
@@ -393,7 +393,7 @@ function BridgePage() {
                       <Button
                         onClick={() => {
                           if (tokenBalance) {
-                            setAmount(parseFloat(tokenBalance) / 4);
+                            setAmount((parseFloat(tokenBalance) / 4).toString());
                           }
                         }}
                       >
@@ -402,7 +402,7 @@ function BridgePage() {
                       <Button
                         onClick={() => {
                           if (tokenBalance) {
-                            setAmount(parseFloat(tokenBalance) / 2);
+                            setAmount((parseFloat(tokenBalance) / 2).toString());
                           }
                         }}
                       >
@@ -411,7 +411,7 @@ function BridgePage() {
                       <Button
                         onClick={() => {
                           if (tokenBalance) {
-                            setAmount(parseFloat(tokenBalance));
+                            setAmount(parseFloat(tokenBalance).toString());
                           }
                         }}
                       >

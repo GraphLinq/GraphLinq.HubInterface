@@ -2,11 +2,11 @@ import React from "react";
 import "./_inputNumber.scss"; // Assurez-vous d'importer le fichier de style CSS ou SCSS approprié
 
 interface InputNumberProps {
-  icon: React.ReactNode;
-  currencyText: string;
-  value: number;
+  icon?: React.ReactNode;
+  currencyText?: string;
+  value: string;
   max: number;
-  onChange?: (value: number) => void;
+  onChange?: (value: string) => void;
 }
 
 const InputNumber: React.FC<InputNumberProps> = ({
@@ -16,23 +16,31 @@ const InputNumber: React.FC<InputNumberProps> = ({
   value,
   onChange,
 }) => {
+  let timeoutId: NodeJS.Timeout;
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = e.target.value !== "" ? parseFloat(e.target.value) : 0;
+    clearTimeout(timeoutId);
 
-    if (newValue > max) {
-      newValue = max;
+    let newValue = e.target.value !== "" ? e.target.value : '0';
+    
+    if (parseFloat(newValue) > max) {
+      newValue = max.toString();
     }
+    
+          e.target.value = newValue;
+    
+          if (!isNaN(parseFloat(newValue)) && onChange) {
+            onChange(newValue);
+          }
 
-    e.target.value = newValue.toString();
+    timeoutId = setTimeout(() => {
 
-    if (!isNaN(newValue) && onChange) {
-      onChange(newValue);
-    }
+    }, 500);
   };
 
   return (
     <div className="inputNumber">
-      <div className="inputNumber-icon">{icon}</div>
+      {icon && <div className="inputNumber-icon">{icon}</div>}
       <input
         type="number"
         value={value}
@@ -40,7 +48,7 @@ const InputNumber: React.FC<InputNumberProps> = ({
         onChange={handleInputChange}
         className="inputNumber-input"
       />
-      <div className="inputNumber-currency">{currencyText}</div>
+      {currencyText && <div className="inputNumber-currency">{currencyText}</div>}
     </div>
   );
 };

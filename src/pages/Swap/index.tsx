@@ -26,6 +26,7 @@ import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import useUniswap from "../../composables/useUniswap";
 import InputRadioGroup from "@components/InputRadioGroup";
+import InputNumber from "@components/InputNumber";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -78,7 +79,7 @@ function SwapPage() {
 
     const quotePromise = new Promise(async (resolve, reject) => {
       try {
-        if (!ownCurrency) return;
+        if (!ownCurrency || parseFloat(ownCurrencyAmount) === 0) return;
 
         const base = await quoteSwap(
           ownCurrency.address[isMainnet ? "mainnet" : "glq"],
@@ -92,7 +93,7 @@ function SwapPage() {
         const result = await quoteSwap(
           ownCurrency.address[isMainnet ? "mainnet" : "glq"],
           tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
-          ownCurrencyAmount
+          parseFloat(ownCurrencyAmount)
         );
         setQuoteAmount(result);
 
@@ -134,7 +135,7 @@ function SwapPage() {
     ownCurrency.address[isMainnet ? "mainnet" : "glq"]
   );
 
-  const [ownCurrencyAmount, setOwnCurrencyAmount] = useState(0);
+  const [ownCurrencyAmount, setOwnCurrencyAmount] = useState("0");
 
   const activeTokenContract = useTokenContract(
     ownCurrency.address[isMainnet ? "mainnet" : "glq"]
@@ -152,22 +153,8 @@ function SwapPage() {
       setTradeCurrencyOption(active);
     }
 
-    setOwnCurrencyAmount(0);
+    setOwnCurrencyAmount("0");
     setQuoteAmount("0");
-  };
-
-  const handleCurrencyAmountChange = (evt: ChangeEvent<HTMLInputElement>) => {
-    let newValue = evt.target.value !== "" ? parseFloat(evt.target.value) : 0;
-
-    if (newValue > parseFloat(evt.target.max)) {
-      newValue = parseFloat(evt.target.max);
-    }
-
-    evt.target.value = newValue.toString();
-
-    if (!isNaN(newValue)) {
-      setOwnCurrencyAmount(newValue);
-    }
   };
 
   const handleSend = async () => {
@@ -176,7 +163,7 @@ function SwapPage() {
 
     resetFeedback();
 
-    if (ownCurrencyAmount <= 0) {
+    if (parseFloat(ownCurrencyAmount) <= 0) {
       setError(
         `Invalid amount to swap : ${ownCurrencyAmount} ${ownCurrency.name}`
       );
@@ -193,13 +180,13 @@ function SwapPage() {
       ethers.utils.formatEther(allowance.toString())
     );
 
-    if (allowanceDecimal < ownCurrencyAmount) {
+    if (allowanceDecimal < parseFloat(ownCurrencyAmount)) {
       setPending(
         "Allowance pending, please allow the use of your token balance for the contract..."
       );
       const approveTx = await activeTokenContract.approve(
         GLQCHAIN_SWAP_ROUTER_ADDRESS,
-        ethers.utils.parseEther(ownCurrencyAmount.toString())
+        ethers.utils.parseEther(ownCurrencyAmount)
       );
       setPending("Waiting for confirmations...");
       await approveTx.wait();
@@ -210,7 +197,7 @@ function SwapPage() {
 
     if (
       ownCurrencyBalance &&
-      ownCurrencyAmount > parseFloat(ownCurrencyBalance)
+      parseFloat(ownCurrencyAmount) > parseFloat(ownCurrencyBalance)
     ) {
       setPending("");
       setError(
@@ -226,7 +213,7 @@ function SwapPage() {
     const tx = await executeSwap(
       ownCurrency.address[isMainnet ? "mainnet" : "glq"],
       tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
-      ownCurrencyAmount,
+      parseFloat(ownCurrencyAmount),
       account,
       quoteAmount,
       maxSlippage
@@ -284,7 +271,16 @@ function SwapPage() {
                       <div className="swap-choice-label">You pay</div>
                       <div className="swap-choice-input">
                         <div className="swap-choice-input-wrapper">
-                          <input
+                          <InputNumber
+                            value={ownCurrencyAmount}
+                            max={
+                              ownCurrencyBalance
+                                ? parseFloat(ownCurrencyBalance)
+                                : 0
+                            }
+                            onChange={(val) => setOwnCurrencyAmount(val)}
+                          />
+                          {/* <input
                             type="number"
                             value={ownCurrencyAmount}
                             max={
@@ -293,11 +289,11 @@ function SwapPage() {
                                 : 0
                             }
                             onChange={(evt) => handleCurrencyAmountChange(evt)}
-                          />
+                          /> */}
                         </div>
                         <div className="swap-choice-input-price">
                           {calculatePrice(
-                            ownCurrencyAmount,
+                            parseFloat(ownCurrencyAmount),
                             ownCurrency.exchangeRate
                           )}
                         </div>
@@ -417,7 +413,10 @@ function SwapPage() {
                       <p>
                         Your swap of{" "}
                         <b>
-                          {formatNumberToFixed(ownCurrencyAmount, 6)}{" "}
+                          {formatNumberToFixed(
+                            parseFloat(ownCurrencyAmount),
+                            6
+                          )}{" "}
                           {ownCurrency.name}
                         </b>{" "}
                         for{" "}
