@@ -72,7 +72,7 @@ function SwapPage() {
 
   const [maxSlippage, setMaxSlippage] = useState(slippageOptions[0].value);
 
-  let quoteQueue = Promise.resolve();
+  let quoteQueue: Promise<void | unknown> = Promise.resolve();
 
   const getQuote = async () => {
     setLoadingQuote(true);

@@ -1,16 +1,16 @@
 function useNetwork() {
   const switchToGraphLinqMainnet = async () => {
-    const windowObject = window;
+    const winEth = window.ethereum as any;
 
-    if (windowObject.ethereum) {
+    if (winEth) {
         const chainId = '0x266';
-        const isChainAlreadyAdded = await windowObject.ethereum.request({
+        const isChainAlreadyAdded = await winEth.request({
             method: "wallet_switchEthereumChain",
             params: [{ chainId: chainId }]
         }).catch(() => false);
 
         if (!isChainAlreadyAdded) {
-            await windowObject.ethereum.request({
+            await winEth.request({
                 method: "wallet_addEthereumChain",
                 params: [{
                     chainId: chainId,
@@ -30,9 +30,9 @@ function useNetwork() {
 
   
   const switchToMainnet = async () => {
-    const windowObject = window;
+    const winEth = window.ethereum as any;
 
-    windowObject.ethereum ? await windowObject.ethereum.request({
+    winEth ? await winEth.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: '0x1' }]
     }) : null;

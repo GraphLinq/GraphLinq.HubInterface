@@ -16,11 +16,13 @@ function useAddTokens() {
     setLoading(true);
 
     try {
-      if (!window.ethereum || !window.ethereum.request) {
+      const winEth = window.ethereum as any;
+      
+      if (!winEth) {
         throw new Error("Ethereum provider not found.");
       }
 
-      const success = await window.ethereum.request({
+      const success = await winEth.request({
         method: "wallet_watchAsset",
         params: {
           type: "ERC20",

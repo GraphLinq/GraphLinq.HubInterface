@@ -137,7 +137,7 @@ function BridgePage() {
   const handleSelectChange = (active: number) => {
     resetFeedback();
     setActiveOption(active);
-    setAmount(0);
+    setAmount('0');
   };
 
   const handleSwitchNetwork = () => {
