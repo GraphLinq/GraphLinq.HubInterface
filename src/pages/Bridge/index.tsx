@@ -331,6 +331,7 @@ function BridgePage() {
               )}
               <div className="bridge-swap">
                 <Select
+                  active={activeOption}
                   options={currencyOptions.map((opt) => (
                     <>
                       {opt.icon} <span>{opt.name}</span>

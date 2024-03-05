@@ -5,15 +5,14 @@ import Check from "@assets/icons/check.svg?react";
 
 interface SelectProps {
   options: React.ReactNode[];
+  active: number;
   onChange?: (index: number) => void;
 }
 
-const Select: React.FC<SelectProps> = ({ options, onChange }) => {
+const Select: React.FC<SelectProps> = ({ options, active, onChange }) => {
   const [isOpen, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
 
   const handleOptionClick = (index: number) => {
-    setActiveIndex(index);
     if (onChange) {
       onChange(index);
     }
@@ -23,7 +22,7 @@ const Select: React.FC<SelectProps> = ({ options, onChange }) => {
   return (
     <div className="select" data-open={isOpen}>
       <div className="select-current" onClick={() => setOpen(!isOpen)}>
-        {options[activeIndex]}
+        {options[active]}
         <div className="select-arrow">
           <Arrow />
         </div>
@@ -36,7 +35,7 @@ const Select: React.FC<SelectProps> = ({ options, onChange }) => {
             onClick={() => handleOptionClick(i)}
           >
             {opt}
-            {activeIndex === i && <Check />}
+            {active === i && <Check />}
           </div>
         ))}
       </div>

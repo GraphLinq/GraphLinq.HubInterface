@@ -24,7 +24,7 @@ export const GLQCHAIN_BRIDGE_OUT_WGLQ =
   "0xEB567ec41738c2bAb2599A1070FC5B727721b3B6";
 
 /* Tokens */
-type Token = {
+export type Token = {
   icon: JSX.Element | null;
   name: "GLQ" | "WGLQ" | "ETH" | "WETH";
   address: {

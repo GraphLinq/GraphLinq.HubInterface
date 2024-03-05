@@ -119,16 +119,14 @@ function SwapPage() {
   };
 
   const [ownCurrencyOption, setOwnCurrencyOption] = useState(0);
-  const [tradeCurrencyOption, setTradeCurrencyOption] = useState(0);
+  const [tradeCurrencyOption, setTradeCurrencyOption] = useState(1);
   const ownCurrencyOptions = (
     isMainnet ? MAINNET_CURRENCIES : GLQCHAIN_CURRENCIES
   ).map((currency) => {
     currency.icon = tokenIcons[currency.name];
     return currency;
   });
-  const tradeCurrencyOptions = ownCurrencyOptions.filter(
-    (_, i) => i !== ownCurrencyOption
-  );
+  const tradeCurrencyOptions = [...ownCurrencyOptions];
 
   const ownCurrency = ownCurrencyOptions[ownCurrencyOption];
   const tradeCurrency = tradeCurrencyOptions[tradeCurrencyOption];
@@ -149,15 +147,35 @@ function SwapPage() {
   ) => {
     resetFeedback();
 
+
     if (currency === "own") {
       setOwnCurrencyOption(active);
+
+      if (tradeCurrencyOption === active) {
+    console.log(active, ownCurrencyOption);
+
+        setTradeCurrencyOption(ownCurrencyOption);
+      }
     } else {
       setTradeCurrencyOption(active);
+
+      if (ownCurrencyOption === active) {
+        setOwnCurrencyOption(tradeCurrencyOption);
+      }
     }
 
     setOwnCurrencyAmount("0");
     setQuoteAmount("0");
   };
+
+const handleSwapCurrencies = () => {
+  const newTradeCurrencyOption = ownCurrencyOption;
+  setOwnCurrencyOption(tradeCurrencyOption);
+  setTradeCurrencyOption(newTradeCurrencyOption);
+
+  setOwnCurrencyAmount("0");
+  setQuoteAmount("0");
+}
 
   const handleSend = async () => {
     if (!quoteAmount || !account || loadingQuote || !activeTokenContract)
@@ -305,6 +323,7 @@ function SwapPage() {
                             )}
                           </div>
                           <Select
+                          active={ownCurrencyOption}
                             options={ownCurrencyOptions.map((opt) => (
                               <>
                                 {opt.icon} <span>{opt.name}</span>
@@ -316,7 +335,7 @@ function SwapPage() {
                           />
                         </div>
                       </div>
-                      <div className="swap-choices-switch">
+                      <div className="swap-choices-switch" onClick={handleSwapCurrencies}>
                         <Swap />
                       </div>
                       <div className="swap-choice">
@@ -339,6 +358,7 @@ function SwapPage() {
                             )}
                           </div>
                           <Select
+                          active={tradeCurrencyOption}
                             options={tradeCurrencyOptions.map((opt) => (
                               <>
                                 {opt.icon} <span>{opt.name}</span>
