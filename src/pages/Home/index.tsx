@@ -46,11 +46,19 @@ function HomePage() {
                   <div className="home-add-col">
                     <div className="home-add-col-title">Tokens</div>
                     <div className="home-add-col-actions">
-                      <Button onClick={addWGLQToken} icon={<GLQToken />}>
-                        {isGLQChain ? 'WGLQ' : 'GLQ'}
+                      <Button
+                        onClick={addWGLQToken}
+                        icon={<GLQToken />}
+                        type="secondary"
+                      >
+                        {isGLQChain ? "WGLQ" : "GLQ"}
                       </Button>
                       {isGLQChain && (
-                        <Button onClick={addWETHToken} icon={<ETHToken />}>
+                        <Button
+                          onClick={addWETHToken}
+                          icon={<ETHToken />}
+                          type="secondary"
+                        >
                           WETH
                         </Button>
                       )}
@@ -62,6 +70,7 @@ function HomePage() {
                       <Button
                         onClick={switchToGraphLinqMainnet}
                         icon={<Network />}
+                        type="secondary"
                       >
                         GLQ Chain
                       </Button>
@@ -73,14 +82,9 @@ function HomePage() {
           </div>
         </div>
         <div className="home-more">
-        <p>Want to know more about GraphLinq ?</p>
-                <Button
-                  link="https://graphlinq.io/"
-                  icon={<GLQToken />}
-                  target="_blank"
-                >
-                  Learn more
-                </Button>
+          <a href="https://graphlinq.io/" target="_blank">
+          Want to know more about GraphLinq ?
+          </a>
         </div>
       </div>
     </>

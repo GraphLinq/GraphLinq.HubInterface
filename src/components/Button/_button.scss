@@ -28,4 +28,10 @@
           z-index: 10;
         }
       }
+
+      &[data-type="secondary"] {
+    background: var(--c-martinique);
+    gap: 8px;
+    padding: 12px 20px;
+      }
 }

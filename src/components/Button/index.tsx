@@ -9,12 +9,13 @@ interface ButtonProps {
   icon?: React.ReactNode;
   disabled?: boolean;
   target?: string;
+  type?: 'secondary';
 }
 
-const Button: React.FC<ButtonProps> = ({ link, onClick, children, icon, disabled, target }) => {
+const Button: React.FC<ButtonProps> = ({ link, onClick, children, icon, disabled, target, type }) => {
   if (link) {
     return (
-      <Link to={link} target={target} className="button" data-disabled={disabled}>
+      <Link to={link} target={target} className="button" data-disabled={disabled} data-type={type}>
         {icon && <span className="button-icon">{icon}</span>}
         <span className="button-label">{children}</span>
       </Link>
@@ -22,7 +23,7 @@ const Button: React.FC<ButtonProps> = ({ link, onClick, children, icon, disabled
   }
 
   return (
-    <button onClick={onClick} className="button" data-disabled={disabled}>
+    <button onClick={onClick} className="button" data-disabled={disabled} data-type={type}>
       {icon && <span className="button-icon">{icon}</span>}
       <span className="button-label">{children}</span>
     </button>
