@@ -1,18 +1,18 @@
 import Footer from "@components/Footer"
 import Header from "@components/Header"
+import TxProgress from "@components/TxProgress"
 import { AppContextProvider } from "@context/AppContext"
-import { HelmetProvider } from "react-helmet-async"
+import BridgePage from '@pages/Bridge'
+import HomePage from '@pages/Home'
+import SwapPage from "@pages/Swap"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { HelmetProvider } from "react-helmet-async"
 import {
   createBrowserRouter,
   Outlet,
   RouterProvider,
   ScrollRestoration,
 } from "react-router-dom"
-import HomePage from '@pages/Home'
-import BridgePage from '@pages/Bridge'
-import SwapPage from "@pages/Swap"
-import TxProgress from "@components/TxProgress"
 
 
 function App() {
