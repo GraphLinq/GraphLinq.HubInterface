@@ -1,8 +1,8 @@
 import "./_swap.scss";
 import Arrow from "@assets/icons/arrow.svg?react";
-import Spinner from "@assets/icons/spinner.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
+import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
@@ -67,6 +67,7 @@ function SwapPage() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(true);
+  const [formDisabled, setFormDisabled] = useState(false);
 
   const [baseQuoteAmount, setBaseQuoteAmount] = useState<string | null>("0");
   const [quoteAmount, setQuoteAmount] = useState<string | null>("0");
@@ -191,6 +192,7 @@ function SwapPage() {
 
     try {
       setLoading(true);
+      setFormDisabled(true);
 
       let allowance = "0";
       allowance = await activeTokenContract.allowance(
@@ -225,12 +227,13 @@ function SwapPage() {
         setError(
           `You only have ${ownCurrencyBalance} ${ownCurrency.name} in your wallet.`
         );
+        setFormDisabled(false);
         return;
       }
 
-      setPending(
-        "Pending, check your wallet extension to execute the chain transaction..."
-      );
+      // setPending(
+      //   "Pending, check your wallet extension to execute the chain transaction..."
+      // );
 
       const tx = await executeSwap(
         ownCurrency.address[isMainnet ? "mainnet" : "glq"],
@@ -247,10 +250,12 @@ function SwapPage() {
 
       setSuccess(receipt.transactionHash);
       setLoading(false);
+      setFormDisabled(false);
     } catch (error: any) {
       resetFeedback();
       setError(error.toString());
       setLoading(false);
+      setFormDisabled(false);
     }
   };
 
@@ -283,7 +288,7 @@ function SwapPage() {
           <div className="main-card-title">Swap</div>
           <div
             className="main-card-content"
-            data-disabled={loadingQuote || loadingBalance}
+            data-disabled={loadingQuote || loadingBalance || formDisabled}
           >
             {!account ? (
               <>
@@ -437,7 +442,22 @@ function SwapPage() {
                         Send
                       </Button>
                     </div>
-                    {error && (
+                    
+                  </>
+                ) : (
+                  <>
+                    <div className="main-card-wrongnetwork">
+                      Please switch to GLQ Chain network to swap assets.
+                      <Button onClick={switchToGraphLinqMainnet}>
+                        Switch to GLQ Chain network
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+          {error && (
                       <Alert type="error">
                         <p>{error}</p>
                       </Alert>
@@ -475,20 +495,6 @@ function SwapPage() {
                         </p>
                       </Alert>
                     )}
-                  </>
-                ) : (
-                  <>
-                    <div className="main-card-wrongnetwork">
-                      Please switch to GLQ Chain network to swap assets.
-                      <Button onClick={switchToGraphLinqMainnet}>
-                        Switch to GLQ Chain network
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </div>
         </div>
       </div>
     </>

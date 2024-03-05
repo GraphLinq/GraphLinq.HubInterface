@@ -38,6 +38,7 @@
       height: 48px;
       background-color: var(--c-mulled-wine);
       border-radius: 50%;
+      cursor: pointer;
 
       @include max($mobile-s) {
         margin: -8px 0;

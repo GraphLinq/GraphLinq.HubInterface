@@ -1,6 +1,7 @@
 import "./_bridge.scss";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
+import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
@@ -53,6 +54,7 @@ function BridgePage() {
   const { calculatePrice } = useExchangeRates();
   const { setWaitingTxData } = useAppContext();
 
+  const [loading, setLoading] = useState(false);
   const [formDisabled, setFormDisabled] = useState(false);
 
   const [error, setError] = useState("");
@@ -166,6 +168,7 @@ function BridgePage() {
     }
 
     setFormDisabled(true);
+    setLoading(true);
 
     if (bridgeContract) {
       try {
@@ -207,12 +210,14 @@ function BridgePage() {
           setError(
             `You only have ${tokenBalance} ${activeCurrency.name} in your wallet.`
           );
+          setFormDisabled(false);
+          setLoading(false);
           return;
         }
 
-        setPending(
-          "Pending, check your wallet extension to execute the chain transaction..."
-        );
+        // setPending(
+        //   "Pending, check your wallet extension to execute the chain transaction..."
+        // );
 
         const value =
           activeCurrency.address.mainnet === "native"
@@ -246,10 +251,13 @@ function BridgePage() {
         );
         fetchBalance();
         setWaitingTxData(true);
+        setFormDisabled(false);
+        setLoading(false);
       } catch (error: any) {
         resetFeedback();
         setError(error.toString());
         setFormDisabled(false);
+        setLoading(false);
       }
     }
   };
@@ -424,13 +432,14 @@ function BridgePage() {
                   </div>
                   <div className="bridge-amount-cost">
                     Bridge fee :{" "}
-                    {bridgeCost ? calculatePrice(bridgeCost, "eth") : "..."}
+                    {bridgeCost ? calculatePrice(bridgeCost, "eth") : "$0.0000"}
                   </div>
                   <div className="bridge-amount-submit">
-                    <Button onClick={handleSend}>Send</Button>
+                    <Button onClick={handleSend} icon={loading && <Spinner/>}>Send</Button>
                   </div>
                 </div>
-                {error && (
+              </div>
+              {error && (
                   <Alert type="error">
                     <p>{error}</p>
                   </Alert>
@@ -470,7 +479,6 @@ function BridgePage() {
                     </Button>
                   </div>
                 )}
-              </div>
             </>
           )}
         </div>

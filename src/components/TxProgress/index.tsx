@@ -1,4 +1,5 @@
 import "./_txProgress.scss";
+import Spinner from "@assets/icons/spinner.svg?react";
 import Alert from "@components/Alert";
 import { useAppContext } from "@context/AppContext";
 import { useQuery } from "@tanstack/react-query";
@@ -57,7 +58,7 @@ const TxProgress = () => {
       return (
         <div className="txProgress">
           {isWaitingTxData && (
-            <Alert type="warning">Waiting for tx data...</Alert>
+            <Alert type="warning"><Spinner/> <span>Waiting for tx data...</span></Alert>
           )}
         </div>
       );
