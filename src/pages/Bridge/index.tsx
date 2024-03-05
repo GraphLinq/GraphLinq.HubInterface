@@ -137,7 +137,7 @@ function BridgePage() {
   const handleSelectChange = (active: number) => {
     resetFeedback();
     setActiveOption(active);
-    setAmount('0');
+    setAmount("");
   };
 
   const handleSwitchNetwork = () => {
@@ -149,7 +149,7 @@ function BridgePage() {
     }
   };
 
-  const [amount, setAmount] = useState("0");
+  const [amount, setAmount] = useState("");
 
   const handleSend = async () => {
     if (formDisabled) {
@@ -385,7 +385,7 @@ function BridgePage() {
                         currencyText={activeCurrency.name}
                         value={amount}
                         max={tokenBalance ? parseFloat(tokenBalance) : 0}
-                        onChange={(value) => setAmount(value)}
+                        onChange={(val) => setAmount(val)}
                       />
                     </div>
                     <div className="bridge-amount-swap-actions">

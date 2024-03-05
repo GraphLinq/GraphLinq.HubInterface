@@ -30,7 +30,7 @@ const useUniswap = () => {
     amountIn: number
   ): Promise<string | null> => {
     if (!quoter || !account) return null;
-
+    
     try {
       const amountInFormatted = ethers.utils.parseEther(amountIn.toString());
       const parameters = {

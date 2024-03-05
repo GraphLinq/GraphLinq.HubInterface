@@ -42,8 +42,7 @@ function useAddTokens() {
         throw new Error("Failed to add token.");
       }
     } catch (error: any) {
-      console.error("Error adding token:", error);
-      setError(error.message || "An error occurred while adding token.");
+      setError(error.toString());
       setLoading(false);
     }
   };

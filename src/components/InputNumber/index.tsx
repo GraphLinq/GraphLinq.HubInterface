@@ -17,15 +17,13 @@ const InputNumber: React.FC<InputNumberProps> = ({
   onChange,
 }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = e.target.value !== "" ? parseFloat(e.target.value).toString() : "0";
-    
+    let newValue = e.target.value.replace(',', '.');
+
     if (parseFloat(newValue) > max) {
       newValue = max.toString();
     }
 
-    e.target.value = newValue;
-
-    if (!isNaN(parseFloat(newValue)) && onChange) {
+    if (onChange) {
       onChange(newValue);
     }
   };
@@ -34,9 +32,16 @@ const InputNumber: React.FC<InputNumberProps> = ({
     <div className="inputNumber">
       {icon && <div className="inputNumber-icon">{icon}</div>}
       <input
-        type="number"
+        type="text"
+        pattern="^[0-9]*[.,]?[0-9]*$"
         value={value}
+        placeholder="0"
         max={max}
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck="false"
+        minLength={1}
+        inputMode="decimal"
         onChange={handleInputChange}
         className="inputNumber-input"
       />
