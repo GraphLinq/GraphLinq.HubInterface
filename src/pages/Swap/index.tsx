@@ -229,9 +229,20 @@ function SwapPage() {
   };
 
   useEffect(() => {
-    if (account) {
-      getQuote();
-    }
+    let timer: NodeJS.Timeout;
+    
+    const debouncedGetQuote = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (account) {
+          getQuote();
+        }
+      }, 500);
+    };
+
+    debouncedGetQuote();
+
+    return () => clearTimeout(timer);
   }, [account, ownCurrency, ownCurrencyAmount]);
 
   const trackingExplorer = `${GLQ_EXPLORER}/tx/${success}`;
