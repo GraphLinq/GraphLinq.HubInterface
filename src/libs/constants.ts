@@ -44,5 +44,4 @@ export const CHAIN_INFO: { [key: string]: ChainInfo } = {
 
 // URLs
 export const METAMASK_URL = "https://metamask.io/"
-export const APP_API_URL = import.meta.env.VITE_APP_API_URL
-export const CHAT_API_URL = import.meta.env.VITE_CHAT_API_URL
+export const RPC_URL = "https://glq-dataseed.graphlinq.io";

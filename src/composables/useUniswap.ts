@@ -7,18 +7,23 @@ import { abi as QuoterV2ABI } from "@uniswap/v3-periphery/artifacts/contracts/le
 import { useWeb3React } from "@web3-react/core";
 import { Contract } from "ethers";
 import { ethers } from "ethers";
+import useChains from "./useChains";
+import { RPC_URL } from "../libs/constants";
 
 const useUniswap = () => {
   const { provider, account } = useWeb3React();
+  const { isMainnet } = useChains();
   const swapRouter: Contract = new Contract(
     GLQCHAIN_SWAP_ROUTER_ADDRESS,
     SWAP_ROUTER_ABI,
     provider?.getSigner(account)
   );
+
+  const rpcProvider = new ethers.providers.JsonRpcProvider(RPC_URL);
   const quoter: Contract = new Contract(
     GLQCHAIN_SWAP_QUOTER_ADDRESS,
     QuoterV2ABI,
-    provider?.getSigner(account)
+    isMainnet ? rpcProvider : provider?.getSigner(account)
   );
 
   const feeInPercent = 1;
@@ -30,7 +35,7 @@ const useUniswap = () => {
     amountIn: number
   ): Promise<string | null> => {
     if (!quoter || !account) return null;
-    
+
     try {
       const amountInFormatted = ethers.utils.parseEther(amountIn.toString());
       const parameters = {
