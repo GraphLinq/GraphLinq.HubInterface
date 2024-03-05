@@ -81,9 +81,19 @@
       gap: 8px;
       color: var(--c-lavender);
       font-weight: 600;
+      transition: color 0.2s ease-out;
+
+      &:hover {
+        color: var(--c-white);
+
+        path {
+          fill: var(--c-white);
+        }
+      }
 
       path {
         fill: var(--c-lavender);
+        transition: fill 0.2s ease-out;
       }
     }
   }
