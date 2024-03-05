@@ -5,9 +5,18 @@
     gap: 8px;
     padding: 12px 24px;
     border-radius: 100px;
-    background: linear-gradient(270deg, #9a23e6 -0.49%, #5519ee 99.51%);
+    background: linear-gradient(270deg, #9a23e6, #5519ee, #9a23e6);
+    background-size: 200% 100%;
     color: var(--c-white);
-    transition: transform .2s ease-out;
+    transition: all .2s ease-out;
+
+    &:hover {
+      background-position: 100% 0;
+    }
+
+    &-icon {
+      font-size: 0;
+    }
 
     path {
         fill: var(--c-white);
@@ -33,5 +42,18 @@
     background: var(--c-martinique);
     gap: 8px;
     padding: 12px 20px;
+
+    path {
+      fill: var(--c-lavender);
+      transition: 0.2s fill ease-out;
+    }
+
+    &:hover {
+      color: var(--c-white);
+
+      path {
+        fill: var(--c-white);
+      }
+    }
       }
 }

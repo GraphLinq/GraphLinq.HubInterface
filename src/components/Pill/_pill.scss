@@ -1,6 +1,8 @@
 @import "../../assets/css/mixins/medias.scss";
 
 .pill {
+  $el: &;
+
   display: flex;
   align-items: center;
   gap: 8px;
@@ -13,6 +15,12 @@
   @include max($mobile-s) {
     padding: 4px 8px;
     gap: 4px;
+  }
+
+  &:hover {
+    #{$el}-plus {
+      transform: scale(.9);
+    }
   }
 
   &-icon {
@@ -43,6 +51,10 @@
         color: var(--c-lavender);
       }
     }
+  }
+
+  &-plus {
+    transition: transform .2s ease-out;
   }
 
   &[data-focus]:active {
