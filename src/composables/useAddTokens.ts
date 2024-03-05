@@ -1,6 +1,6 @@
 import { useState } from "react";
 import useChains from "./useChains";
-import { WGLQ_TOKEN } from "@constants/index";
+import { WETH_TOKEN, WGLQ_TOKEN } from "@constants/index";
 
 function useAddTokens() {
   const { isGLQChain } = useChains();
@@ -60,7 +60,7 @@ function useAddTokens() {
     if (!isGLQChain) return;
 
     addToken(
-      WGLQ_TOKEN.address.glq,
+      WETH_TOKEN.address.glq,
       "WETH",
       18,
       "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
