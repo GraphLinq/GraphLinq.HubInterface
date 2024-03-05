@@ -134,7 +134,7 @@ function SwapPage() {
   const ownCurrency = ownCurrencyOptions[ownCurrencyOption];
   const tradeCurrency = tradeCurrencyOptions[tradeCurrencyOption];
 
-  const { balance: ownCurrencyBalance, loadingBalance } = useTokenBalance(
+  const { balance: ownCurrencyBalance, loadingBalance, fetchBalance } = useTokenBalance(
     ownCurrency.address[isMainnet ? "mainnet" : "glq"]
   );
 
@@ -251,6 +251,7 @@ function SwapPage() {
       setSuccess(receipt.transactionHash);
       setLoading(false);
       setFormDisabled(false);
+      fetchBalance();
     } catch (error: any) {
       resetFeedback();
       setError(error.toString());
