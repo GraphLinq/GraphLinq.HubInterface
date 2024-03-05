@@ -7,6 +7,11 @@
   border: 1px solid var(--c-martinique);
   color: var(--c-white);
   cursor: pointer;
+  transition: border-color .2s ease-out;
+  
+  &:hover {
+    border-color: var(--c-mulled-wine);
+  }
 
   &-current {
     display: flex;
