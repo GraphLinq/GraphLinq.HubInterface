@@ -88,13 +88,15 @@ function SwapPage() {
         );
         setBaseQuoteAmount(base);
 
-        if (parseFloat(ownCurrencyAmount) === 0) return;
+        let result: string | null = '0';
+        if (parseFloat(ownCurrencyAmount) !== 0) {
+          result = await quoteSwap(
+            ownCurrency.address[isMainnet ? "mainnet" : "glq"],
+            tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
+            parseFloat(ownCurrencyAmount)
+          );
+        }
 
-        const result = await quoteSwap(
-          ownCurrency.address[isMainnet ? "mainnet" : "glq"],
-          tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
-          parseFloat(ownCurrencyAmount)
-        );
         setQuoteAmount(result);
 
         resolve(result);

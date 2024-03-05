@@ -16,26 +16,18 @@ const InputNumber: React.FC<InputNumberProps> = ({
   value,
   onChange,
 }) => {
-  let timeoutId: NodeJS.Timeout;
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    clearTimeout(timeoutId);
-
-    let newValue = e.target.value !== "" ? e.target.value : '0';
+    let newValue = e.target.value !== "" ? parseFloat(e.target.value).toString() : "0";
     
     if (parseFloat(newValue) > max) {
       newValue = max.toString();
     }
-    
-          e.target.value = newValue;
-    
-          if (!isNaN(parseFloat(newValue)) && onChange) {
-            onChange(newValue);
-          }
 
-    timeoutId = setTimeout(() => {
+    e.target.value = newValue;
 
-    }, 500);
+    if (!isNaN(parseFloat(newValue)) && onChange) {
+      onChange(newValue);
+    }
   };
 
   return (
@@ -48,7 +40,9 @@ const InputNumber: React.FC<InputNumberProps> = ({
         onChange={handleInputChange}
         className="inputNumber-input"
       />
-      {currencyText && <div className="inputNumber-currency">{currencyText}</div>}
+      {currencyText && (
+        <div className="inputNumber-currency">{currencyText}</div>
+      )}
     </div>
   );
 };

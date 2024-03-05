@@ -36,11 +36,11 @@ const useExchangeRates = () => {
         const glqPerETH = await quoteSwap(
           WETH_TOKEN.address[isMainnet ? "mainnet" : "glq"],
           WGLQ_TOKEN.address[isMainnet ? "mainnet" : "glq"],
-          1
+          0.01
         );
 
         if (glqPerETH) {
-          const glqRate = ethRate / parseFloat(glqPerETH);
+          const glqRate = ethRate / (parseFloat(glqPerETH) * 100);
 
           setExchangeRates({
             loading: false,
