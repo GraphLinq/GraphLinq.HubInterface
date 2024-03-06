@@ -11,9 +11,11 @@ import { useEffect, useState } from "react";
 import useNetwork from "../../composables/useNetwork";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
+import { useAccount, useChainId } from "wagmi";
 
 const TxProgress = () => {
-  const { chainId, account } = useWeb3React();
+  const { address: account } = useAccount();
+  const chainId = useChainId();
   const { switchToGraphLinqMainnet, switchToMainnet } = useNetwork();
   const { isWaitingTxData, setWaitingTxData } = useAppContext();
 

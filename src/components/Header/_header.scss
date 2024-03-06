@@ -58,11 +58,22 @@
   }
 
   &-right {
+    position: relative;
     justify-content: flex-end;
     gap: 16px;
 
     @include max($mobile-s) {
       gap: 8px;
+    }
+
+    &-connect {
+      position: absolute;
+      top: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 8px;
+      width: 100%;
     }
   }
 
@@ -71,7 +82,7 @@
     align-items: center;
     gap: 16px;
 
-    @include max($desktop-xl) {
+    @include max($desktop) {
       display: none;
     }
 

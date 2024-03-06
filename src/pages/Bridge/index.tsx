@@ -37,6 +37,7 @@ import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
+import { useAccount, useChainId } from "wagmi";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -48,7 +49,8 @@ const tokenIcons = {
 let bridgeCost: number | null = null;
 
 function BridgePage() {
-  const { chainId, account } = useWeb3React();
+  const {  address: account} = useAccount();
+  const chainId = useChainId();
   const { isMainnet } = useChains();
   const { switchToGraphLinqMainnet, switchToMainnet } = useNetwork();
   const { calculatePrice } = useExchangeRates();

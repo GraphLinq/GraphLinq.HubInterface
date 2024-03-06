@@ -5,6 +5,8 @@ import Dashboard from "@assets/icons/dashboard.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import LogoName from "@assets/icons/logo-name.svg?react";
+import Metamask from "@assets/icons/metamask.svg?react";
+import WalletConnect from "@assets/icons/walletconnect.svg?react";
 import Logo from "@assets/icons/logo.svg?react";
 import Swap from "@assets/icons/swap-coin.svg?react";
 import Wallet from "@assets/icons/wallet.svg?react";
@@ -13,24 +15,20 @@ import Pill from "@components/Pill";
 import { WGLQ_TOKEN } from "@constants/index";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { formatEthereumAddress } from "@utils/string";
-import { useWeb3React } from "@web3-react/core";
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 
 import useChains from "../../composables/useChains";
 import useExchangeRates from "../../composables/useExchangeRates";
 import useTokenBalance from "../../composables/useTokenBalance";
-import {
-  tryActivateConnector,
-  getConnection,
-  ConnectionType,
-} from "../../libs/connections";
+import { useAccount, useConnect } from "wagmi";
 
 function Header() {
-  const { account } = useWeb3React();
+  const { connectors, connect } = useConnect();
+  const { address: account } = useAccount();
   const { isMainnet } = useChains();
   const { glq, eth } = useExchangeRates();
-  const {balance: GLQBalance} = useTokenBalance(
+  const { balance: GLQBalance } = useTokenBalance(
     isMainnet ? WGLQ_TOKEN.address.mainnet : "native"
   );
 
@@ -73,13 +71,9 @@ function Header() {
     },
   ];
 
-  const handleConnect = async () => {
-    await tryActivateConnector(
-      getConnection(ConnectionType.INJECTED).connector
-    );
-  };
 
   const [scroll, setScroll] = useState(false);
+  const [displayConnectors, setDisplayConnectors] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -90,14 +84,14 @@ function Header() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   return (
-    <header className={`header ${scroll ? 'scrolled' : ''}`}>
+    <header className={`header ${scroll ? "scrolled" : ""}`}>
       <div className="header-left">
         <Link to={"/"} className="header-logo">
           <Logo />
@@ -107,7 +101,9 @@ function Header() {
           {currencies.map((currency, i) => (
             <div className="header-currencies-item" key={i}>
               {currency.icon}
-              {currency.value && <span>{formatNumberToDollars(currency.value, 4)}</span>}
+              {currency.value && (
+                <span>{formatNumberToDollars(currency.value, 4)}</span>
+              )}
             </div>
           ))}
         </div>
@@ -133,9 +129,23 @@ function Header() {
             <Pill icon={<Wallet />}>{formatEthereumAddress(account)}</Pill>
           </>
         ) : (
-          <Button onClick={handleConnect} icon={<Connect />}>
-            Connect Wallet
-          </Button>
+          <>
+            <Button onClick={() => setDisplayConnectors(!displayConnectors)} icon={<Connect />}>
+              Connect Wallet
+            </Button>
+            {displayConnectors && (            <div className="header-right-connect">
+              {connectors.map((connector) => (
+                <Button
+                  key={connector.uid}
+                  onClick={() => connect({ connector })}
+                  type="secondary"
+                  icon={connector.id === 'walletConnect' ? <WalletConnect/> : <Metamask/>}
+                >
+                  {connector.name}
+                </Button>
+              ))}
+            </div>)}
+          </>
         )}
       </div>
     </header>

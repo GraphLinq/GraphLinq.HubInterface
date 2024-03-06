@@ -4,7 +4,6 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import svgr from "vite-plugin-svgr";
 
-
 export default defineConfig({
   plugins: [react(), svgr()],
   resolve: {
@@ -20,5 +19,8 @@ export default defineConfig({
       '@constants': `${ path.resolve(__dirname, 'src/constants') }`,
       '@data': `${ path.resolve(__dirname, 'src/data') }`,
     }
-  }
+  },
+  define: {
+    "global.WebSocket": "globalThis.WebSocket"
+  },
 })

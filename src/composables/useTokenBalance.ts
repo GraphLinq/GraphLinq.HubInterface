@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { useWeb3React } from "@web3-react/core";
 import { Contract } from "ethers";
 import { ethers } from "ethers";
+import { useAccount, useChainId } from "wagmi";
+import { useEthersSigner } from "./useEthersProvider";
 
 function useTokenBalance(tokenAddress: string) {
-  const { account, provider, chainId } = useWeb3React();
+  const { address: account} = useAccount();
+  const provider = useEthersSigner();
+  const chainId = useChainId();
   const [balance, setBalance] = useState<string | null>(null);
   const [loadingBalance, setLoadingBalance] = useState(false);
 
@@ -46,7 +49,7 @@ function useTokenBalance(tokenAddress: string) {
 
   useEffect(() => {
     fetchBalance();
-  }, [account, provider, tokenAddress]);
+  }, [account, tokenAddress]);
 
   return { balance, fetchBalance, loadingBalance };
 }

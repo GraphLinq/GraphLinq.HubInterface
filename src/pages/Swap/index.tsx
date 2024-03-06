@@ -28,6 +28,7 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import useUniswap from "../../composables/useUniswap";
+import { useAccount } from "wagmi";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -56,7 +57,8 @@ const slippageOptions = [
 ];
 
 function SwapPage() {
-  const { account } = useWeb3React();
+  const { address: account} = useAccount();
+
   const { calculatePrice } = useExchangeRates();
   const { switchToGraphLinqMainnet } = useNetwork();
   const { isGLQChain, isMainnet } = useChains();
