@@ -49,7 +49,7 @@ function useAddTokens() {
 
   const addWGLQToken = async () => {
     addToken(
-      WGLQ_TOKEN.address[isGLQChain ? "glq" : "mainnet"],
+      WGLQ_TOKEN.address[isGLQChain ? "glq" : "mainnet"]!,
       isGLQChain ? "WGLQ" : "GLQ",
       18,
       "https://s2.coinmarketcap.com/static/img/coins/64x64/9029.png"
@@ -60,7 +60,7 @@ function useAddTokens() {
     if (!isGLQChain) return;
 
     addToken(
-      WETH_TOKEN.address.glq,
+      WETH_TOKEN.address.glq!,
       "WETH",
       18,
       "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"

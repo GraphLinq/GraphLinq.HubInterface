@@ -17,10 +17,10 @@ import {
   GLQ_EXPLORER,
 } from "@constants/index";
 import { formatNumberToFixed } from "@utils/number";
-import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { useAccount } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import { useTokenContract } from "../../composables/useContract";
@@ -28,7 +28,6 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import useUniswap from "../../composables/useUniswap";
-import { useAccount } from "wagmi";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -87,8 +86,8 @@ function SwapPage() {
         if (!ownCurrency) return;
 
         const base = await quoteSwap(
-          ownCurrency.address[isMainnet ? "mainnet" : "glq"],
-          tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
+          ownCurrency.address[isMainnet ? "mainnet" : "glq"]!,
+          tradeCurrency.address[isMainnet ? "mainnet" : "glq"]!,
           1
         );
         setBaseQuoteAmount(base);
@@ -96,8 +95,8 @@ function SwapPage() {
         let result: string | null = "0";
         if (!isNaN(parseFloat(ownCurrencyAmount)) && parseFloat(ownCurrencyAmount) !== 0) {
           result = await quoteSwap(
-            ownCurrency.address[isMainnet ? "mainnet" : "glq"],
-            tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
+            ownCurrency.address[isMainnet ? "mainnet" : "glq"]!,
+            tradeCurrency.address[isMainnet ? "mainnet" : "glq"]!,
             parseFloat(ownCurrencyAmount)
           );
         }
@@ -137,7 +136,7 @@ function SwapPage() {
   const tradeCurrency = tradeCurrencyOptions[tradeCurrencyOption];
 
   const { balance: ownCurrencyBalance, loadingBalance, fetchBalance } = useTokenBalance(
-    ownCurrency.address[isMainnet ? "mainnet" : "glq"]
+    ownCurrency.address[isMainnet ? "mainnet" : "glq"]!
   );
 
   const [ownCurrencyAmount, setOwnCurrencyAmount] = useState("");
@@ -238,8 +237,8 @@ function SwapPage() {
       // );
 
       const tx = await executeSwap(
-        ownCurrency.address[isMainnet ? "mainnet" : "glq"],
-        tradeCurrency.address[isMainnet ? "mainnet" : "glq"],
+        ownCurrency.address[isMainnet ? "mainnet" : "glq"]!,
+        tradeCurrency.address[isMainnet ? "mainnet" : "glq"]!,
         parseFloat(ownCurrencyAmount),
         account,
         quoteAmount,

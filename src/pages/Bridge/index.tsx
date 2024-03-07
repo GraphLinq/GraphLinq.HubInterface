@@ -20,10 +20,10 @@ import { Contract } from "@ethersproject/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
 import { formatNumberToFixed } from "@utils/number";
-import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { useAccount, useBalance, useChainId } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import {
@@ -36,7 +36,6 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
-import { useAccount, useBalance, useChainId } from "wagmi";
 
 const tokenIcons = {
   GLQ: <GLQToken />,

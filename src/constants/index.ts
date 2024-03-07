@@ -28,13 +28,13 @@ export type Token = {
   icon: JSX.Element | null;
   name: "GLQ" | "WGLQ" | "ETH" | "WETH";
   address: {
-    mainnet: string | undefined;
-    glq: string | undefined;
+    mainnet: `0x${string}` | undefined;
+    glq: `0x${string}` | undefined;
   };
   mirror: "GLQ" | "WGLQ" | "ETH" | "WETH";
   bridge?: {
-    mainnet: string;
-    glq: string;
+    mainnet: `0x${string}`;
+    glq: `0x${string}`;
   };
   chainDestination: {
     mainnet: string;
@@ -84,7 +84,7 @@ export const ETH_TOKEN: Token = {
   name: "ETH",
   address: {
     mainnet: undefined,
-    glq: "",
+    glq: "0xbeED106D0f2e6950BFa1Eec74E1253CA0a643442",
   },
   mirror: "WETH",
   bridge: {

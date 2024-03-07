@@ -1,12 +1,11 @@
 import { WETH_TOKEN, WGLQ_TOKEN } from "@constants/index";
 import { formatNumberToDollars } from "@utils/number";
-import { useWeb3React } from "@web3-react/core";
 import { useState, useEffect } from "react";
+import { useAccount } from "wagmi";
 
 import useChains from "./useChains";
-import useUniswap from "./useUniswap";
-import { useAccount } from "wagmi";
 import { useEthersSigner } from "./useEthersProvider";
+import useUniswap from "./useUniswap";
 
 interface CoinbaseExchangeRates {
   loading: boolean;
@@ -37,8 +36,8 @@ const useExchangeRates = () => {
         const ethRate = parseFloat(ethData.data.rates.USD);
 
         const glqPerETH = await quoteSwap(
-          WETH_TOKEN.address[isMainnet ? "mainnet" : "glq"],
-          WGLQ_TOKEN.address[isMainnet ? "mainnet" : "glq"],
+          WETH_TOKEN.address[isMainnet ? "mainnet" : "glq"]!,
+          WGLQ_TOKEN.address[isMainnet ? "mainnet" : "glq"]!,
           0.01
         );
 
