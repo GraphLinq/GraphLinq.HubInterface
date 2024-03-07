@@ -6,25 +6,26 @@ import { abi as SWAP_ROUTER_ABI } from "@intrinsic-network/swap-router-contracts
 import { abi as QuoterV2ABI } from "@uniswap/v3-periphery/artifacts/contracts/lens/QuoterV2.sol/QuoterV2.json";
 import { Contract } from "ethers";
 import { ethers } from "ethers";
-import { useAccount, useReadContract } from "wagmi";
-import useProvider from "./useProvider";
+import { useAccount } from "wagmi";
 import { useEthersSigner } from "./useEthersProvider";
+import useRpcProvider from "./useRpcProvider";
 
 const useUniswap = () => {
-  const {  address: account} = useAccount();
+  const { address: account } = useAccount();
   const provider = useEthersSigner();
-  console.log(provider);
+  const { rpcProvider } = useRpcProvider();
+
   
   const swapRouter: Contract = new Contract(
     GLQCHAIN_SWAP_ROUTER_ADDRESS,
     SWAP_ROUTER_ABI,
-    provider
+    account ? provider : rpcProvider
   );
 
   const quoter: Contract = new Contract(
     GLQCHAIN_SWAP_QUOTER_ADDRESS,
     QuoterV2ABI,
-    provider
+    account ? provider : rpcProvider
   );
 
   const feeInPercent = 1;
@@ -35,7 +36,7 @@ const useUniswap = () => {
     outputToken: string,
     amountIn: number
   ): Promise<string | null> => {
-    if (!quoter || !account) return null;
+    if (!quoter) return null;
 
     try {
       const amountInFormatted = ethers.utils.parseEther(amountIn.toString());
@@ -48,6 +49,7 @@ const useUniswap = () => {
       };
       const amountOut =
         await quoter.callStatic.quoteExactInputSingle(parameters);
+        console.log(amountOut);
       return ethers.utils.formatEther(amountOut[0]);
     } catch (error) {
       console.error("Failed to quote swap:", error);

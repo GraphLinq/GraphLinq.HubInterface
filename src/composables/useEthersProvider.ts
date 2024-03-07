@@ -10,6 +10,7 @@ export function clientToSigner(client: Client<Transport, Chain, Account>) {
     name: chain.name,
     ensAddress: chain.contracts?.ensRegistry?.address,
   }
+  console.log(account, chain, transport);
   const provider = new providers.Web3Provider(transport, network)
   const signer = provider.getSigner(account.address)
   return signer;

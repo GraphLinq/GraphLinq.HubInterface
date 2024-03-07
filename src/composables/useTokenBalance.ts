@@ -23,7 +23,7 @@ function useTokenBalance(tokenAddress: string) {
 
     try {
       let tokenBalance;
-      if (tokenAddress === "native") {
+      if (tokenAddress === undefined) {
         tokenBalance = await provider.getBalance(account);
       } else {
         const tokenContract = new Contract(
@@ -49,7 +49,7 @@ function useTokenBalance(tokenAddress: string) {
 
   useEffect(() => {
     fetchBalance();
-  }, [account, tokenAddress]);
+  }, [account, tokenAddress, provider]);
 
   return { balance, fetchBalance, loadingBalance };
 }

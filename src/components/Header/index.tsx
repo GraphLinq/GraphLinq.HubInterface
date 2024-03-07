@@ -20,17 +20,19 @@ import { Link, NavLink } from "react-router-dom";
 
 import useChains from "../../composables/useChains";
 import useExchangeRates from "../../composables/useExchangeRates";
-import useTokenBalance from "../../composables/useTokenBalance";
-import { useAccount, useConnect } from "wagmi";
+import { useAccount, useBalance, useConnect } from "wagmi";
+import { ethers } from "ethers";
 
 function Header() {
   const { connectors, connect } = useConnect();
   const { address: account } = useAccount();
   const { isMainnet } = useChains();
   const { glq, eth } = useExchangeRates();
-  const { balance: GLQBalance } = useTokenBalance(
-    isMainnet ? WGLQ_TOKEN.address.mainnet : "native"
-  );
+  const {data: balanceRaw} = useBalance({
+    address: account,
+    token: isMainnet ? WGLQ_TOKEN.address.mainnet : undefined
+  });
+  const GLQBalance = balanceRaw?.value ? ethers.utils.formatEther(balanceRaw?.value) : '0';
 
   const currencies = [
     {

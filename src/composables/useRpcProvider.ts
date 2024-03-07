@@ -4,14 +4,14 @@ import { useAccount } from 'wagmi';
 import { GLQ_RPC_URL, MAINNET_RPC_URL } from '../libs/constants';
 import useChains from './useChains';
 
-function useProvider() {
+function useRpcProvider() {
   const { address: account } = useAccount();
   const { isMainnet } = useChains();
 
-  const provider = new ethers.providers.JsonRpcProvider(isMainnet ? MAINNET_RPC_URL : GLQ_RPC_URL);
-  const signer = provider.getSigner(account);
+  const rpcProvider = new ethers.providers.JsonRpcProvider(isMainnet ? MAINNET_RPC_URL : GLQ_RPC_URL);
+  const rpcSigner = rpcProvider.getSigner(account);
 
-  return { provider, signer };
+  return { rpcProvider, rpcSigner };
 }
 
-export default useProvider;
+export default useRpcProvider;
