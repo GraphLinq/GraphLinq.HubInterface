@@ -1,4 +1,3 @@
-import { useWeb3React } from "@web3-react/core";
 import { useMemo } from "react";
 
 import ERC20 from "../contracts/ERC20.json";
@@ -6,30 +5,35 @@ import EVMBridge from "../contracts/EVMBridge.json";
 import EVMBridgeERC20Minter from "../contracts/EVMBridgeERC20Minter.json";
 import EVMBridgeNative from "../contracts/EVMBridgeNative.json";
 import { getContract } from "../utils/contracts";
+import { useAccount } from "wagmi";
+import { useEthersSigner } from "./useEthersProvider";
+import useRpcProvider from "./useRpcProvider";
 
 // returns null on errors
 function useContract(address: string | undefined, ABI: object, withSignerIfPossible = true) {
-  const { provider, account } = useWeb3React();
+  const { address: account } = useAccount();
+  const provider = useEthersSigner();
+  const { rpcProvider } = useRpcProvider();
 
   return useMemo(() => {
     if (!address || !ABI || !provider) return null;
+
     try {
       const contract = getContract(
         address,
         ABI,
-        provider,
-        withSignerIfPossible && account ? account : undefined
+        account ? provider : rpcProvider
       );
       return contract;
     } catch (error) {
-      // console.error("Failed to get contract", error);
+      console.error("Failed to get contract", error);
       return null;
     }
   }, [address, ABI, provider, withSignerIfPossible, account]);
 }
 
 // Tokens
-export function useTokenContract(tokenAddress: string, withSignerIfPossible = true) {
+export function useTokenContract(tokenAddress: string | undefined, withSignerIfPossible = true) {
   return useContract(tokenAddress, ERC20, withSignerIfPossible);
 }
 

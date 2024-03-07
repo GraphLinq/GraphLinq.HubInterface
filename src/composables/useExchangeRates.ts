@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 
 import useChains from "./useChains";
 import useUniswap from "./useUniswap";
+import { useAccount } from "wagmi";
+import { useEthersSigner } from "./useEthersProvider";
 
 interface CoinbaseExchangeRates {
   loading: boolean;
@@ -14,7 +16,7 @@ interface CoinbaseExchangeRates {
 }
 
 const useExchangeRates = () => {
-  const { account } = useWeb3React();
+  const { address: account } = useAccount();
   const [exchangeRates, setExchangeRates] = useState<CoinbaseExchangeRates>({
     loading: true,
     error: null,
@@ -23,6 +25,7 @@ const useExchangeRates = () => {
   });
   const { isMainnet } = useChains();
   const { quoteSwap } = useUniswap();
+  const provider = useEthersSigner();
 
   useEffect(() => {
     const fetchExchangeRates = async () => {
@@ -60,7 +63,7 @@ const useExchangeRates = () => {
     };
 
     fetchExchangeRates();
-  }, [account]);
+  }, [account, provider]);
 
   const calculatePrice = (amount: number, currency: "eth" | "glq") => {
     if (!exchangeRates[currency]) {

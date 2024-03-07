@@ -4,26 +4,28 @@ import {
 } from "@constants/index";
 import { abi as SWAP_ROUTER_ABI } from "@intrinsic-network/swap-router-contracts/artifacts/contracts/SwapRouter02.sol/SwapRouter02.json";
 import { abi as QuoterV2ABI } from "@uniswap/v3-periphery/artifacts/contracts/lens/QuoterV2.sol/QuoterV2.json";
-import { useWeb3React } from "@web3-react/core";
 import { Contract } from "ethers";
 import { ethers } from "ethers";
-import useChains from "./useChains";
-import { RPC_URL } from "../libs/constants";
+import { useAccount } from "wagmi";
+import { useEthersSigner } from "./useEthersProvider";
+import useRpcProvider from "./useRpcProvider";
 
 const useUniswap = () => {
-  const { provider, account } = useWeb3React();
-  const { isMainnet } = useChains();
+  const { address: account } = useAccount();
+  const provider = useEthersSigner();
+  const { rpcProvider } = useRpcProvider();
+
+  
   const swapRouter: Contract = new Contract(
     GLQCHAIN_SWAP_ROUTER_ADDRESS,
     SWAP_ROUTER_ABI,
-    provider?.getSigner(account)
+    account ? provider : rpcProvider
   );
 
-  const rpcProvider = new ethers.providers.JsonRpcProvider(RPC_URL);
   const quoter: Contract = new Contract(
     GLQCHAIN_SWAP_QUOTER_ADDRESS,
     QuoterV2ABI,
-    isMainnet ? rpcProvider : provider?.getSigner(account)
+    account ? provider : rpcProvider
   );
 
   const feeInPercent = 1;
@@ -34,7 +36,7 @@ const useUniswap = () => {
     outputToken: string,
     amountIn: number
   ): Promise<string | null> => {
-    if (!quoter || !account) return null;
+    if (!quoter) return null;
 
     try {
       const amountInFormatted = ethers.utils.parseEther(amountIn.toString());
@@ -47,6 +49,7 @@ const useUniswap = () => {
       };
       const amountOut =
         await quoter.callStatic.quoteExactInputSingle(parameters);
+        console.log(amountOut);
       return ethers.utils.formatEther(amountOut[0]);
     } catch (error) {
       console.error("Failed to quote swap:", error);

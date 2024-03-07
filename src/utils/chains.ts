@@ -1,15 +1,13 @@
-// Sets if the example should run locally or on chain
 export enum Chain {
-  POLYGON,
   MAINNET,
+  GQL_CHAIN
 }
 
-// Inputs that configure this example to run
 interface ExampleConfig {
   chain: Chain;
   rpc: {
-    polygon: string;
     mainnet: string;
+    glqchain: string;
   };
 }
 
@@ -17,8 +15,8 @@ interface ExampleConfig {
 export const CurrentConfig: ExampleConfig = {
   chain: Chain.MAINNET,
   rpc: {
-    polygon: "",
-    mainnet: "",
+    mainnet: "https://eth.llamarpc.com",
+    glqchain: "https://glq-dataseed.graphlinq.io/",
   },
 };
 

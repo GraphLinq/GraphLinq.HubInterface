@@ -1,11 +1,11 @@
 import { MAINNET_CHAIN_ID, GLQ_CHAIN_ID } from '@utils/chains';
-import { useWeb3React } from '@web3-react/core';
+import { useChainId } from 'wagmi';
 
 function useChains() {
-  const { chainId } = useWeb3React();
+  const chainId = useChainId();
 
-  const isMainnet = chainId === MAINNET_CHAIN_ID;
-  const isGLQChain = chainId === GLQ_CHAIN_ID;
+  const isMainnet = chainId == MAINNET_CHAIN_ID;
+  const isGLQChain = chainId == GLQ_CHAIN_ID;
 
   return { isMainnet, isGLQChain };
 }

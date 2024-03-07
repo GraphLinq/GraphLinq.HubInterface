@@ -25,12 +25,11 @@ export function getProviderOrSigner(library: any, account: any) {
 export function getContract(
   address: any,
   ABI: any,
-  library: any,
-  account: any
+  provider: any,
 ) {
   if (!isAddress(address) || address === AddressZero) {
     throw Error(`Invalid 'address' parameter '${address}'.`);
   }
 
-  return new Contract(address, ABI, getProviderOrSigner(library, account));
+  return new Contract(address, ABI, provider);
 }

@@ -34,9 +34,9 @@ import {
 } from "../../composables/useContract";
 import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
-import useTokenBalance from "../../composables/useTokenBalance";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
+import { useAccount, useBalance, useChainId } from "wagmi";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -48,7 +48,8 @@ const tokenIcons = {
 let bridgeCost: number | null = null;
 
 function BridgePage() {
-  const { chainId, account } = useWeb3React();
+  const {  address: account} = useAccount();
+  const chainId = useChainId();
   const { isMainnet } = useChains();
   const { switchToGraphLinqMainnet, switchToMainnet } = useNetwork();
   const { calculatePrice } = useExchangeRates();
@@ -83,11 +84,11 @@ function BridgePage() {
   });
   const activeCurrency = currencyOptions[activeOption];
 
-  const {
-    balance: tokenBalance,
-    fetchBalance,
-    loadingBalance,
-  } = useTokenBalance(activeCurrency.address[isMainnet ? "mainnet" : "glq"]);
+  const {data: balanceRaw, isLoading: loadingBalance, refetch: fetchBalance} = useBalance({
+    address: account,
+    token: activeCurrency.address[isMainnet ? "mainnet" : "glq"]
+  });
+  const tokenBalance = balanceRaw?.value ? ethers.utils.formatEther(balanceRaw?.value) : '0';
 
   const activeTokenContract = useTokenContract(
     activeCurrency.address[isMainnet ? "mainnet" : "glq"]
@@ -108,7 +109,7 @@ function BridgePage() {
   let bridgeContract: Contract | null = null;
   if (chainId) {
     if (isMainnet) {
-      if (activeCurrency.address.mainnet === "native") {
+      if (activeCurrency.address.mainnet === undefined) {
         bridgeContract = activeEVMBridgeNativeContract;
       } else {
         bridgeContract = activeEVMBridgeContract;
@@ -117,7 +118,6 @@ function BridgePage() {
       bridgeContract = activeEVMBridgeERC20MinterContract;
     }
   }
-
   useEffect(() => {
     if (bridgeContract) {
       const fetchBridgeCost = async () => {
@@ -154,7 +154,7 @@ function BridgePage() {
   const [amount, setAmount] = useState("");
 
   const handleSend = async () => {
-    if (formDisabled) {
+    if (formDisabled || !bridgeContract) {
       return;
     }
 
@@ -170,13 +170,12 @@ function BridgePage() {
     setFormDisabled(true);
     setLoading(true);
 
-    if (bridgeContract) {
       try {
         const bridgeCost = await bridgeContract.getFeesInETH();
 
         let allowance = "0";
         if (
-          activeCurrency.address.mainnet !== "native" &&
+          activeCurrency.address.mainnet !== undefined &&
           activeTokenContract
         ) {
           const requiredAmount = parseFloat(amount) + parseFloat(bridgeCost);
@@ -220,7 +219,7 @@ function BridgePage() {
         // );
 
         const value =
-          activeCurrency.address.mainnet === "native"
+          activeCurrency.address.mainnet === undefined
             ? ethers.utils.parseEther(amount + bridgeCost).toString()
             : parseFloat(bridgeCost);
 
@@ -259,7 +258,7 @@ function BridgePage() {
         setFormDisabled(false);
         setLoading(false);
       }
-    }
+    
   };
 
   useEffect(() => {

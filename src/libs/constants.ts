@@ -1,19 +1,9 @@
-import { Chain, CurrentConfig } from "../utils/chains"
-
-// Chains
-const MAINNET_CHAIN_ID = 1
-const POLYGON_CHAIN_ID = 137
-
-export const INPUT_CHAIN_ID =
-  CurrentConfig.chain === Chain.POLYGON ? POLYGON_CHAIN_ID : MAINNET_CHAIN_ID
-export const INPUT_CHAIN_URL =
-  CurrentConfig.chain === Chain.POLYGON
-    ? CurrentConfig.rpc.polygon
-    : CurrentConfig.rpc.mainnet
+import { GLQ_EXPLORER, MAINNET_EXPLORER } from "@constants/index"
+import { CurrentConfig, GLQ_CHAIN_ID, MAINNET_CHAIN_ID } from "../utils/chains"
 
 export const CHAIN_TO_URL_MAP = {
-  [POLYGON_CHAIN_ID]: CurrentConfig.rpc.polygon,
-  [MAINNET_CHAIN_ID]: CurrentConfig.rpc.mainnet
+  [MAINNET_CHAIN_ID]: CurrentConfig.rpc.mainnet,
+  [GLQ_CHAIN_ID]: CurrentConfig.rpc.glqchain
 }
 
 type ChainInfo = {
@@ -29,19 +19,20 @@ type ChainInfo = {
 
 export const CHAIN_INFO: { [key: string]: ChainInfo } = {
   [MAINNET_CHAIN_ID]: {
-    explorer: "https://etherscan.io/",
+    explorer: MAINNET_EXPLORER,
     label: "Ethereum",
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     rpcUrl: CurrentConfig.rpc.mainnet
   },
-  [POLYGON_CHAIN_ID]: {
-    explorer: "https://polygonscan.com/",
-    label: "Polygon",
-    nativeCurrency: { name: "Polygon Matic", symbol: "MATIC", decimals: 18 },
-    rpcUrl: CurrentConfig.rpc.polygon
+  [GLQ_CHAIN_ID]: {
+    explorer: GLQ_EXPLORER,
+    label: "GLQ Chain",
+    nativeCurrency: { name: "GLQ", symbol: "GLQ", decimals: 18 },
+    rpcUrl: CurrentConfig.rpc.glqchain
   }
 }
 
 // URLs
 export const METAMASK_URL = "https://metamask.io/"
-export const RPC_URL = "https://glq-dataseed.graphlinq.io";
+export const GLQ_RPC_URL = "https://glq-dataseed.graphlinq.io";
+export const MAINNET_RPC_URL = "https://ethereum-sepolia-rpc.publicnode.com";

@@ -28,8 +28,8 @@ export type Token = {
   icon: JSX.Element | null;
   name: "GLQ" | "WGLQ" | "ETH" | "WETH";
   address: {
-    mainnet: string;
-    glq: string;
+    mainnet: string | undefined;
+    glq: string | undefined;
   };
   mirror: "GLQ" | "WGLQ" | "ETH" | "WETH";
   bridge?: {
@@ -49,7 +49,7 @@ export const GLQ_TOKEN: Token = {
   address: {
     // mainnet: "",
     mainnet: "0x1973006F6bA037e70967A1bB2A15c5432361c5fE", // Sepolia
-    glq: "native",
+    glq: undefined,
   },
   mirror: "WGLQ",
   chainDestination: {
@@ -83,8 +83,7 @@ export const ETH_TOKEN: Token = {
   icon: null,
   name: "ETH",
   address: {
-    // mainnet: "native",
-    mainnet: "native", // Sepolia
+    mainnet: undefined,
     glq: "",
   },
   mirror: "WETH",
