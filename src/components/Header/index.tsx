@@ -5,34 +5,37 @@ import Dashboard from "@assets/icons/dashboard.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import LogoName from "@assets/icons/logo-name.svg?react";
-import Metamask from "@assets/icons/metamask.svg?react";
-import WalletConnect from "@assets/icons/walletconnect.svg?react";
 import Logo from "@assets/icons/logo.svg?react";
+import Metamask from "@assets/icons/metamask.svg?react";
 import Swap from "@assets/icons/swap-coin.svg?react";
 import Wallet from "@assets/icons/wallet.svg?react";
+import WalletConnect from "@assets/icons/walletconnect.svg?react";
+import Wrapper from "@assets/icons/wrapper.svg?react";
 import Button from "@components/Button";
 import Pill from "@components/Pill";
 import { WGLQ_TOKEN } from "@constants/index";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { formatEthereumAddress } from "@utils/string";
+import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { useAccount, useBalance, useConnect } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import useExchangeRates from "../../composables/useExchangeRates";
-import { useAccount, useBalance, useConnect } from "wagmi";
-import { ethers } from "ethers";
 
 function Header() {
   const { connectors, connect } = useConnect();
   const { address: account } = useAccount();
   const { isMainnet } = useChains();
   const { glq, eth } = useExchangeRates();
-  const {data: balanceRaw} = useBalance({
+  const { data: balanceRaw } = useBalance({
     address: account,
-    token: isMainnet ? WGLQ_TOKEN.address.mainnet : undefined
+    token: isMainnet ? WGLQ_TOKEN.address.mainnet : undefined,
   });
-  const GLQBalance = balanceRaw?.value ? ethers.utils.formatEther(balanceRaw?.value) : '0';
+  const GLQBalance = balanceRaw?.value
+    ? ethers.utils.formatEther(balanceRaw?.value)
+    : "0";
 
   const currencies = [
     {
@@ -71,8 +74,12 @@ function Header() {
       label: "Swap",
       url: "/swap",
     },
+    {
+      icon: <Wrapper />,
+      label: "Wrapper",
+      url: "/wrapper",
+    },
   ];
-
 
   const [scroll, setScroll] = useState(false);
   const [displayConnectors, setDisplayConnectors] = useState(false);
@@ -132,21 +139,32 @@ function Header() {
           </>
         ) : (
           <>
-            <Button onClick={() => setDisplayConnectors(!displayConnectors)} icon={<Connect />}>
+            <Button
+              onClick={() => setDisplayConnectors(!displayConnectors)}
+              icon={<Connect />}
+            >
               Connect Wallet
             </Button>
-            {displayConnectors && (            <div className="header-right-connect">
-              {connectors.map((connector) => (
-                <Button
-                  key={connector.uid}
-                  onClick={() => connect({ connector })}
-                  type="secondary"
-                  icon={connector.id === 'walletConnect' ? <WalletConnect/> : <Metamask/>}
-                >
-                  {connector.name}
-                </Button>
-              ))}
-            </div>)}
+            {displayConnectors && (
+              <div className="header-right-connect">
+                {connectors.map((connector) => (
+                  <Button
+                    key={connector.uid}
+                    onClick={() => connect({ connector })}
+                    type="secondary"
+                    icon={
+                      connector.id === "walletConnect" ? (
+                        <WalletConnect />
+                      ) : (
+                        <Metamask />
+                      )
+                    }
+                  >
+                    {connector.name}
+                  </Button>
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>

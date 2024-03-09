@@ -35,7 +35,7 @@
         }
       }
       &:last-of-type {
-        // @include max($desktop) {
+        // @include max($desktop-l) {
         //   display: none;
         // }
         @include max($desktop-s) {
@@ -82,7 +82,7 @@
     align-items: center;
     gap: 16px;
 
-    @include max($desktop) {
+    @include max($desktop-l) {
       display: none;
     }
 

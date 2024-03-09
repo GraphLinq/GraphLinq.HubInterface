@@ -47,7 +47,7 @@ const tokenIcons = {
 let bridgeCost: number | null = null;
 
 function BridgePage() {
-  const {  address: account} = useAccount();
+  const { address: account } = useAccount();
   const chainId = useChainId();
   const { isMainnet } = useChains();
   const { switchToGraphLinqMainnet, switchToMainnet } = useNetwork();
@@ -83,11 +83,17 @@ function BridgePage() {
   });
   const activeCurrency = currencyOptions[activeOption];
 
-  const {data: balanceRaw, isLoading: loadingBalance, refetch: fetchBalance} = useBalance({
+  const {
+    data: balanceRaw,
+    isLoading: loadingBalance,
+    refetch: fetchBalance,
+  } = useBalance({
     address: account,
-    token: activeCurrency.address[isMainnet ? "mainnet" : "glq"]
+    token: activeCurrency.address[isMainnet ? "mainnet" : "glq"],
   });
-  const tokenBalance = balanceRaw?.value ? ethers.utils.formatEther(balanceRaw?.value) : '0';
+  const tokenBalance = balanceRaw?.value
+    ? ethers.utils.formatEther(balanceRaw?.value)
+    : "0";
 
   const activeTokenContract = useTokenContract(
     activeCurrency.address[isMainnet ? "mainnet" : "glq"]
@@ -169,95 +175,91 @@ function BridgePage() {
     setFormDisabled(true);
     setLoading(true);
 
-      try {
-        const bridgeCost = await bridgeContract.getFeesInETH();
+    try {
+      const bridgeCost = await bridgeContract.getFeesInETH();
 
-        let allowance = "0";
-        if (
-          activeCurrency.address.mainnet !== undefined &&
-          activeTokenContract
-        ) {
-          const requiredAmount = parseFloat(amount) + parseFloat(bridgeCost);
-          allowance = await activeTokenContract.allowance(
-            account,
-            bridgeContract.address
-          );
-
-          const allowanceDecimal = parseFloat(
-            ethers.utils.formatEther(allowance.toString())
-          );
-
-          if (allowanceDecimal < requiredAmount) {
-            setPending(
-              "Allowance pending, please allow the use of your token balance for the contract..."
-            );
-            const approveTx = await activeTokenContract.approve(
-              bridgeContract.address,
-              ethers.utils.parseEther(requiredAmount.toString())
-            );
-            setPending("Waiting for confirmations...");
-            await approveTx.wait();
-            setPending(
-              "Allowance successfully increased, waiting for deposit transaction..."
-            );
-          }
-        }
-
-        if (tokenBalance && parseFloat(amount) > parseFloat(tokenBalance)) {
-          setPending("");
-          setError(
-            `You only have ${tokenBalance} ${activeCurrency.name} in your wallet.`
-          );
-          setFormDisabled(false);
-          setLoading(false);
-          return;
-        }
-
-        // setPending(
-        //   "Pending, check your wallet extension to execute the chain transaction..."
-        // );
-
-        const value =
-          activeCurrency.address.mainnet === undefined
-            ? ethers.utils.parseEther(amount + bridgeCost).toString()
-            : parseFloat(bridgeCost);
-
-        const resultTx = await bridgeContract.initTransfer(
-          ethers.utils.parseEther(amount.toString()).toString(),
-          activeCurrency.chainDestination[isMainnet ? "mainnet" : "glq"],
+      let allowance = "0";
+      if (activeCurrency.address.mainnet !== undefined && activeTokenContract) {
+        const requiredAmount = parseFloat(amount) + parseFloat(bridgeCost);
+        allowance = await activeTokenContract.allowance(
           account,
-          {
-            value: value,
-          }
+          bridgeContract.address
         );
 
-        setPending("Waiting for confirmations...");
+        const allowanceDecimal = parseFloat(
+          ethers.utils.formatEther(allowance.toString())
+        );
 
-        const txReceipt = await resultTx.wait();
-        if (txReceipt.status === 1) {
-          const transfers = await bridgeContract.getLastsTransfers(1);
-
-          if (transfers[0] && transfers[0][0]) {
-            setTracking(transfers[0][0]);
-          }
+        if (allowanceDecimal < requiredAmount) {
+          setPending(
+            "Allowance pending, please allow the use of your token balance for the contract..."
+          );
+          const approveTx = await activeTokenContract.approve(
+            bridgeContract.address,
+            ethers.utils.parseEther(requiredAmount.toString())
+          );
+          setPending("Waiting for confirmations...");
+          await approveTx.wait();
+          setPending(
+            "Allowance successfully increased, waiting for deposit transaction..."
+          );
         }
-
-        setPending(
-          `It will take approximatively 10 minutes to execute the bridge transaction and sending ${amount.toString()} ${
-            activeCurrency.name
-          } on the ${isMainnet ? "GLQ Chain" : "Ethereum"} network.`
-        );
-        fetchBalance();
-        setWaitingTxData(true);
-        setFormDisabled(false);
-        setLoading(false);
-      } catch (error: any) {
-        resetFeedback();
-        setError(error.toString());
-        setFormDisabled(false);
-        setLoading(false);
       }
-    
+
+      if (tokenBalance && parseFloat(amount) > parseFloat(tokenBalance)) {
+        setPending("");
+        setError(
+          `You only have ${tokenBalance} ${activeCurrency.name} in your wallet.`
+        );
+        setFormDisabled(false);
+        setLoading(false);
+        return;
+      }
+
+      // setPending(
+      //   "Pending, check your wallet extension to execute the chain transaction..."
+      // );
+
+      const value =
+        activeCurrency.address.mainnet === undefined
+          ? ethers.utils.parseEther(amount + bridgeCost).toString()
+          : parseFloat(bridgeCost);
+
+      const resultTx = await bridgeContract.initTransfer(
+        ethers.utils.parseEther(amount.toString()).toString(),
+        activeCurrency.chainDestination[isMainnet ? "mainnet" : "glq"],
+        account,
+        {
+          value: value,
+        }
+      );
+
+      setPending("Waiting for confirmations...");
+
+      const txReceipt = await resultTx.wait();
+      if (txReceipt.status === 1) {
+        const transfers = await bridgeContract.getLastsTransfers(1);
+
+        if (transfers[0] && transfers[0][0]) {
+          setTracking(transfers[0][0]);
+        }
+      }
+
+      setPending(
+        `It will take approximatively 10 minutes to execute the bridge transaction and sending ${amount.toString()} ${
+          activeCurrency.name
+        } on the ${isMainnet ? "GLQ Chain" : "Ethereum"} network.`
+      );
+      fetchBalance();
+      setWaitingTxData(true);
+      setFormDisabled(false);
+      setLoading(false);
+    } catch (error: any) {
+      resetFeedback();
+      setError(error.toString());
+      setFormDisabled(false);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -346,7 +348,10 @@ function BridgePage() {
                   ))}
                   onChange={(active) => handleSelectChange(active)}
                 />
-                <div className="bridge-swap-switch" onClick={handleSwitchNetwork}>
+                <div
+                  className="bridge-swap-switch"
+                  onClick={handleSwitchNetwork}
+                >
                   <Swap />
                 </div>
                 <Pill>
@@ -433,50 +438,52 @@ function BridgePage() {
                     {bridgeCost ? calculatePrice(bridgeCost, "eth") : "$0.0000"}
                   </div>
                   <div className="bridge-amount-submit">
-                    <Button onClick={handleSend} icon={loading && <Spinner/>}>Send</Button>
+                    <Button onClick={handleSend} icon={loading && <Spinner />}>
+                      Send
+                    </Button>
                   </div>
                 </div>
               </div>
               {error && (
-                  <Alert type="error">
-                    <p>{error}</p>
-                  </Alert>
-                )}
-                {!success && pending && (
-                  <Alert type="warning">
-                    <p>{pending}</p>
-                  </Alert>
-                )}
-                {success && (
-                  <div className="bridge-success">
-                    <Alert type="success">
-                      <p>
-                        Successfully completed,{" "}
-                        <b>
-                          {tracking &&
-                            typeof tracking !== "string" &&
-                            ethers.utils
-                              .formatEther(tracking.quantity)
-                              .toString()}{" "}
-                          {activeCurrency.name}
-                        </b>{" "}
-                        has been bridged to your wallet on the{" "}
-                        <b>{isMainnet ? "GLQ Chain" : "Ethereum"} network</b>,
-                        just switch back network to see your tokens!
+                <Alert type="error">
+                  <p>{error}</p>
+                </Alert>
+              )}
+              {!success && pending && (
+                <Alert type="warning">
+                  <p>{pending}</p>
+                </Alert>
+              )}
+              {success && (
+                <div className="bridge-success">
+                  <Alert type="success">
+                    <p>
+                      Successfully completed,{" "}
+                      <b>
+                        {tracking &&
+                          typeof tracking !== "string" &&
+                          ethers.utils
+                            .formatEther(tracking.quantity)
+                            .toString()}{" "}
+                        {activeCurrency.name}
+                      </b>{" "}
+                      has been bridged to your wallet on the{" "}
+                      <b>{isMainnet ? "GLQ Chain" : "Ethereum"} network</b>,
+                      just switch back network to see your tokens!
+                    </p>
+                    {tracking && typeof tracking !== "string" && (
+                      <p className="small" style={{ marginTop: 8 }}>
+                        <a href={trackingExplorer} target="_blank">
+                          <small>Tx hash: {tracking.bridge_tx}</small>
+                        </a>
                       </p>
-                      {tracking && typeof tracking !== "string" && (
-                        <p className="small" style={{ marginTop: 8 }}>
-                          <a href={trackingExplorer} target="_blank">
-                            <small>Tx hash: {tracking.bridge_tx}</small>
-                          </a>
-                        </p>
-                      )}
-                    </Alert>
-                    <Button onClick={handleSwitchNetwork}>
-                      Switch to {isMainnet ? "GLQ Chain" : "Ethereum"} network
-                    </Button>
-                  </div>
-                )}
+                    )}
+                  </Alert>
+                  <Button onClick={handleSwitchNetwork}>
+                    Switch to {isMainnet ? "GLQ Chain" : "Ethereum"} network
+                  </Button>
+                </div>
+              )}
             </>
           )}
         </div>

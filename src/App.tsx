@@ -15,6 +15,7 @@ import {
 } from "react-router-dom";
 import { WagmiProvider } from "wagmi";
 import { config } from "./config";
+import WrapperPage from "@pages/Wrapper";
 
 function App() {
   const queryClient = new QueryClient();
@@ -52,6 +53,10 @@ function App() {
         {
           path: "/swap",
           element: <SwapPage />,
+        },
+        {
+          path: "/wrapper",
+          element: <WrapperPage />,
         },
       ],
     },
