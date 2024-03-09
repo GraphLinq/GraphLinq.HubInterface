@@ -7,6 +7,7 @@ import { abi as QuoterV2ABI } from "@uniswap/v3-periphery/artifacts/contracts/le
 import { Contract } from "ethers";
 import { ethers } from "ethers";
 import { useAccount } from "wagmi";
+
 import useRpcProvider from "./useRpcProvider";
 
 const useUniswap = () => {
@@ -16,13 +17,13 @@ const useUniswap = () => {
   const swapRouter: Contract = new Contract(
     GLQCHAIN_SWAP_ROUTER_ADDRESS,
     SWAP_ROUTER_ABI,
-    rpcProvider.getSigner(account)
+    account ? rpcProvider.getSigner(account) : rpcProvider
   );
 
   const quoter: Contract = new Contract(
     GLQCHAIN_SWAP_QUOTER_ADDRESS,
     QuoterV2ABI,
-    rpcProvider.getSigner(account)
+    account ? rpcProvider.getSigner(account) : rpcProvider
   );
 
   const feeInPercent = 1;
@@ -82,7 +83,7 @@ const useUniswap = () => {
         amountOutMinimum: amountOutMinimum,
         sqrtPriceLimitX96: 0,
       };
-      
+
       return await swapRouter.exactInputSingle(params, { gasLimit: 400000 });
     } catch (error) {
       console.error("Failed to execute swap:", error);
