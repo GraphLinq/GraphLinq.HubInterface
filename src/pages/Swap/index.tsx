@@ -10,7 +10,6 @@ import InputNumber from "@components/InputNumber";
 import InputRadioGroup from "@components/InputRadioGroup";
 import Select from "@components/Select";
 import {
-  MAINNET_CURRENCIES,
   GLQCHAIN_CURRENCIES,
   SITE_NAME,
   GLQCHAIN_SWAP_ROUTER_ADDRESS,
@@ -56,11 +55,11 @@ const slippageOptions = [
 ];
 
 function SwapPage() {
-  const { address: account} = useAccount();
+  const { address: account } = useAccount();
 
   const { calculatePrice } = useExchangeRates();
   const { switchToGraphLinqMainnet } = useNetwork();
-  const { isGLQChain, isMainnet } = useChains();
+  const { isGLQChain } = useChains();
   const { quoteSwap, executeSwap, feeInPercent } = useUniswap();
 
   const [error, setError] = useState("");
@@ -86,17 +85,20 @@ function SwapPage() {
         if (!ownCurrency) return;
 
         const base = await quoteSwap(
-          ownCurrency.address[isMainnet ? "mainnet" : "glq"]!,
-          tradeCurrency.address[isMainnet ? "mainnet" : "glq"]!,
+          ownCurrency.address.glq!,
+          tradeCurrency.address.glq!,
           1
         );
         setBaseQuoteAmount(base);
 
         let result: string | null = "0";
-        if (!isNaN(parseFloat(ownCurrencyAmount)) && parseFloat(ownCurrencyAmount) !== 0) {
+        if (
+          !isNaN(parseFloat(ownCurrencyAmount)) &&
+          parseFloat(ownCurrencyAmount) !== 0
+        ) {
           result = await quoteSwap(
-            ownCurrency.address[isMainnet ? "mainnet" : "glq"]!,
-            tradeCurrency.address[isMainnet ? "mainnet" : "glq"]!,
+            ownCurrency.address.glq!,
+            tradeCurrency.address.glq!,
             parseFloat(ownCurrencyAmount)
           );
         }
@@ -124,9 +126,7 @@ function SwapPage() {
 
   const [ownCurrencyOption, setOwnCurrencyOption] = useState(0);
   const [tradeCurrencyOption, setTradeCurrencyOption] = useState(1);
-  const ownCurrencyOptions = (
-    isMainnet ? MAINNET_CURRENCIES : GLQCHAIN_CURRENCIES
-  ).map((currency) => {
+  const ownCurrencyOptions = GLQCHAIN_CURRENCIES.map((currency) => {
     currency.icon = tokenIcons[currency.name];
     return currency;
   });
@@ -135,15 +135,15 @@ function SwapPage() {
   const ownCurrency = ownCurrencyOptions[ownCurrencyOption];
   const tradeCurrency = tradeCurrencyOptions[tradeCurrencyOption];
 
-  const { balance: ownCurrencyBalance, loadingBalance, fetchBalance } = useTokenBalance(
-    ownCurrency.address[isMainnet ? "mainnet" : "glq"]!
-  );
+  const {
+    balance: ownCurrencyBalance,
+    loadingBalance,
+    fetchBalance,
+  } = useTokenBalance(ownCurrency.address.glq!);
 
   const [ownCurrencyAmount, setOwnCurrencyAmount] = useState("");
 
-  const activeTokenContract = useTokenContract(
-    ownCurrency.address[isMainnet ? "mainnet" : "glq"]
-  );
+  const activeTokenContract = useTokenContract(ownCurrency.address.glq);
 
   const handleCurrencySelectChange = (
     active: number,
@@ -237,8 +237,8 @@ function SwapPage() {
       // );
 
       const tx = await executeSwap(
-        ownCurrency.address[isMainnet ? "mainnet" : "glq"]!,
-        tradeCurrency.address[isMainnet ? "mainnet" : "glq"]!,
+        ownCurrency.address.glq!,
+        tradeCurrency.address.glq!,
         parseFloat(ownCurrencyAmount),
         account,
         quoteAmount,
@@ -333,7 +333,9 @@ function SwapPage() {
                           </div>
                           <div className="swap-choice-input-price">
                             {calculatePrice(
-                              !isNaN(parseFloat(ownCurrencyAmount)) ? parseFloat(ownCurrencyAmount) : 0,
+                              !isNaN(parseFloat(ownCurrencyAmount))
+                                ? parseFloat(ownCurrencyAmount)
+                                : 0,
                               ownCurrency.exchangeRate
                             )}
                           </div>
@@ -439,12 +441,11 @@ function SwapPage() {
                       <Button
                         onClick={handleSend}
                         disabled={loadingQuote || loadingBalance}
-                        icon={loading && <Spinner/>}
+                        icon={loading && <Spinner />}
                       >
                         Send
                       </Button>
                     </div>
-                    
                   </>
                 ) : (
                   <>
@@ -460,43 +461,40 @@ function SwapPage() {
             )}
           </div>
           {error && (
-                      <Alert type="error">
-                        <p>{error}</p>
-                      </Alert>
-                    )}
-                    {!success && pending && (
-                      <Alert type="warning">
-                        <p>{pending}</p>
-                      </Alert>
-                    )}
-                    {success && (
-                      <Alert type="success">
-                        <p>
-                          Your swap of{" "}
-                          <b>
-                            {formatNumberToFixed(
-                              parseFloat(ownCurrencyAmount),
-                              6
-                            )}{" "}
-                            {ownCurrency.name}
-                          </b>{" "}
-                          for{" "}
-                          <b>
-                            {formatNumberToFixed(
-                              quoteAmount ? parseFloat(quoteAmount) : 0,
-                              6
-                            )}{" "}
-                            {tradeCurrency.name}
-                          </b>{" "}
-                          is now successfully completed.
-                        </p>
-                        <p className="small" style={{ marginTop: 8 }}>
-                          <a href={trackingExplorer} target="_blank">
-                            <small>Tx hash: {success}</small>
-                          </a>
-                        </p>
-                      </Alert>
-                    )}
+            <Alert type="error">
+              <p>{error}</p>
+            </Alert>
+          )}
+          {!success && pending && (
+            <Alert type="warning">
+              <p>{pending}</p>
+            </Alert>
+          )}
+          {success && (
+            <Alert type="success">
+              <p>
+                Your swap of{" "}
+                <b>
+                  {formatNumberToFixed(parseFloat(ownCurrencyAmount), 6)}{" "}
+                  {ownCurrency.name}
+                </b>{" "}
+                for{" "}
+                <b>
+                  {formatNumberToFixed(
+                    quoteAmount ? parseFloat(quoteAmount) : 0,
+                    6
+                  )}{" "}
+                  {tradeCurrency.name}
+                </b>{" "}
+                is now successfully completed.
+              </p>
+              <p className="small" style={{ marginTop: 8 }}>
+                <a href={trackingExplorer} target="_blank">
+                  <small>Tx hash: {success}</small>
+                </a>
+              </p>
+            </Alert>
+          )}
         </div>
       </div>
     </>

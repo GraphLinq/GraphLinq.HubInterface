@@ -22,11 +22,7 @@ export function getProviderOrSigner(library: any, account: any) {
 }
 
 // account is optional
-export function getContract(
-  address: any,
-  ABI: any,
-  provider: any,
-) {
+export function getContract(address: any, ABI: any, provider: any) {
   if (!isAddress(address) || address === AddressZero) {
     throw Error(`Invalid 'address' parameter '${address}'.`);
   }

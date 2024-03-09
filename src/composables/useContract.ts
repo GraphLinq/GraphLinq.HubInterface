@@ -1,19 +1,24 @@
 import { useMemo } from "react";
+import { useAccount } from "wagmi";
 
 import ERC20 from "../contracts/ERC20.json";
 import EVMBridge from "../contracts/EVMBridge.json";
 import EVMBridgeERC20Minter from "../contracts/EVMBridgeERC20Minter.json";
 import EVMBridgeNative from "../contracts/EVMBridgeNative.json";
 import { getContract } from "../utils/contracts";
-import { useAccount } from "wagmi";
+
 import { useEthersSigner } from "./useEthersProvider";
 import useRpcProvider from "./useRpcProvider";
 
 // returns null on errors
-function useContract(address: string | undefined, ABI: object, withSignerIfPossible = true) {
+function useContract(
+  address: string | undefined,
+  ABI: object,
+  withSignerIfPossible = true
+) {
   const { address: account } = useAccount();
   const provider = useEthersSigner();
-  const { rpcProvider } = useRpcProvider();
+  const rpcProvider = useRpcProvider();
 
   return useMemo(() => {
     if (!address || !ABI || !provider) return null;
@@ -33,7 +38,10 @@ function useContract(address: string | undefined, ABI: object, withSignerIfPossi
 }
 
 // Tokens
-export function useTokenContract(tokenAddress: string | undefined, withSignerIfPossible = true) {
+export function useTokenContract(
+  tokenAddress: string | undefined,
+  withSignerIfPossible = true
+) {
   return useContract(tokenAddress, ERC20, withSignerIfPossible);
 }
 

@@ -346,8 +346,8 @@ function BridgePage() {
                   ))}
                   onChange={(active) => handleSelectChange(active)}
                 />
-                <div className="bridge-swap-switch">
-                  <Swap onClick={handleSwitchNetwork} />
+                <div className="bridge-swap-switch" onClick={handleSwitchNetwork}>
+                  <Swap />
                 </div>
                 <Pill>
                   {activeCurrency.icon}

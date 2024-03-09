@@ -3,7 +3,6 @@ import { formatNumberToDollars } from "@utils/number";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 
-import useChains from "./useChains";
 import { useEthersSigner } from "./useEthersProvider";
 import useUniswap from "./useUniswap";
 
@@ -22,7 +21,6 @@ const useExchangeRates = () => {
     eth: null,
     glq: null,
   });
-  const { isMainnet } = useChains();
   const { quoteSwap } = useUniswap();
   const provider = useEthersSigner();
 
@@ -36,8 +34,8 @@ const useExchangeRates = () => {
         const ethRate = parseFloat(ethData.data.rates.USD);
 
         const glqPerETH = await quoteSwap(
-          WETH_TOKEN.address[isMainnet ? "mainnet" : "glq"]!,
-          WGLQ_TOKEN.address[isMainnet ? "mainnet" : "glq"]!,
+          WETH_TOKEN.address.glq!,
+          WGLQ_TOKEN.address.glq!,
           0.01
         );
 
