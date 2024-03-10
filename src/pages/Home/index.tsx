@@ -11,6 +11,7 @@ import Network from "@assets/icons/network.svg?react";
 import useAddTokens from "../../composables/useAddTokens";
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
+import HomeGraph from "@components/HomeGraph";
 
 function HomePage() {
   const { addWETHToken, addWGLQToken } = useAddTokens();
@@ -32,6 +33,7 @@ function HomePage() {
                 This is the main place for any activity within the GraphLinq
                 Chain.
               </div>
+              <HomeGraph/>
               <div className="home-actions">
                 <Button link="/bridge" icon={<Bridge />}>
                   Bridge
