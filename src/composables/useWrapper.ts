@@ -5,16 +5,18 @@ import { useAccount } from "wagmi";
 
 import WRAPPER_ABI from "../contracts/EVMBridgeERC20Minter.json";
 
+import { useEthersSigner } from "./useEthersProvider";
 import useRpcProvider from "./useRpcProvider";
 
 const useWrapper = () => {
   const { address: account } = useAccount();
   const rpcProvider = useRpcProvider();
+  const provider = useEthersSigner();
 
-  const wrapper: Contract = new Contract(
+  const wrapper = new Contract(
     GLQCHAIN_BRIDGE_OUT_WGLQ,
     WRAPPER_ABI,
-    account ? rpcProvider.getSigner(account) : rpcProvider
+    provider ? provider : rpcProvider
   );
 
   const executeWrap = async (amountIn: number) => {
@@ -41,8 +43,9 @@ const useWrapper = () => {
         from: account,
       };
       return await wrapper.unwrap(amountInFormatted, txOptions);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to unwrap assets:", error);
+      throw new Error(error);
     }
   };
 

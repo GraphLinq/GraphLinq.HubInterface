@@ -8,12 +8,16 @@
 
 
     &-wrap {
-      margin-bottom: 32px;
 
-      & + & {
+      &[data-type="unwrap"] {
+        margin-top: 32px;
         padding-top: 32px;
         border-top: 1px solid var(--c-martinique);
         margin-bottom: 0;
+      }
+
+      & + .alert {
+        margin-top: 16px;
       }
 
       &[data-disabled="true"] {

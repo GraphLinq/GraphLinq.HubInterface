@@ -2,7 +2,12 @@ import Alert from "@components/Alert";
 import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import "./_wrapper.scss";
-import { GLQ_TOKEN, SITE_NAME, WGLQ_TOKEN } from "@constants/index";
+import {
+  GLQ_EXPLORER,
+  GLQ_TOKEN,
+  SITE_NAME,
+  WGLQ_TOKEN,
+} from "@constants/index";
 import { formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import { useState } from "react";
@@ -24,24 +29,34 @@ function WrapperPage() {
   const [errorWrap, setErrorWrap] = useState("");
   const [pendingWrap, setPendingWrap] = useState("");
   const [successWrap, setSuccessWrap] = useState("");
+  const [successWrapTx, setSuccessWrapTx] = useState("");
+  const [loadingWrap, setLoadingWrap] = useState(false);
 
   const [errorUnwrap, setErrorUnwrap] = useState("");
   const [pendingUnwrap, setPendingUnwrap] = useState("");
   const [successUnwrap, setSuccessUnwrap] = useState("");
+  const [successUnwrapTx, setSuccessUnwrapTx] = useState("");
+  const [loadingUnwrap, setLoadingUnwrap] = useState(false);
 
   const resetFeedback = () => {
     setErrorWrap("");
     setPendingWrap("");
     setSuccessWrap("");
+    setSuccessWrapTx("");
     setErrorUnwrap("");
     setPendingUnwrap("");
     setSuccessUnwrap("");
+    setSuccessUnwrapTx("");
   };
 
-  const [loading, setLoading] = useState(false);
   const [formDisabled, setFormDisabled] = useState(false);
+  const loading = loadingWrap || loadingUnwrap;
 
-  const { data: glqBalanceRaw, isLoading: loadingGLQBalance } = useBalance({
+  const {
+    data: glqBalanceRaw,
+    isLoading: loadingGLQBalance,
+    refetch: fetchGLQBalance,
+  } = useBalance({
     address: account,
   });
   const glqBalance = glqBalanceRaw?.value
@@ -52,52 +67,53 @@ function WrapperPage() {
 
   const handleWrap = async () => {
     if (!glqAmount || !account || loading || !wrapperContract) return;
-    
+
     resetFeedback();
 
     if (parseFloat(glqAmount) <= 0) {
-      setErrorWrap(
-        `Invalid amount to wrap : ${glqAmount} GLQ`
-      );
+      setErrorWrap(`Invalid amount to wrap : ${glqAmount} GLQ`);
       return;
     }
 
     try {
-      setLoading(true);
+      setLoadingWrap(true);
       setFormDisabled(true);
 
-      if (
-        glqBalance &&
-        parseFloat(glqAmount) > parseFloat(glqBalance)
-      ) {
+      if (glqBalance && parseFloat(glqAmount) > parseFloat(glqBalance)) {
         setPendingWrap("");
-        setErrorWrap(
-          `You only have ${glqBalance} GLQ in your wallet.`
-        );
+        setErrorWrap(`You only have ${glqBalance} GLQ in your wallet.`);
         setFormDisabled(false);
         return;
       }
 
-      const tx = await executeWrap(
-        parseFloat(glqAmount)
-      );
+      const tx = await executeWrap(parseFloat(glqAmount));
 
       setPendingWrap("Waiting for confirmations...");
 
       const receipt = await tx.wait();
 
-      setSuccessWrap(receipt.transactionHash);
-      setLoading(false);
+      setSuccessWrap(glqAmount);
+      setSuccessWrapTx(receipt.transactionHash);
+      
+      await fetchGLQBalance();
+      await fetchWGLQBalance();
+      
+      setLoadingWrap(false);
       setFormDisabled(false);
+      setGLQAmount('');
     } catch (error: any) {
       resetFeedback();
       setErrorWrap(error.toString());
-      setLoading(false);
+      setLoadingWrap(false);
       setFormDisabled(false);
     }
   };
 
-  const { data: wglqBalanceRaw, isLoading: loadingWGLQBalance } = useBalance({
+  const {
+    data: wglqBalanceRaw,
+    isLoading: loadingWGLQBalance,
+    refetch: fetchWGLQBalance,
+  } = useBalance({
     address: account,
     token: WGLQ_TOKEN.address.glq,
   });
@@ -109,50 +125,52 @@ function WrapperPage() {
 
   const handleUnwrap = async () => {
     if (!wglqAmount || !account || loading || !wrapperContract) return;
-    
+
     resetFeedback();
 
     if (parseFloat(wglqAmount) <= 0) {
-      setErrorUnwrap(
-        `Invalid amount to unwrap : ${wglqAmount} WGLQ`
-      );
+      setErrorUnwrap(`Invalid amount to unwrap : ${wglqAmount} WGLQ`);
       return;
     }
 
     try {
-      setLoading(true);
+      setLoadingUnwrap(true);
       setFormDisabled(true);
 
-      if (
-        wglqBalance &&
-        parseFloat(wglqAmount) > parseFloat(wglqBalance)
-      ) {
+      if (wglqBalance && parseFloat(wglqAmount) > parseFloat(wglqBalance)) {
         setPendingUnwrap("");
-        setErrorUnwrap(
-          `You only have ${wglqBalance} WGLQ in your wallet.`
-        );
+        setErrorUnwrap(`You only have ${wglqBalance} WGLQ in your wallet.`);
         setFormDisabled(false);
         return;
       }
 
-      const tx = await executeUnwrap(
-        parseFloat(wglqAmount)
-      );
+      const tx = await executeUnwrap(parseFloat(wglqAmount));
 
       setPendingUnwrap("Waiting for confirmations...");
 
       const receipt = await tx.wait();
 
-      setSuccessUnwrap(receipt.transactionHash);
-      setLoading(false);
+      setSuccessUnwrap(wglqAmount);
+      setSuccessUnwrapTx(receipt.transactionHash);
+
+      await fetchGLQBalance();
+      await fetchWGLQBalance();
+
+      setLoadingUnwrap(false);
       setFormDisabled(false);
+
+      setWGLQAmount('');
     } catch (error: any) {
       resetFeedback();
       setErrorUnwrap(error.toString());
-      setLoading(false);
+      setLoadingUnwrap(false);
       setFormDisabled(false);
     }
   };
+
+  const trackingExplorer = `${GLQ_EXPLORER}/tx/${
+    successWrapTx || successUnwrapTx
+  }`;
 
   return (
     <>
@@ -182,6 +200,7 @@ function WrapperPage() {
                       {/* GLQ Amount */}
                       <div
                         className="wrapper-amount-wrap"
+                        data-type="wrap"
                         data-disabled={formDisabled || loadingGLQBalance}
                       >
                         <div className="wrapper-amount-subtitle">Available</div>
@@ -242,34 +261,46 @@ function WrapperPage() {
                         <div className="wrapper-amount-submit">
                           <Button
                             onClick={handleWrap}
-                            icon={loading && <Spinner />}
+                            icon={loadingWrap && <Spinner />}
                             disabled={loading || loadingGLQBalance}
                           >
                             Wrap
                           </Button>
                         </div>
-                        {errorWrap && (
-            <Alert type="error">
-              <p>{errorWrap}</p>
-            </Alert>
-          )}
-          {!successWrap && pendingWrap && (
-            <Alert type="warning">
-              <p>{pendingWrap}</p>
-            </Alert>
-          )}
-          {successWrap && (
-            <div className="wrapper-success">
-              <Alert type="success">
-                <p>Successfully completed, ...</p>
-              </Alert>
-            </div>
-          )}
                       </div>
+                      {errorWrap && (
+                        <Alert type="error">
+                          <p>{errorWrap}</p>
+                        </Alert>
+                      )}
+                      {!successWrap && pendingWrap && (
+                        <Alert type="warning">
+                          <p>{pendingWrap}</p>
+                        </Alert>
+                      )}
+                      {successWrap && (
+                        <Alert type="success">
+                          <p>
+                            You successfully wrapped for{" "}
+                            <b>
+                              {formatNumberToFixed(parseFloat(successWrap), 6)}{" "}
+                              WGLQ
+                            </b>
+                            .
+                          </p>
+                          <p className="small" style={{ marginTop: 8 }}>
+                            <a href={trackingExplorer} target="_blank">
+                              <small>Tx hash: {successWrapTx}</small>
+                            </a>
+                          </p>
+                        </Alert>
+                      )}
+
 
                       {/* WGLQ Amount */}
                       <div
                         className="wrapper-amount-wrap"
+                        data-type="unwrap"
                         data-disabled={formDisabled || loadingWGLQBalance}
                       >
                         <div className="wrapper-amount-subtitle">Available</div>
@@ -330,30 +361,39 @@ function WrapperPage() {
                         <div className="wrapper-amount-submit">
                           <Button
                             onClick={handleUnwrap}
-                            icon={loading && <Spinner />}
+                            icon={loadingUnwrap && <Spinner />}
                           >
                             Unwrap
                           </Button>
                         </div>
-
-                        {errorUnwrap && (
-            <Alert type="error">
-              <p>{errorUnwrap}</p>
-            </Alert>
-          )}
-          {!successUnwrap && pendingUnwrap && (
-            <Alert type="warning">
-              <p>{pendingUnwrap}</p>
-            </Alert>
-          )}
-          {successUnwrap && (
-            <div className="wrapper-success">
-              <Alert type="success">
-                <p>Successfully completed, ...</p>
-              </Alert>
-            </div>
-          )}
                       </div>
+                      {errorUnwrap && (
+                        <Alert type="error">
+                          <p>{errorUnwrap}</p>
+                        </Alert>
+                      )}
+                      {!successUnwrap && pendingUnwrap && (
+                        <Alert type="warning">
+                          <p>{pendingUnwrap}</p>
+                        </Alert>
+                      )}
+                      {successUnwrap && (
+                        <Alert type="success">
+                          <p>
+                            You successfully unwrapped for{" "}
+                            <b>
+                              {formatNumberToFixed(parseFloat(successUnwrap), 6)}{" "}
+                              GLQ
+                            </b>
+                            .
+                          </p>
+                          <p className="small" style={{ marginTop: 8 }}>
+                            <a href={trackingExplorer} target="_blank">
+                              <small>Tx hash: {successUnwrapTx}</small>
+                            </a>
+                          </p>
+                        </Alert>
+                      )}
                     </div>
                   </>
                 ) : (

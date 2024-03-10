@@ -6,24 +6,24 @@ import { abi as SWAP_ROUTER_ABI } from "@intrinsic-network/swap-router-contracts
 import { abi as QuoterV2ABI } from "@uniswap/v3-periphery/artifacts/contracts/lens/QuoterV2.sol/QuoterV2.json";
 import { Contract } from "ethers";
 import { ethers } from "ethers";
-import { useAccount } from "wagmi";
 
+import { useEthersSigner } from "./useEthersProvider";
 import useRpcProvider from "./useRpcProvider";
 
 const useUniswap = () => {
-  const { address: account } = useAccount();
   const rpcProvider = useRpcProvider();
+  const provider = useEthersSigner();
 
   const swapRouter: Contract = new Contract(
     GLQCHAIN_SWAP_ROUTER_ADDRESS,
     SWAP_ROUTER_ABI,
-    account ? rpcProvider.getSigner(account) : rpcProvider
+    provider ? provider : rpcProvider
   );
 
   const quoter: Contract = new Contract(
     GLQCHAIN_SWAP_QUOTER_ADDRESS,
     QuoterV2ABI,
-    account ? rpcProvider.getSigner(account) : rpcProvider
+    provider ? provider : rpcProvider
   );
 
   const feeInPercent = 1;
