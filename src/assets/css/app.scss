@@ -90,7 +90,12 @@ body {
 
   &-title {
     font-size: 48px;
+    line-height: 1;
     font-weight: 600;
+
+    @include max($mobile-s) {
+      font-size: 32px;
+    }
   }
 
   &-desc {

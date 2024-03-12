@@ -14,6 +14,8 @@
   --c-bastille: #1B1621;
   --c-denim: #1573e6;
   --c-fog: #DED2FF;
+  --c-mint-green: #69ffa5;
+  --c-mint-red: #ff4935;
 
   @include max($mobile-s) {
     --header-height: 72px;

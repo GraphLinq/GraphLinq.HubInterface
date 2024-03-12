@@ -19,6 +19,7 @@ function HomeGraph() {
         ".cg-container .cg-widget .cg-absolute"
       ).style.display = "none";
       host.querySelector("style").innerHTML += `
+                .cg-container{border:0 !important;margin-top: -40px;}
                 .highcharts-credits,
                 .highcharts-scrollbar,
                 .highcharts-title, 
