@@ -63,11 +63,11 @@ function HomeGraph() {
   }, []);
   return (
     <>
-      <coingecko-coin-compare-chart-widget
+      <div dangerouslySetInnerHTML={{__html: `<coingecko-coin-compare-chart-widget
         coin-ids="graphlinq-protocol"
         currency="usd"
         locale="us"
-      ></coingecko-coin-compare-chart-widget>
+      ></coingecko-coin-compare-chart-widget>`}}></div>
     </>
   );
 }
