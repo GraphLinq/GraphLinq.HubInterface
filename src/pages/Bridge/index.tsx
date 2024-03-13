@@ -124,21 +124,17 @@ function BridgePage() {
     }
   }
   useEffect(() => {
-    if (bridgeContract) {
-      const fetchBridgeCost = async () => {
-        try {
-          if (!bridgeContract) {
-            throw Error();
-          }
-
+    const fetchBridgeCost = async () => {
+      try {
+        if (bridgeContract) {
           bridgeCost = await bridgeContract.getFeesInETH();
-        } catch (error) {
-          console.error("Error fetching bridge fee:", error);
         }
-      };
+      } catch (error) {
+        console.error("Error fetching bridge fee:", error);
+      }
+    };
 
-      fetchBridgeCost();
-    }
+    fetchBridgeCost();
   }, [bridgeContract]);
 
   const handleSelectChange = (active: number) => {

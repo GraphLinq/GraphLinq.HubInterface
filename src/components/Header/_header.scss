@@ -82,7 +82,7 @@
     align-items: center;
     gap: 16px;
 
-    @include max($desktop-l) {
+    @include max($desktop-xl) {
       display: none;
     }
 

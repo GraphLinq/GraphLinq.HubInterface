@@ -33,7 +33,7 @@ const useUniswap = () => {
     inputToken: string,
     outputToken: string,
     amountIn: number
-  ): Promise<string | null> => {
+  ) => {
     if (!quoter) return null;
 
     try {
@@ -85,8 +85,9 @@ const useUniswap = () => {
       };
 
       return await swapRouter.exactInputSingle(params, { gasLimit: 400000 });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to execute swap:", error);
+      throw new Error(error);
     }
   };
 
