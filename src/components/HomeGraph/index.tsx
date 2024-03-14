@@ -14,7 +14,7 @@ function HomeGraph() {
         return;
       }
 
-      document.querySelector("coingecko-coin-compare-chart-widget").style.opacity='1';
+      (document.querySelector("coingecko-coin-compare-chart-widget") as HTMLElement).style.opacity='1';
 
       const sheet = new CSSStyleSheet();
       host.adoptedStyleSheets = [sheet];
