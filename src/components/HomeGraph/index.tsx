@@ -13,6 +13,9 @@ function HomeGraph() {
         applyCss();
         return;
       }
+
+      document.querySelector("coingecko-coin-compare-chart-widget").style.opacity='1';
+
       const sheet = new CSSStyleSheet();
       host.adoptedStyleSheets = [sheet];
       host.querySelector(
@@ -20,6 +23,7 @@ function HomeGraph() {
       ).style.display = "none";
       host.querySelector("style").innerHTML += `
                 .cg-container{border:0 !important;margin-top: -40px;}
+                [data-loading]{display: none!important;}
                 .highcharts-credits,
                 .highcharts-scrollbar,
                 .highcharts-title, 
@@ -63,11 +67,15 @@ function HomeGraph() {
   }, []);
   return (
     <>
-      <div dangerouslySetInnerHTML={{__html: `<coingecko-coin-compare-chart-widget
+      <div
+        dangerouslySetInnerHTML={{
+          __html: `<coingecko-coin-compare-chart-widget
         coin-ids="graphlinq-protocol"
         currency="usd"
         locale="us"
-      ></coingecko-coin-compare-chart-widget>`}}></div>
+      ></coingecko-coin-compare-chart-widget>`,
+        }}
+      ></div>
     </>
   );
 }

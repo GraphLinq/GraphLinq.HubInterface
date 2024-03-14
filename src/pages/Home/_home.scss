@@ -3,9 +3,13 @@
 
 .home {
   padding-top: 40px;
-  
+
   @include max($mobile-s) {
     padding-top: 16px;
+  }
+
+  coingecko-coin-compare-chart-widget {
+    opacity: 0;
   }
 
   .main-card {
@@ -65,7 +69,7 @@
   &-stats {
     display: flex;
     gap: 24px;
-    
+
     @include max($tablet) {
       flex-wrap: wrap;
       gap: 16px;
@@ -259,7 +263,6 @@
     }
   }
 
-  
   &-more {
     color: var(--c-lavender);
     padding: 0 24px;
@@ -326,7 +329,7 @@
       gap: 16px;
 
       @include max($mobile-s) {
-      gap: 24px;
+        gap: 24px;
         flex-direction: column;
         align-items: center;
       }
@@ -356,7 +359,7 @@
           @include max($mobile-s) {
             transform: rotate(180deg);
           }
-  
+
           path {
             fill: var(--c-lavender);
           }
@@ -391,8 +394,11 @@
       &-actions {
         display: flex;
         gap: 16px;
+
+        .button {
+          white-space: nowrap;
+        }
       }
     }
   }
-
 }
