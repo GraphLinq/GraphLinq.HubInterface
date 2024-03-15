@@ -6,15 +6,16 @@ interface PillProps {
   onClick?: () => void;
   children: React.ReactNode;
   icon?: React.ReactNode;
+  add?: boolean;
 }
 
-const Pill: React.FC<PillProps> = ({ onClick, children, icon }) => {
+const Pill: React.FC<PillProps> = ({ onClick, children, icon, add }) => {
   if (onClick) {
     return (
       <button onClick={onClick} className="pill" data-focus>
         {icon && <span className="pill-icon">{icon}</span>}
         <span className="pill-label">{children}</span>
-        <span className="pill-plus"><Plus/></span>
+        {add && <span className="pill-plus"><Plus/></span>}
       </button>
     );
   }

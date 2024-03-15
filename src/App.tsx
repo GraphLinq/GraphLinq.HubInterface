@@ -16,6 +16,7 @@ import {
 import { WagmiProvider } from "wagmi";
 import { config } from "./config";
 import WrapperPage from "@pages/Wrapper";
+import PoolPage from "@pages/Pool";
 
 function App() {
   const queryClient = new QueryClient();
@@ -45,6 +46,10 @@ function App() {
         {
           path: "/",
           element: <HomePage />,
+        },
+        {
+          path: "/pool",
+          element: <PoolPage />,
         },
         {
           path: "/bridge",

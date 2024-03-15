@@ -4,6 +4,7 @@ import Connect from "@assets/icons/connect-wallet.svg?react";
 import Dashboard from "@assets/icons/dashboard.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
+import Pool from "@assets/icons/pool.svg?react";
 import LogoName from "@assets/icons/logo-name.svg?react";
 import Logo from "@assets/icons/logo.svg?react";
 import Metamask from "@assets/icons/metamask.svg?react";
@@ -53,6 +54,11 @@ function Header() {
       icon: <Dashboard />,
       label: "Dashboard",
       url: "/",
+    },
+    {
+      icon: <Pool />,
+      label: "Pool",
+      url: "/pool",
     },
     // {
     //   icon: <CoinInfo />,
@@ -131,7 +137,7 @@ function Header() {
         {account ? (
           <>
             {GLQBalance && (
-              <Pill icon={<GLQToken />} onClick={() => {}}>
+              <Pill icon={<GLQToken />} onClick={() => {}} add={true}>
                 {formatNumberToFixed(parseFloat(GLQBalance), 6) || "..."}
               </Pill>
             )}

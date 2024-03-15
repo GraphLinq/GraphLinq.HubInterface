@@ -27,6 +27,7 @@
     font-size: 0;
 
     svg {
+      max-width: 20px;
       @include max($mobile-s) {
         height: 18px;
       }
