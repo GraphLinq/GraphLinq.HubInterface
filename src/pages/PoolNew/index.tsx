@@ -2,7 +2,7 @@ import ArrowBack from "@assets/icons/arrow-back.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
-import MultiRangeSlider from "multi-range-slider-react";
+import MultiRangeSlider, { ChangeResult } from "multi-range-slider-react";
 import Button from "@components/Button";
 import "./_poolNew.scss";
 import { GLQCHAIN_CURRENCIES, SITE_NAME } from "@constants/index";
@@ -65,8 +65,8 @@ function PoolNewPage() {
   const [firstCurrencyAmount, setFirstCurrencyAmount] = useState("");
   const [secondCurrencyAmount, setSecondCurrencyAmount] = useState("");
 
-  const [firstCurrencyBalance, setFirstCurrencyBalance] = useState("0");
-  const [secondCurrencyBalance, setSecondCurrencyBalance] = useState("0");
+  const [firstCurrencyBalance] = useState("0");
+  const [secondCurrencyBalance] = useState("0");
 
   const handleCurrencySelectChange = (
     active: number,
@@ -106,11 +106,11 @@ function PoolNewPage() {
   const [rangeMin, setRangeMin] = useState("35000");
   const [rangeMax, setRangeMax] = useState("45000");
 
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   const handleSubmit = () => {};
 
-  const handleInput = (e) => {
+  const handleInput = (e: ChangeResult) => {
     setRangeMin(e.minValue.toString());
     setRangeMax(e.maxValue.toString());
   };
@@ -214,7 +214,7 @@ function PoolNewPage() {
                             stepOnly={true}
                             ruler={false}
                             label={false}
-                            onInput={(e) => {
+                            onInput={(e: ChangeResult) => {
                               handleInput(e);
                             }}
                           />
