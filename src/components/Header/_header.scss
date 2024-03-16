@@ -35,13 +35,13 @@
         }
       }
       &:last-of-type {
-        // @include max($desktop-l) {
-        //   display: none;
-        // }
+        @include max($desktop) {
+          display: none;
+        }
         @include max($desktop-s) {
           display: block;
         }
-        @include max($mobile-s) {
+        @include max($mobile) {
           display: none;
         }
       }
@@ -118,7 +118,7 @@
     gap: 4px;
     height: 80px;
 
-    @include max($desktop) {
+    @include max($desktop-l) {
       position: initial;
       transform: none;
       margin-right: auto;

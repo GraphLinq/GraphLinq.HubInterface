@@ -56,6 +56,11 @@
       border: 1px solid var(--c-martinique);
       border-radius: 24px;
 
+      @include max($mobile-s) {
+        flex-direction: column-reverse;
+        gap: 16px;
+      }
+
       &-left {
         display: flex;
         flex-direction: column;

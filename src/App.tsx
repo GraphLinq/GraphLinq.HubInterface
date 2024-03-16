@@ -4,7 +4,10 @@ import TxProgress from "@components/TxProgress";
 import { AppContextProvider } from "@context/AppContext";
 import BridgePage from "@pages/Bridge";
 import HomePage from "@pages/Home";
+import PoolPage from "@pages/Pool";
+import PoolNewPage from "@pages/PoolNew";
 import SwapPage from "@pages/Swap";
+import WrapperPage from "@pages/Wrapper";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import {
@@ -14,9 +17,8 @@ import {
   ScrollRestoration,
 } from "react-router-dom";
 import { WagmiProvider } from "wagmi";
+
 import { config } from "./config";
-import WrapperPage from "@pages/Wrapper";
-import PoolPage from "@pages/Pool";
 
 function App() {
   const queryClient = new QueryClient();
@@ -50,6 +52,10 @@ function App() {
         {
           path: "/pool",
           element: <PoolPage />,
+        },
+        {
+          path: "/pool/new",
+          element: <PoolNewPage />,
         },
         {
           path: "/bridge",

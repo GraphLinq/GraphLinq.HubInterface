@@ -9,7 +9,7 @@ interface ButtonProps {
   icon?: React.ReactNode;
   disabled?: boolean;
   target?: string;
-  type?: 'secondary';
+  type?: 'secondary' | 'tertiary';
 }
 
 const Button: React.FC<ButtonProps> = ({ link, onClick, children, icon, disabled, target, type }) => {

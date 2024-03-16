@@ -1,29 +1,24 @@
-import Alert from "@components/Alert";
-import Button from "@components/Button";
-import InputNumber from "@components/InputNumber";
+import Canceled from "@assets/icons/canceled.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
-import Canceled from "@assets/icons/canceled.svg?react";
-import Visiblity from "@assets/icons/visibility.svg?react";
+import SearchEmpty from "@assets/icons/search-empty.svg?react";
 import VisiblityOff from "@assets/icons/visibility-off.svg?react";
+import Visiblity from "@assets/icons/visibility.svg?react";
+import Button from "@components/Button";
 import "./_pool.scss";
+import Pill from "@components/Pill";
 import {
   ETH_TOKEN,
-  GLQ_EXPLORER,
   GLQ_TOKEN,
   SITE_NAME,
-  WGLQ_TOKEN,
 } from "@constants/index";
 import { formatNumberToFixed } from "@utils/number";
-import { ethers } from "ethers";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useAccount, useBalance } from "wagmi";
-import SearchEmpty from "@assets/icons/search-empty.svg?react";
+import { useAccount } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
-import Pill from "@components/Pill";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -132,11 +127,12 @@ function PoolPage() {
                             </div>
                           </div>
                           <div className="pool-list">
-                            {filteredPositions.map((pos) => (
+                            {filteredPositions.map((pos, key) => (
                               <>
                                 <div
                                   className="pool-list-item"
                                   data-status={pos.status}
+                                  key={key}
                                 >
                                   <div className="pool-list-item-left">
                                     <div className="pool-list-item-infos">
@@ -162,7 +158,7 @@ function PoolPage() {
                                       <div className="pool-list-item-range-max">
                                         Max:{" "}
                                         <span>
-                                          {formatNumberToFixed(pos.max)}
+                                          {pos.max === Infinity ? "∞" : formatNumberToFixed(pos.max)}
                                         </span>{" "}
                                         {pos.pair.first.name} per{" "}
                                         {pos.pair.second.name}

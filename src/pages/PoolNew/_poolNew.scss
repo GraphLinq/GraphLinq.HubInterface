@@ -1,0 +1,61 @@
+@import "../../assets/css/mixins/styles";
+@import "../../assets/css/mixins/medias";
+
+.poolNew {
+  &-header {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+
+    .button path {
+      fill: none !important;
+    }
+  }
+  &-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+
+    &-title {
+      font-size: 18px;
+    }
+    
+    &-wrapper {
+      display: flex;
+    align-items: center;
+    gap: 8px;
+
+    @include max($mobile-s) {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .select {
+      flex: 1;
+
+      @include max($mobile-s) {
+        width: 100%;
+      }
+    }
+
+    &-switch {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background-color: var(--c-mulled-wine);
+      border-radius: 50%;
+      cursor: pointer;
+
+      @include max($mobile-s) {
+        margin: -8px 0;
+        position: relative;
+        z-index: 1;
+      }
+    }
+    }
+  }
+}
