@@ -119,7 +119,7 @@ function HomePage() {
               </div>
               <div className="home-bubble" data-gradient="2">
                 <div className="home-bubble-value">
-                  {parseFloat(totalSwap).toLocaleString()}
+                  {parseFloat(totalSwap).toLocaleString("en-US")}
                 </div>
                 <div className="home-bubble-label">24h WGLQ swap</div>
               </div>

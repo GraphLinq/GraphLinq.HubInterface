@@ -3,6 +3,7 @@ import "./_inputRadioGroup.scss";
 
 interface Option {
   label: string;
+  sublabel?: string;
   value: string;
 }
 
@@ -10,12 +11,14 @@ interface InputRadioGroupProps {
   options: Option[];
   defaultOption?: string;
   onChange?: (value: string) => void;
+  type?: "large";
 }
 
 const InputRadioGroup: React.FC<InputRadioGroupProps> = ({
   options,
   defaultOption,
   onChange,
+  type,
 }) => {
   const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedValue = e.target.value;
@@ -25,7 +28,7 @@ const InputRadioGroup: React.FC<InputRadioGroupProps> = ({
   };
 
   return (
-    <div className="inputRadioGroup">
+    <div className="inputRadioGroup" data-type={type}>
       {options.map((option, index) => (
         <label key={index} className="inputRadioGroup-label">
           <input
@@ -36,7 +39,10 @@ const InputRadioGroup: React.FC<InputRadioGroupProps> = ({
             checked={option.value === defaultOption}
             className="inputRadioGroup-input"
           />
-          <span>{option.label}</span>
+          <span>
+            {option.label}
+            {option.sublabel && <i>{option.sublabel}</i>}
+          </span>
         </label>
       ))}
     </div>
