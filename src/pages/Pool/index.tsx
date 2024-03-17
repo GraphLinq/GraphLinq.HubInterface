@@ -19,6 +19,7 @@ import { useAccount } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
+import usePool from "../../composables/usePool";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -33,6 +34,9 @@ function PoolPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
+  const { tokenIds } = usePool();
+
+  console.log(tokenIds);
 
   enum PositionStatus {
     IN_RANGE,

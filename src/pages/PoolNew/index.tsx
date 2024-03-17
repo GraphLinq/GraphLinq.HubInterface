@@ -8,13 +8,16 @@ import "./_poolNew.scss";
 import { GLQCHAIN_CURRENCIES, SITE_NAME } from "@constants/index";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useAccount } from "wagmi";
+import { useAccount, useBalance } from "wagmi";
 import Spinner from "@assets/icons/spinner.svg?react";
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import Select from "@components/Select";
 import InputRadioGroup from "@components/InputRadioGroup";
 import InputNumber from "@components/InputNumber";
+import usePool from "../../composables/usePool";
+import { ethers } from "ethers";
+import { useTokenContract } from "../../composables/useContract";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -27,22 +30,22 @@ const feesOptions = [
   {
     label: "0.01%",
     sublabel: "Very stable",
-    value: "0.1",
+    value: "0.01",
   },
   {
     label: "0.05%",
     sublabel: "Stable",
-    value: "0.5",
+    value: "0.05",
   },
   {
     label: "0.30%",
     sublabel: "For most",
-    value: "3",
+    value: "0.3",
   },
   {
     label: "1%",
     sublabel: "Exotic pairs",
-    value: "10",
+    value: "1",
   },
 ];
 
@@ -52,6 +55,7 @@ function PoolNewPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
+  const { deployOrGetPool } = usePool();
 
   const [firstCurrencyOption, setFirstCurrencyOption] = useState(0);
   const [secondCurrencyOption, setSecondCurrencyOption] = useState(1);
@@ -64,11 +68,26 @@ function PoolNewPage() {
   const firstCurrency = firstCurrencyOptions[firstCurrencyOption];
   const secondCurrency = secondCurrencyOptions[secondCurrencyOption];
 
+  const firstCurrencyTokenContract = useTokenContract(firstCurrency.address.glq);
+  const secondCurrencyTokenContract = useTokenContract(secondCurrency.address.glq);
+
   const [firstCurrencyAmount, setFirstCurrencyAmount] = useState("");
   const [secondCurrencyAmount, setSecondCurrencyAmount] = useState("");
 
-  const [firstCurrencyBalance] = useState("0");
-  const [secondCurrencyBalance] = useState("0");
+  const { data: firstCurrencyBalanceRaw } = useBalance({
+    address: account,
+    token: firstCurrency.address.glq,
+  });  
+  const firstCurrencyBalance = firstCurrencyBalanceRaw?.value
+  ? ethers.utils.formatEther(firstCurrencyBalanceRaw?.value)
+  : "0";
+  const { data: secondCurrencyBalanceRaw } = useBalance({
+    address: account,
+    token: secondCurrency.address.glq,
+  });
+  const secondCurrencyBalance = secondCurrencyBalanceRaw?.value
+  ? ethers.utils.formatEther(secondCurrencyBalanceRaw?.value)
+  : "0";
 
   const handleCurrencySelectChange = (
     active: number,
@@ -110,11 +129,25 @@ function PoolNewPage() {
 
   const [loading] = useState(false);
 
-  const handleSubmit = () => {};
-
   const handleInput = (e: ChangeResult) => {
     setRangeMin(e.minValue.toString());
     setRangeMax(e.maxValue.toString());
+  };
+
+
+
+  const handleSubmit = async () => {
+    console.log("submit start");
+    
+
+    await deployOrGetPool(
+      firstCurrency.address.glq!,
+      secondCurrency.address.glq!,
+      firstCurrencyAmount,
+      secondCurrencyAmount,
+      fees
+    );
+    console.log("submit end");
   };
 
   return (
