@@ -26,14 +26,14 @@ function useContract(
       const contract = getContract(
         address,
         ABI,
-        provider 
+        provider
       );
       return contract;
     } catch (error) {
       console.error("Failed to get contract", error);
       return null;
     }
-  }, [address, ABI, provider, withSignerIfPossible, account]);
+  }, [address, ABI, withSignerIfPossible, account]);
 }
 
 // Tokens
