@@ -5,6 +5,7 @@ import { useAccount } from "wagmi";
 
 import { useEthersSigner } from "./useEthersProvider";
 import useUniswap from "./useUniswap";
+import useRpcProvider from "./useRpcProvider";
 
 interface CoinbaseExchangeRates {
   loading: boolean;
@@ -22,7 +23,9 @@ const useExchangeRates = () => {
     glq: null,
   });
   const { quoteSwap } = useUniswap();
-  const provider = useEthersSigner();
+  const rpcProvider = useRpcProvider();
+  const injectedProvider = useEthersSigner();
+  const provider = injectedProvider ?? rpcProvider;
 
   useEffect(() => {
     const fetchExchangeRates = async () => {

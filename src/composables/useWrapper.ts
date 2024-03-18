@@ -11,12 +11,13 @@ import useRpcProvider from "./useRpcProvider";
 const useWrapper = () => {
   const { address: account } = useAccount();
   const rpcProvider = useRpcProvider();
-  const provider = useEthersSigner();
+  const injectedProvider = useEthersSigner();
+  const provider = injectedProvider ?? rpcProvider;
 
   const wrapper = new Contract(
     GLQCHAIN_BRIDGE_OUT_WGLQ,
     WRAPPER_ABI,
-    provider ? provider : rpcProvider
+    provider
   );
 
   const executeWrap = async (amountIn: number) => {

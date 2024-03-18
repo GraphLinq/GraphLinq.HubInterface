@@ -12,18 +12,19 @@ import useRpcProvider from "./useRpcProvider";
 
 const useUniswap = () => {
   const rpcProvider = useRpcProvider();
-  const provider = useEthersSigner();
+  const injectedProvider = useEthersSigner();
+  const provider = injectedProvider ?? rpcProvider;
 
   const swapRouter: Contract = new Contract(
     GLQCHAIN_SWAP_ROUTER_ADDRESS,
     SWAP_ROUTER_ABI,
-    provider ? provider : rpcProvider
+    provider
   );
 
   const quoter: Contract = new Contract(
     GLQCHAIN_SWAP_QUOTER_ADDRESS,
     QuoterV2ABI,
-    provider ? provider : rpcProvider
+    provider
   );
 
   const feeInPercent = 1;

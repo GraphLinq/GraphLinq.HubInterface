@@ -8,16 +8,19 @@ import {
 interface AppContextProps {
   isWaitingTxData: boolean
   setWaitingTxData: React.Dispatch<React.SetStateAction<boolean>>
+  isTxInProgress: boolean
+  setTxInProgress: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined)
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
-  const [isWaitingTxData, setWaitingTxData] = useState<AppContextProps["isWaitingTxData"]>(false)
+  const [isWaitingTxData, setWaitingTxData] = useState<AppContextProps["isWaitingTxData"]>(false);
+  const [isTxInProgress, setTxInProgress] = useState<AppContextProps["isTxInProgress"]>(false);
 
   return (
     <AppContext.Provider
-      value={{ isWaitingTxData, setWaitingTxData }}
+      value={{ isWaitingTxData, setWaitingTxData, isTxInProgress, setTxInProgress }}
     >
       {children}
     </AppContext.Provider>

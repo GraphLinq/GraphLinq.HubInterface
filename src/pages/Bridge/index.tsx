@@ -16,7 +16,6 @@ import {
   MAINNET_EXPLORER,
 } from "@constants/index";
 import { useAppContext } from "@context/AppContext";
-import { Contract } from "@ethersproject/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
 import { formatNumberToFixed } from "@utils/number";
@@ -27,9 +26,7 @@ import { useAccount, useBalance, useChainId } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import {
-  useEVMBridgeContract,
-  useEVMBridgeERC20MinterContract,
-  useEVMBridgeNativeContract,
+  useBridgeContract,
   useTokenContract,
 } from "../../composables/useContract";
 import useExchangeRates from "../../composables/useExchangeRates";
@@ -98,31 +95,10 @@ function BridgePage() {
   const activeTokenContract = useTokenContract(
     activeCurrency.address[isMainnet ? "mainnet" : "glq"]
   );
-  const activeEVMBridgeContract = useEVMBridgeContract(
+  const bridgeContract = useBridgeContract(
     activeCurrency.bridge &&
       activeCurrency.bridge[isMainnet ? "mainnet" : "glq"]
   );
-  const activeEVMBridgeNativeContract = useEVMBridgeNativeContract(
-    activeCurrency.bridge &&
-      activeCurrency.bridge[isMainnet ? "mainnet" : "glq"]
-  );
-  const activeEVMBridgeERC20MinterContract = useEVMBridgeERC20MinterContract(
-    activeCurrency.bridge &&
-      activeCurrency.bridge[isMainnet ? "mainnet" : "glq"]
-  );
-
-  let bridgeContract: Contract | null = null;
-  if (chainId) {
-    if (isMainnet) {
-      if (activeCurrency.address.mainnet === undefined) {
-        bridgeContract = activeEVMBridgeNativeContract;
-      } else {
-        bridgeContract = activeEVMBridgeContract;
-      }
-    } else {
-      bridgeContract = activeEVMBridgeERC20MinterContract;
-    }
-  }
   useEffect(() => {
     const fetchBridgeCost = async () => {
       try {
@@ -224,22 +200,21 @@ function BridgePage() {
       const resultTx = await bridgeContract.initTransfer(
         ethers.utils.parseEther(amount.toString()).toString(),
         activeCurrency.chainDestination[isMainnet ? "mainnet" : "glq"],
-        account,
         {
-          value: value,
+          value: value
         }
       );
 
       setPending("Waiting for confirmations...");
-
+        
       const txReceipt = await resultTx.wait();
-      if (txReceipt.status === 1) {
-        const transfers = await bridgeContract.getLastsTransfers(1);
+      // if (txReceipt.status === 1) {
+      //   const transfers = await bridgeContract.getLastsTransfers(1);
 
-        if (transfers[0] && transfers[0][0]) {
-          setTracking(transfers[0][0]);
-        }
-      }
+      //   if (transfers[0] && transfers[0][0]) {
+      //     setTracking(transfers[0][0]);
+      //   }
+      // }
 
       setPending(
         `It will take approximatively 10 minutes to execute the bridge transaction and sending ${amount.toString()} ${

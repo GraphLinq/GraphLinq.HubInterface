@@ -3,8 +3,6 @@ import { useAccount } from "wagmi";
 
 import ERC20 from "../contracts/ERC20.json";
 import EVMBridge from "../contracts/EVMBridge.json";
-import EVMBridgeERC20Minter from "../contracts/EVMBridgeERC20Minter.json";
-import EVMBridgeNative from "../contracts/EVMBridgeNative.json";
 import { getContract } from "../utils/contracts";
 
 import { useEthersSigner } from "./useEthersProvider";
@@ -17,8 +15,9 @@ function useContract(
   withSignerIfPossible = true
 ) {
   const { address: account } = useAccount();
-  const provider = useEthersSigner();
   const rpcProvider = useRpcProvider();
+  const injectedProvider = useEthersSigner();
+  const provider = injectedProvider ?? rpcProvider;
 
   return useMemo(() => {
     if (!address || !ABI || !provider) return null;
@@ -27,7 +26,7 @@ function useContract(
       const contract = getContract(
         address,
         ABI,
-        account ? provider : rpcProvider
+        provider 
       );
       return contract;
     } catch (error) {
@@ -45,22 +44,7 @@ export function useTokenContract(
   return useContract(tokenAddress, ERC20, withSignerIfPossible);
 }
 
-// Bridge GLQChain tokens
-export function useEVMBridgeERC20MinterContract(
-  tokenAddress: string | undefined,
-  withSignerIfPossible = true
-) {
-  return useContract(tokenAddress, EVMBridgeERC20Minter, withSignerIfPossible);
-}
-// Bridge Mainnet native token
-export function useEVMBridgeNativeContract(
-  tokenAddress: string | undefined,
-  withSignerIfPossible = true
-) {
-  return useContract(tokenAddress, EVMBridgeNative, withSignerIfPossible);
-}
-// Bridge Mainnet other tokens
-export function useEVMBridgeContract(
+export function useBridgeContract(
   tokenAddress: string | undefined,
   withSignerIfPossible = true
 ) {

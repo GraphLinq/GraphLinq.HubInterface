@@ -1,3 +1,5 @@
+import { isTestnet } from "@constants/index";
+
 export enum Chain {
   MAINNET,
   GQL_CHAIN
@@ -36,7 +38,7 @@ function getChainName(chainId: number): string {
   return chain ? chain.name : "Unknown chain";
 }
 
-const MAINNET_CHAIN_ID = 11155111;
+const MAINNET_CHAIN_ID = isTestnet ? 11155111 : 1;
 const GLQ_CHAIN_ID = 614;
 
 export { getChainName, MAINNET_CHAIN_ID,  GLQ_CHAIN_ID };

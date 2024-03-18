@@ -3,10 +3,13 @@ import { Contract } from "ethers";
 import { ethers } from "ethers";
 import { useAccount, useChainId } from "wagmi";
 import { useEthersSigner } from "./useEthersProvider";
+import useRpcProvider from "./useRpcProvider";
 
 function useTokenBalance(tokenAddress: string) {
   const { address: account} = useAccount();
-  const provider = useEthersSigner();
+  const rpcProvider = useRpcProvider();
+  const injectedProvider = useEthersSigner();
+  const provider = injectedProvider ?? rpcProvider;
   const chainId = useChainId();
   const [balance, setBalance] = useState<string | null>(null);
   const [loadingBalance, setLoadingBalance] = useState(false);

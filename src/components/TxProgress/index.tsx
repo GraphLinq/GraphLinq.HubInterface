@@ -43,8 +43,8 @@ const TxProgress = () => {
     } else {
       info = qTrackingInformation.data.find(
         (transfer) =>
-          transfer.executionState === ExecutionState.PENDING ||
-          transfer.executionState === ExecutionState.IN_EXECUTION
+          transfer.from === account && (transfer.executionState === ExecutionState.PENDING ||
+          transfer.executionState === ExecutionState.IN_EXECUTION)
       );
     }
 

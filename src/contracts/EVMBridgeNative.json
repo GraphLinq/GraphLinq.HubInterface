@@ -7,53 +7,62 @@
           "type": "string"
         },
         {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
           "internalType": "uint256",
           "name": "_feesInDollar",
           "type": "uint256"
         },
         {
-          "internalType": "address",
-          "name": "_dex_in",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_dex_out",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_dex_pool",
-          "type": "address"
+          "internalType": "uint256",
+          "name": "_minimumTransferQuantity",
+          "type": "uint256"
         }
       ],
       "stateMutability": "nonpayable",
       "type": "constructor"
     },
     {
+      "anonymous": false,
       "inputs": [
         {
-          "internalType": "string[]",
-          "name": "",
-          "type": "string[]"
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
         },
         {
-          "internalType": "address[]",
-          "name": "transfersAddresses",
-          "type": "address[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "amounts",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "bytes32[]",
-          "name": "_transfersHashs",
-          "type": "bytes32[]"
+          "indexed": false,
+          "internalType": "string",
+          "name": "toChain",
+          "type": "string"
         }
       ],
-      "name": "addTransfersFrom",
+      "name": "BridgeTransfer",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "bn",
+          "type": "uint256"
+        }
+      ],
+      "name": "addTransferFrom",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -125,7 +134,7 @@
     },
     {
       "inputs": [],
-      "name": "collectTokenFees",
+      "name": "claimFees",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -194,6 +203,19 @@
     },
     {
       "inputs": [],
+      "name": "getFees",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "getFeesInDollar",
       "outputs": [
         {
@@ -213,82 +235,6 @@
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "size",
-          "type": "uint256"
-        }
-      ],
-      "name": "getLastsTransfers",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "bytes32",
-              "name": "hash",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "address",
-              "name": "from",
-              "type": "address"
-            },
-            {
-              "internalType": "address",
-              "name": "coin",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "quantity",
-              "type": "uint256"
-            },
-            {
-              "internalType": "string",
-              "name": "fromChain",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "toChain",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "feesInToken",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "feesInETH",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "blockTimestamp",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "blockNumber",
-              "type": "uint256"
-            },
-            {
-              "internalType": "string",
-              "name": "data",
-              "type": "string"
-            }
-          ],
-          "internalType": "struct Transfer[]",
-          "name": "",
-          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
@@ -326,176 +272,6 @@
     {
       "inputs": [
         {
-          "internalType": "bytes32",
-          "name": "transferHash",
-          "type": "bytes32"
-        }
-      ],
-      "name": "getTransfer",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "bytes32",
-              "name": "hash",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "address",
-              "name": "from",
-              "type": "address"
-            },
-            {
-              "internalType": "address",
-              "name": "coin",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "quantity",
-              "type": "uint256"
-            },
-            {
-              "internalType": "string",
-              "name": "fromChain",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "toChain",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "feesInToken",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "feesInETH",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "blockTimestamp",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "blockNumber",
-              "type": "uint256"
-            },
-            {
-              "internalType": "string",
-              "name": "data",
-              "type": "string"
-            }
-          ],
-          "internalType": "struct Transfer",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getTransferLength",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "int256",
-          "name": "page",
-          "type": "int256"
-        },
-        {
-          "internalType": "int256",
-          "name": "pageSize",
-          "type": "int256"
-        }
-      ],
-      "name": "getTransfers",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "bytes32",
-              "name": "hash",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "address",
-              "name": "from",
-              "type": "address"
-            },
-            {
-              "internalType": "address",
-              "name": "coin",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "quantity",
-              "type": "uint256"
-            },
-            {
-              "internalType": "string",
-              "name": "fromChain",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "toChain",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "feesInToken",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "feesInETH",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "blockTimestamp",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "blockNumber",
-              "type": "uint256"
-            },
-            {
-              "internalType": "string",
-              "name": "data",
-              "type": "string"
-            }
-          ],
-          "internalType": "struct Transfer[]",
-          "name": "",
-          "type": "tuple[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "uint256",
           "name": "quantity",
           "type": "uint256"
@@ -503,11 +279,6 @@
         {
           "internalType": "string",
           "name": "toChain",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "data",
           "type": "string"
         }
       ],
@@ -519,6 +290,30 @@
     {
       "inputs": [],
       "name": "isPaused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "transferBn",
+          "type": "uint256"
+        }
+      ],
+      "name": "isTransferProcessed",
       "outputs": [
         {
           "internalType": "bool",
@@ -646,25 +441,6 @@
     {
       "inputs": [
         {
-          "internalType": "bytes32",
-          "name": "transferHash",
-          "type": "bytes32"
-        }
-      ],
-      "name": "transferExists",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "uint256",
           "name": "_feesInDollar",
           "type": "uint256"
@@ -674,36 +450,5 @@
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "coin",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "quantity",
-          "type": "uint256"
-        }
-      ],
-      "name": "withdraw",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "quantity",
-          "type": "uint256"
-        }
-      ],
-      "name": "withdrawETH",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
     }
-]
+  ]
