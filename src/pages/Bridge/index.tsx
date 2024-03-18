@@ -207,7 +207,7 @@ function BridgePage() {
 
       setPending("Waiting for confirmations...");
         
-      const txReceipt = await resultTx.wait();
+      await resultTx.wait();
       // if (txReceipt.status === 1) {
       //   const transfers = await bridgeContract.getLastsTransfers(1);
 
