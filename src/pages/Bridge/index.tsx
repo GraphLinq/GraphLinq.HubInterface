@@ -42,7 +42,7 @@ const tokenIcons = {
   WETH: <ETHToken />,
 };
 
-let bridgeCost: number | null = null;
+let bridgeCost = ethers.BigNumber.from(0);
 
 function BridgePage() {
   const { address: account } = useAccount();
@@ -104,8 +104,8 @@ function BridgePage() {
     const fetchBridgeCost = async () => {
       try {
         if (bridgeContract) {
-          const value: string = await bridgeContract.getFeesInETH();
-          bridgeCost = parseFloat(ethers.utils.formatEther(value));
+          const value: ethers.BigNumber = await bridgeContract.getFeesInETH();
+          bridgeCost = value;
         }
       } catch (error) {
         console.error("Error fetching bridge fee:", error);
@@ -150,28 +150,27 @@ function BridgePage() {
     setLoading(true);
 
     try {
-      const bridgeCost = await bridgeContract.getFeesInETH();
+      bridgeCost = await bridgeContract.getFeesInETH();
 
-      let allowance = "0";
+      let allowance = ethers.BigNumber.from(0);
       if ((!isMainnet || isMainnet && activeCurrency.address.mainnet !== undefined) && activeTokenContract) {
-        const requiredAmount = parseFloat(amount) + parseFloat(bridgeCost);
+        const amountInWei = ethers.utils.parseEther(amount.toString());
+        const requiredAmount = amountInWei.add(bridgeCost);
+
         allowance = await activeTokenContract.allowance(
           account,
           bridgeContract.address
         );
 
-        const allowanceDecimal = parseFloat(
-          ethers.utils.formatEther(allowance.toString())
-        );
-
-        if (allowanceDecimal < requiredAmount) {
+        if (allowance.lt(requiredAmount)) {
           setPending(
             "Allowance pending, please allow the use of your token balance for the contract..."
           );
           const approveTx = await activeTokenContract.approve(
             bridgeContract.address,
-            ethers.utils.parseEther(requiredAmount.toString())
+            requiredAmount
           );
+
           setPending("Waiting for confirmations...");
           await approveTx.wait();
           setPending(
@@ -190,14 +189,16 @@ function BridgePage() {
         return;
       }
 
-      // setPending(
-      //   "Pending, check your wallet extension to execute the chain transaction..."
-      // );
+      const bridgeCostInWei = ethers.utils.parseEther(bridgeCost.toString());
 
-      const value =
-      (!isMainnet || isMainnet && activeCurrency.address.mainnet !== undefined)
-          ? parseFloat(bridgeCost)
-          : ethers.utils.parseEther(amount + bridgeCost).toString();
+      let value: string;
+      if (!isMainnet || (isMainnet && activeCurrency.address.mainnet !== undefined)) {
+        value = bridgeCostInWei.toString();
+      } else {
+        const amountInWei = ethers.utils.parseEther(amount.toString());
+        const totalAmountInWei = amountInWei.add(bridgeCostInWei);
+        value = totalAmountInWei.toString();
+      }
 
       const resultTx = await bridgeContract.initTransfer(
         ethers.utils.parseEther(amount.toString()).toString(),
@@ -210,13 +211,6 @@ function BridgePage() {
       setPending("Waiting for confirmations...");
         
       await resultTx.wait();
-      // if (txReceipt.status === 1) {
-      //   const transfers = await bridgeContract.getLastsTransfers(1);
-
-      //   if (transfers[0] && transfers[0][0]) {
-      //     setTracking(transfers[0][0]);
-      //   }
-      // }
 
       setPending(
         `It will take approximatively 10 minutes to execute the bridge transaction and sending ${amount.toString()} ${
@@ -408,7 +402,9 @@ function BridgePage() {
                   </div>
                   <div className="bridge-amount-cost">
                     Bridge fee :{" "}
-                    {bridgeCost ? calculatePrice(bridgeCost, "eth") : "$0.0000"}
+                    {bridgeCost ? calculatePrice(parseFloat(
+                                ethers.utils.formatEther(bridgeCost)
+                              ), "eth") : "$0.0000"}
                   </div>
                   <div className="bridge-amount-submit">
                     <Button onClick={handleSend} icon={loading && <Spinner />}>

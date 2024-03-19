@@ -7,7 +7,7 @@ export const getErrorMessage = (error: any): string => {
         break;
       default:
         console.log('Error code not found : ', error);
-        errorMessage = "An error occurred. Please try again later.";
+        errorMessage = `An error occurred : ${error.code}.`;
         break;
     }
   
