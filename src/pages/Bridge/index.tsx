@@ -151,7 +151,7 @@ function BridgePage() {
       const bridgeCost = await bridgeContract.getFeesInETH();
 
       let allowance = "0";
-      if (activeCurrency.address.mainnet !== undefined && activeTokenContract) {
+      if ((!isMainnet || isMainnet && activeCurrency.address.mainnet !== undefined) && activeTokenContract) {
         const requiredAmount = parseFloat(amount) + parseFloat(bridgeCost);
         allowance = await activeTokenContract.allowance(
           account,
@@ -193,9 +193,9 @@ function BridgePage() {
       // );
 
       const value =
-        activeCurrency.address.mainnet === undefined
-          ? ethers.utils.parseEther(amount + bridgeCost).toString()
-          : parseFloat(bridgeCost);
+      (!isMainnet || isMainnet && activeCurrency.address.mainnet !== undefined)
+          ? parseFloat(bridgeCost)
+          : ethers.utils.parseEther(amount + bridgeCost).toString();
 
       const resultTx = await bridgeContract.initTransfer(
         ethers.utils.parseEther(amount.toString()).toString(),
