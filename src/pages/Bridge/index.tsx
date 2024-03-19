@@ -193,14 +193,12 @@ function BridgePage() {
         return;
       }
 
-      const bridgeCostInWei = ethers.utils.parseEther(bridgeCost.toString());
-
       let value: string;
       if (!isMainnet || (isMainnet && activeCurrency.address.mainnet !== undefined)) {
-        value = bridgeCostInWei.toString();
+        value = bridgeCost.toString();
       } else {
         const amountInWei = ethers.utils.parseEther(amount.toString());
-        const totalAmountInWei = amountInWei.add(bridgeCostInWei);
+        const totalAmountInWei = amountInWei.add(bridgeCost);
         value = totalAmountInWei.toString();
       }
 
