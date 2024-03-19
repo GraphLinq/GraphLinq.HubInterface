@@ -1,25 +1,15 @@
-import Button from "@components/Button";
 import "./_home.scss";
-import { SITE_NAME } from "@constants/index";
-import { Helmet } from "react-helmet-async";
 import Arrow from "@assets/icons/arrow.svg?react";
 import Bridge from "@assets/icons/bridge.svg?react";
 import Swap from "@assets/icons/swap-coin.svg?react";
-import GLQToken from "@assets/icons/glq-icon.svg?react";
-import ETHToken from "@assets/icons/eth-icon.svg?react";
-import Network from "@assets/icons/network.svg?react";
-
-import useAddTokens from "../../composables/useAddTokens";
-import useChains from "../../composables/useChains";
-import useNetwork from "../../composables/useNetwork";
 import HomeGraph from "@components/HomeGraph";
-import { useState } from "react";
+import { SITE_NAME } from "@constants/index";
 import { formatNumberToDollars } from "@utils/number";
+import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 
 function HomePage() {
-  const { addWETHToken, addWGLQToken } = useAddTokens();
-  const { switchToGraphLinqMainnet } = useNetwork();
-  const { isGLQChain } = useChains();
+
 
   const [glqPrice] = useState("208.4546466");
   const [glqPreviousPrice] = useState("203.79893566");
@@ -204,55 +194,7 @@ function HomePage() {
           </div>
         </div>
 
-        <div className="home-more">
-          <a href="https://graphlinq.io/" target="_blank">
-            Want to know more about GraphLinq ?
-          </a>
-        </div>
-        <div className="home-add">
-          <p>Here you can add GraphLinq chains and tokens.</p>
-          <div className="home-add-row">
-            <div className="home-add-col">
-              <div className="home-add-col-title">
-                Tokens
-                <Arrow />
-              </div>
-              <div className="home-add-col-actions">
-                <Button
-                  onClick={addWGLQToken}
-                  icon={<GLQToken />}
-                  type="secondary"
-                >
-                  {isGLQChain ? "WGLQ" : "GLQ"}
-                </Button>
-                {isGLQChain && (
-                  <Button
-                    onClick={addWETHToken}
-                    icon={<ETHToken />}
-                    type="secondary"
-                  >
-                    WETH
-                  </Button>
-                )}
-              </div>
-            </div>
-            <div className="home-add-col">
-              <div className="home-add-col-title">
-                Network
-                <Arrow />
-              </div>
-              <div className="home-add-col-actions">
-                <Button
-                  onClick={switchToGraphLinqMainnet}
-                  icon={<Network />}
-                  type="secondary"
-                >
-                  GLQ Chain
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </>
   );

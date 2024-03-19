@@ -1,1 +1,148 @@
-.footer {}
+@import "../../assets/css/mixins/styles";
+@import "../../assets/css/mixins/medias";
+
+.footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    margin-top: 40px;
+  &-more {
+    color: var(--c-lavender);
+    padding: 0 24px;
+
+    a {
+      display: inline-block;
+      background-image: -webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        from(currentColor),
+        to(currentColor)
+      );
+      background-image: linear-gradient(currentColor, currentColor);
+      background-repeat: no-repeat;
+      background-position: 0 100%;
+      background-size: 100% 1px;
+      transition: background-size 0.2s ease-out;
+
+      &:hover {
+        animation: underline 0.4s ease-in-out;
+      }
+
+      @keyframes underline {
+        0% {
+          background-position: 100% 100%;
+          background-size: 100% 1px;
+        }
+
+        50% {
+          background-position: 100% 100%;
+          background-size: 0 1px;
+        }
+        51% {
+          background-position: 0 100%;
+          background-size: 0 1px;
+        }
+        100% {
+          background-position: 0 100%;
+          background-size: 100% 1px;
+        }
+      }
+    }
+  }
+
+  &-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 0 24px;
+  }
+
+  &-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 0 24px 24px;
+    text-align: center;
+
+    &-row {
+      display: flex;
+      width: 100%;
+      gap: 16px;
+
+      @include max($mobile-s) {
+        gap: 24px;
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+    &-col {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 50%;
+
+      @include max($mobile-s) {
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      &-title {
+        display: flex;
+        gap: 4px;
+        color: var(--c-lavender);
+
+        svg {
+          flex-shrink: 0;
+          transform: rotate(90deg);
+
+          @include max($mobile-s) {
+            transform: rotate(180deg);
+          }
+
+          path {
+            fill: var(--c-lavender);
+          }
+        }
+      }
+
+      & + & {
+        flex-direction: row-reverse;
+
+        @include max($mobile-s) {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .footer-add-col-title {
+          flex-direction: row-reverse;
+
+          @include max($mobile-s) {
+            flex-direction: row;
+          }
+
+          svg {
+            transform: rotate(-90deg);
+
+            @include max($mobile-s) {
+              transform: rotate(180deg);
+            }
+          }
+        }
+      }
+
+      &-actions {
+        display: flex;
+        gap: 16px;
+
+        .button {
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+}
