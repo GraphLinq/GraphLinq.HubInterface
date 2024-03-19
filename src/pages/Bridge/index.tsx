@@ -229,7 +229,7 @@ function BridgePage() {
       setLoading(false);
     } catch (error: any) {
       resetFeedback();
-      setError(getErrorMessage(error.code));
+      setError(getErrorMessage(error));
       setFormDisabled(false);
       setLoading(false);
     }

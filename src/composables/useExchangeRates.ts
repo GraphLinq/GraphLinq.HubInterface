@@ -6,6 +6,7 @@ import { useAccount } from "wagmi";
 import { useEthersSigner } from "./useEthersProvider";
 import useUniswap from "./useUniswap";
 import useRpcProvider from "./useRpcProvider";
+import { ethers } from "ethers";
 
 interface CoinbaseExchangeRates {
   loading: boolean;
@@ -43,7 +44,7 @@ const useExchangeRates = () => {
         );
 
         if (glqPerETH) {
-          const glqRate = ethRate / (parseFloat(glqPerETH) * 100);
+          const glqRate = ethRate / (parseFloat(ethers.utils.formatEther(glqPerETH)) * 100);
 
           setExchangeRates({
             loading: false,

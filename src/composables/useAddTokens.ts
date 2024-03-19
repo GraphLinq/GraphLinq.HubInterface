@@ -43,7 +43,7 @@ function useAddTokens() {
         throw new Error("Failed to add token.");
       }
     } catch (error: any) {
-      setError(getErrorMessage(error.code));
+      setError(getErrorMessage(error));
       setLoading(false);
     }
   };

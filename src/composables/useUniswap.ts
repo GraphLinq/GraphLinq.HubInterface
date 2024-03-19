@@ -48,7 +48,7 @@ const useUniswap = () => {
       };
       const amountOut =
         await quoter.callStatic.quoteExactInputSingle(parameters);
-      return ethers.utils.formatEther(amountOut[0]);
+      return amountOut[0] as ethers.BigNumber;
     } catch (error) {
       console.error("Failed to quote swap:", error);
       return null;

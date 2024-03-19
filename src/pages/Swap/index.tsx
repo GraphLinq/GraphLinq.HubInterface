@@ -15,7 +15,7 @@ import {
   GLQCHAIN_SWAP_ROUTER_ADDRESS,
   GLQ_EXPLORER,
 } from "@constants/index";
-import { formatNumberToFixed } from "@utils/number";
+import { formatBigNumberToFixed, formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
@@ -70,16 +70,18 @@ function SwapPage() {
   const [summaryOpen, setSummaryOpen] = useState(true);
   const [formDisabled, setFormDisabled] = useState(false);
 
-  const [baseQuoteAmount, setBaseQuoteAmount] = useState<string | null>("0");
-  const [quoteAmount, setQuoteAmount] = useState<string | null>("0");
+  const [baseQuoteAmount, setBaseQuoteAmount] = useState(
+    ethers.BigNumber.from(0)
+  );
+  const [quoteAmount, setQuoteAmount] = useState(ethers.BigNumber.from(0));
   const [loadingQuote, setLoadingQuote] = useState(false);
 
   const [maxSlippage, setMaxSlippage] = useState(slippageOptions[0].value);
 
   const [lastSwapAmount, setLastSwapAmount] = useState({
-    own: '',
-    trade: ''
-  })
+    own: "",
+    trade: "",
+  });
 
   let quoteQueue: Promise<void | unknown> = Promise.resolve();
 
@@ -95,18 +97,25 @@ function SwapPage() {
           tradeCurrency.address.glq!,
           1
         );
-        setBaseQuoteAmount(base);
 
-        let result: string | null = "0";
+        if (base) {
+          setBaseQuoteAmount(base);
+        }
+
+        let result = ethers.BigNumber.from(0);
         if (
           !isNaN(parseFloat(ownCurrencyAmount)) &&
           parseFloat(ownCurrencyAmount) !== 0
         ) {
-          result = await quoteSwap(
+          const tempResult = await quoteSwap(
             ownCurrency.address.glq!,
             tradeCurrency.address.glq!,
             parseFloat(ownCurrencyAmount)
           );
+
+          if (tempResult) {
+            result = tempResult;
+          }
         }
 
         setQuoteAmount(result);
@@ -172,7 +181,7 @@ function SwapPage() {
     }
 
     setOwnCurrencyAmount("");
-    setQuoteAmount("0");
+    setQuoteAmount(ethers.BigNumber.from(0));
   };
 
   const handleSwapCurrencies = () => {
@@ -181,7 +190,7 @@ function SwapPage() {
     setTradeCurrencyOption(newTradeCurrencyOption);
 
     setOwnCurrencyAmount("");
-    setQuoteAmount("0");
+    setQuoteAmount(ethers.BigNumber.from(0));
   };
 
   const handleSend = async () => {
@@ -190,9 +199,9 @@ function SwapPage() {
 
     resetFeedback();
 
-    if (parseFloat(ownCurrencyAmount) <= 0) {
+    if (isNaN(parseFloat(ownCurrencyAmount)) || parseFloat(ownCurrencyAmount) <= 0) {
       setError(
-        `Invalid amount to swap : ${ownCurrencyAmount} ${ownCurrency.name}`
+        `Invalid amount to swap : ${ownCurrencyAmount !== '' ? ownCurrencyAmount : '0'} ${ownCurrency.name}`
       );
       return;
     }
@@ -247,7 +256,7 @@ function SwapPage() {
         tradeCurrency.address.glq!,
         parseFloat(ownCurrencyAmount),
         account,
-        quoteAmount,
+        ethers.utils.formatEther(quoteAmount),
         maxSlippage
       );
 
@@ -261,16 +270,21 @@ function SwapPage() {
       fetchBalance();
 
       setLastSwapAmount({
-        own: `${formatNumberToFixed(parseFloat(ownCurrencyAmount), 6)} ${ownCurrency.name}`,
-        trade: `${formatNumberToFixed(quoteAmount ? parseFloat(quoteAmount) : 0, 6)} ${tradeCurrency.name}`,
-      })
+        own: `${formatNumberToFixed(parseFloat(ownCurrencyAmount), 6)} ${
+          ownCurrency.name
+        }`,
+        trade: `${formatBigNumberToFixed(quoteAmount, 6)} ${
+          tradeCurrency.name
+        }`,
+      });
 
-      setOwnCurrencyAmount('');
+      setOwnCurrencyAmount("");
     } catch (error: any) {
       resetFeedback();
-      setError(getErrorMessage(error.code));
+      setError(getErrorMessage(error));
       setLoading(false);
       setFormDisabled(false);
+      setOwnCurrencyAmount("");
     }
   };
 
@@ -377,16 +391,13 @@ function SwapPage() {
                           <div className="swap-choice-input-wrapper">
                             <input
                               type="number"
-                              value={formatNumberToFixed(
-                                quoteAmount ? parseFloat(quoteAmount) : 0,
-                                6
-                              )}
+                              value={formatBigNumberToFixed(quoteAmount, 6)}
                               readOnly
                             />
                           </div>
                           <div className="swap-choice-input-price">
                             {calculatePrice(
-                              quoteAmount ? parseFloat(quoteAmount) : 0,
+                              parseFloat(ethers.utils.formatEther(quoteAmount)),
                               tradeCurrency.exchangeRate
                             )}
                           </div>
@@ -416,17 +427,14 @@ function SwapPage() {
                           </span>
                           <span className="color">=</span>
                           <span>
-                            {baseQuoteAmount
-                              ? formatNumberToFixed(
-                                  parseFloat(baseQuoteAmount),
-                                  6
-                                )
-                              : 0}{" "}
+                            {formatBigNumberToFixed(baseQuoteAmount, 6)}{" "}
                             {tradeCurrency.name}
                           </span>
                           <span className="color">
                             {calculatePrice(
-                              baseQuoteAmount ? parseFloat(baseQuoteAmount) : 0,
+                              parseFloat(
+                                ethers.utils.formatEther(baseQuoteAmount)
+                              ),
                               tradeCurrency.exchangeRate
                             )}
                           </span>
@@ -486,11 +494,8 @@ function SwapPage() {
           {success && (
             <Alert type="success">
               <p>
-                Your swap of{" "}
-                <b>{lastSwapAmount.own}</b>{" "}
-                for{" "}
-                <b>{lastSwapAmount.trade}</b>{" "}
-                is now successfully completed.
+                Your swap of <b>{lastSwapAmount.own}</b> for{" "}
+                <b>{lastSwapAmount.trade}</b> is now successfully completed.
               </p>
               <p className="small" style={{ marginTop: 8 }}>
                 <a href={trackingExplorer} target="_blank">
