@@ -29,6 +29,7 @@ const useExchangeRates = () => {
 
   useEffect(() => {
     const fetchExchangeRates = async () => {
+      console.log('fetch');
       try {
         const ethResponse = await fetch(
           "https://api.coinbase.com/v2/exchange-rates?currency=ETH"
@@ -63,6 +64,12 @@ const useExchangeRates = () => {
     };
 
     fetchExchangeRates();
+
+    const intervalId = setInterval(fetchExchangeRates, 5000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [account, provider]);
 
   const calculatePrice = (amount: number, currency: "eth" | "glq") => {
