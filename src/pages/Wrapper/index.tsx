@@ -18,6 +18,7 @@ import Spinner from "@assets/icons/spinner.svg?react";
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import useWrapper from "../../composables/useWrapper";
+import useSound from "../../composables/useSound";
 
 const seoTitle = `${SITE_NAME} — Wrapper`;
 
@@ -25,6 +26,7 @@ function WrapperPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
+  const { playSound } = useSound();
 
   const { wrapper: wrapperContract, executeWrap, executeUnwrap } = useWrapper();
 
@@ -103,6 +105,8 @@ function WrapperPage() {
       setLoadingWrap(false);
       setFormDisabled(false);
       setGLQAmount('');
+
+      playSound('sound_3');
     } catch (error: any) {
       resetFeedback();
       setErrorWrap(error.toString());
@@ -162,6 +166,8 @@ function WrapperPage() {
       setFormDisabled(false);
 
       setWGLQAmount('');
+
+      playSound('sound_3');
     } catch (error: any) {
       resetFeedback();
       setErrorUnwrap(error.toString());

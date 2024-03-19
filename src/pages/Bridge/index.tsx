@@ -34,6 +34,7 @@ import useNetwork from "../../composables/useNetwork";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
 import { getErrorMessage } from "@utils/errors";
+import useSound from "../../composables/useSound";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -53,6 +54,7 @@ function BridgePage() {
   const { switchToGraphLinqMainnet, switchToMainnet } = useNetwork();
   const { calculatePrice } = useExchangeRates();
   const { setWaitingTxData } = useAppContext();
+  const { playSound } = useSound();
 
   const [loading, setLoading] = useState(false);
   const [formDisabled, setFormDisabled] = useState(false);
@@ -265,6 +267,7 @@ function BridgePage() {
       if (info.executionState === ExecutionState.EXECUTED) {
         setSuccess("Transfer complete.");
         setFormDisabled(false);
+        playSound('sound_2');
       }
     }
   }, [qTrackingInformation.data]);

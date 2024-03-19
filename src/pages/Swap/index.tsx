@@ -28,6 +28,7 @@ import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import useUniswap from "../../composables/useUniswap";
 import { getErrorMessage } from "@utils/errors";
+import useSound from "../../composables/useSound";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -64,6 +65,7 @@ function SwapPage() {
   const { switchToGraphLinqMainnet } = useNetwork();
   const { isGLQChain } = useChains();
   const { quoteSwap, executeSwap, feeInPercent } = useUniswap();
+  const { playSound } = useSound();
 
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
@@ -281,6 +283,8 @@ function SwapPage() {
       });
 
       setOwnCurrencyAmount("");
+      
+      playSound('sound_1');
     } catch (error: any) {
       resetFeedback();
       setError(getErrorMessage(error));
