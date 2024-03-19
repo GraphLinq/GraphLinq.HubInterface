@@ -103,7 +103,8 @@ function BridgePage() {
     const fetchBridgeCost = async () => {
       try {
         if (bridgeContract) {
-          bridgeCost = await bridgeContract.getFeesInETH();
+          const value: string = await bridgeContract.getFeesInETH();
+          bridgeCost = parseFloat(ethers.utils.formatEther(value));
         }
       } catch (error) {
         console.error("Error fetching bridge fee:", error);
