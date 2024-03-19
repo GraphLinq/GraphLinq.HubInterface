@@ -1,6 +1,7 @@
 import { useState } from "react";
 import useChains from "./useChains";
 import { WETH_TOKEN, WGLQ_TOKEN } from "@constants/index";
+import { getErrorMessage } from "@utils/errors";
 
 function useAddTokens() {
   const { isGLQChain } = useChains();
@@ -42,7 +43,7 @@ function useAddTokens() {
         throw new Error("Failed to add token.");
       }
     } catch (error: any) {
-      setError(error.toString());
+      setError(getErrorMessage(error.code));
       setLoading(false);
     }
   };

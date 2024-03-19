@@ -29,7 +29,6 @@ const useExchangeRates = () => {
 
   useEffect(() => {
     const fetchExchangeRates = async () => {
-      console.log('fetch');
       try {
         const ethResponse = await fetch(
           "https://api.coinbase.com/v2/exchange-rates?currency=ETH"

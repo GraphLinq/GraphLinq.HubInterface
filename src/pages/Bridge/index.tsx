@@ -33,6 +33,7 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
+import { getErrorMessage } from "@utils/errors";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -228,7 +229,7 @@ function BridgePage() {
       setLoading(false);
     } catch (error: any) {
       resetFeedback();
-      setError(error.toString());
+      setError(getErrorMessage(error.code));
       setFormDisabled(false);
       setLoading(false);
     }

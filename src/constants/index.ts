@@ -1,4 +1,4 @@
-export const isTestnet = false;
+export const isTestnet = true;
 
 /* Commons */
 export const SITE_NAME = "GLQ Hub";

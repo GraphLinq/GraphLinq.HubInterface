@@ -27,6 +27,7 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import useTokenBalance from "../../composables/useTokenBalance";
 import useUniswap from "../../composables/useUniswap";
+import { getErrorMessage } from "@utils/errors";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -74,6 +75,11 @@ function SwapPage() {
   const [loadingQuote, setLoadingQuote] = useState(false);
 
   const [maxSlippage, setMaxSlippage] = useState(slippageOptions[0].value);
+
+  const [lastSwapAmount, setLastSwapAmount] = useState({
+    own: '',
+    trade: ''
+  })
 
   let quoteQueue: Promise<void | unknown> = Promise.resolve();
 
@@ -253,9 +259,16 @@ function SwapPage() {
       setLoading(false);
       setFormDisabled(false);
       fetchBalance();
+
+      setLastSwapAmount({
+        own: `${formatNumberToFixed(parseFloat(ownCurrencyAmount), 6)} ${ownCurrency.name}`,
+        trade: `${formatNumberToFixed(quoteAmount ? parseFloat(quoteAmount) : 0, 6)} ${tradeCurrency.name}`,
+      })
+
+      setOwnCurrencyAmount('');
     } catch (error: any) {
       resetFeedback();
-      setError(error.toString());
+      setError(getErrorMessage(error.code));
       setLoading(false);
       setFormDisabled(false);
     }
@@ -474,18 +487,9 @@ function SwapPage() {
             <Alert type="success">
               <p>
                 Your swap of{" "}
-                <b>
-                  {formatNumberToFixed(parseFloat(ownCurrencyAmount), 6)}{" "}
-                  {ownCurrency.name}
-                </b>{" "}
+                <b>{lastSwapAmount.own}</b>{" "}
                 for{" "}
-                <b>
-                  {formatNumberToFixed(
-                    quoteAmount ? parseFloat(quoteAmount) : 0,
-                    6
-                  )}{" "}
-                  {tradeCurrency.name}
-                </b>{" "}
+                <b>{lastSwapAmount.trade}</b>{" "}
                 is now successfully completed.
               </p>
               <p className="small" style={{ marginTop: 8 }}>
