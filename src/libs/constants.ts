@@ -33,6 +33,7 @@ export const CHAIN_INFO: { [key: string]: ChainInfo } = {
 };
 
 // URLs
+export const HUB_URL = "https://hub.graphlinq.io/";
 export const METAMASK_URL = "https://metamask.io/";
 export const GLQ_RPC_URL = "https://glq-dataseed.graphlinq.io";
 export const MAINNET_RPC_URL = "https://ethereum-sepolia-rpc.publicnode.com";

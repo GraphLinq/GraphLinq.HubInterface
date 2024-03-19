@@ -44,6 +44,8 @@ const tokenIcons = {
 
 let bridgeCost = ethers.BigNumber.from(0);
 
+const seoTitle = `${SITE_NAME} — Bridge`;
+
 function BridgePage() {
   const { address: account } = useAccount();
   const chainId = useChainId();
@@ -267,10 +269,13 @@ function BridgePage() {
     }
   }, [qTrackingInformation.data]);
 
+
   return (
     <>
       <Helmet>
-        <title>{SITE_NAME} — Bridge</title>
+        <title>{seoTitle}</title>
+        <meta property="og:title" content={seoTitle} />
+        <meta property="twitter:title" content={seoTitle} />
       </Helmet>
       <div className="main-page bridge">
         <div className="main-card">

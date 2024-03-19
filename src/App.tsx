@@ -9,7 +9,7 @@ import PoolNewPage from "@pages/PoolNew";
 import SwapPage from "@pages/Swap";
 import WrapperPage from "@pages/Wrapper";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HelmetProvider } from "react-helmet-async";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import {
   createBrowserRouter,
   Outlet,
@@ -19,12 +19,29 @@ import {
 import { WagmiProvider } from "wagmi";
 
 import { config } from "./config";
+import { HUB_URL } from "./libs/constants";
 
 function App() {
   const queryClient = new QueryClient();
 
   const Container = (
     <HelmetProvider>
+      <Helmet>
+        <link rel="canonical" href={HUB_URL} />
+        <meta name="description" content="Explore the GraphLinq Hub, built around decentralized exchanges, offering a range of enticing features for both experienced traders and beginners alike. Enjoy a smooth, easy, and rewarding experience." />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={HUB_URL} />
+        <meta property="og:title" content="GLQ Hub" />
+        <meta property="og:description" content="Explore the GraphLinq Hub, built around decentralized exchanges, offering a range of enticing features for both experienced traders and beginners alike. Enjoy a smooth, easy, and rewarding experience." />
+        <meta property="og:image" content="https://assets-global.website-files.com/65de56ee9ed70741bfc4efc6/65e64a264313f5bc8aac595e_opengraph.webp" />
+
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={HUB_URL} />
+        <meta property="twitter:title" content="GLQ Hub" />
+        <meta property="twitter:description" content="Explore the GraphLinq Hub, built around decentralized exchanges, offering a range of enticing features for both experienced traders and beginners alike. Enjoy a smooth, easy, and rewarding experience." />
+        <meta property="twitter:image" content="https://assets-global.website-files.com/65de56ee9ed70741bfc4efc6/65e64a264313f5bc8aac595e_opengraph.webp" />
+      </Helmet>
       <AppContextProvider>
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>

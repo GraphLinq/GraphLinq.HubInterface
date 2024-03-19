@@ -46,6 +46,8 @@ const feesOptions = [
   },
 ];
 
+const seoTitle = `${SITE_NAME} — Create pool`;
+
 function PoolNewPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
@@ -118,7 +120,9 @@ function PoolNewPage() {
   return (
     <>
       <Helmet>
-        <title>{SITE_NAME} — New Pool</title>
+        <title>{seoTitle}</title>
+        <meta property="og:title" content={seoTitle} />
+        <meta property="twitter:title" content={seoTitle} />
       </Helmet>
       <div className="main-page poolNew">
         <div className="main-card">

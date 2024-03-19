@@ -19,6 +19,8 @@ import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import useWrapper from "../../composables/useWrapper";
 
+const seoTitle = `${SITE_NAME} — Wrapper`;
+
 function WrapperPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
@@ -175,7 +177,9 @@ function WrapperPage() {
   return (
     <>
       <Helmet>
-        <title>{SITE_NAME} — Wrapper</title>
+        <title>{seoTitle}</title>
+        <meta property="og:title" content={seoTitle} />
+        <meta property="twitter:title" content={seoTitle} />
       </Helmet>
       <div className="main-page wrapper">
         <div className="main-card">

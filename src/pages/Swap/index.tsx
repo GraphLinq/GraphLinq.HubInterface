@@ -55,6 +55,8 @@ const slippageOptions = [
   },
 ];
 
+const seoTitle = `${SITE_NAME} — Swap`;
+
 function SwapPage() {
   const { address: account } = useAccount();
 
@@ -310,7 +312,9 @@ function SwapPage() {
   return (
     <>
       <Helmet>
-        <title>{SITE_NAME} — Swap</title>
+        <title>{seoTitle}</title>
+        <meta property="og:title" content={seoTitle} />
+        <meta property="twitter:title" content={seoTitle} />
       </Helmet>
       <div className="main-page swap">
         <div className="main-card">

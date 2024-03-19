@@ -8,6 +8,8 @@ import { formatNumberToDollars } from "@utils/number";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 
+const seoTitle = `${SITE_NAME} — Dashboard`;
+
 function HomePage() {
 
 
@@ -95,7 +97,9 @@ function HomePage() {
   return (
     <>
       <Helmet>
-        <title>{SITE_NAME} — Home</title>
+        <title>{seoTitle}</title>
+        <meta property="og:title" content={seoTitle} />
+        <meta property="twitter:title" content={seoTitle} />
       </Helmet>
       <div className="main-page home">
         <div className="home-wrapper">

@@ -27,6 +27,8 @@ const tokenIcons = {
   WETH: <ETHToken />,
 };
 
+const seoTitle = `${SITE_NAME} — Pool`;
+
 function PoolPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
@@ -67,7 +69,9 @@ function PoolPage() {
   return (
     <>
       <Helmet>
-        <title>{SITE_NAME} — Pool</title>
+        <title>{seoTitle}</title>
+        <meta property="og:title" content={seoTitle} />
+        <meta property="twitter:title" content={seoTitle} />
       </Helmet>
       <div className="main-page pool">
         <div className="main-card">
