@@ -1,4 +1,4 @@
-import { GLQCHAIN_BRIDGE_OUT_WGLQ } from "@constants/index";
+import { GLQCHAIN_WRAPPER } from "@constants/index";
 import { Contract } from "ethers";
 import { ethers } from "ethers";
 import { useAccount } from "wagmi";
@@ -15,7 +15,7 @@ const useWrapper = () => {
   const provider = injectedProvider ?? rpcProvider;
 
   const wrapper = new Contract(
-    GLQCHAIN_BRIDGE_OUT_WGLQ,
+    GLQCHAIN_WRAPPER,
     WRAPPER_ABI,
     provider
   );
@@ -43,6 +43,8 @@ const useWrapper = () => {
       const txOptions = {
         from: account,
       };
+
+      console.log(amountInFormatted.toString());
       return await wrapper.unwrap(amountInFormatted, txOptions);
     } catch (error: any) {
       console.error("Failed to unwrap assets:", error);

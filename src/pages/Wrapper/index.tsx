@@ -19,6 +19,7 @@ import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import useWrapper from "../../composables/useWrapper";
 import useSound from "../../composables/useSound";
+import { getErrorMessage } from "@utils/errors";
 
 const seoTitle = `${SITE_NAME} — Wrapper`;
 
@@ -170,7 +171,7 @@ function WrapperPage() {
       playSound('sound_3');
     } catch (error: any) {
       resetFeedback();
-      setErrorUnwrap(error.toString());
+      setErrorUnwrap(getErrorMessage(error));
       setLoadingUnwrap(false);
       setFormDisabled(false);
     }
