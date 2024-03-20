@@ -44,7 +44,6 @@ const useWrapper = () => {
         from: account,
       };
 
-      console.log(amountInFormatted.toString());
       return await wrapper.unwrap(amountInFormatted, txOptions);
     } catch (error: any) {
       console.error("Failed to unwrap assets:", error);

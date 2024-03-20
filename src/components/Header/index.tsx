@@ -4,10 +4,11 @@ import Connect from "@assets/icons/connect-wallet.svg?react";
 import Dashboard from "@assets/icons/dashboard.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
-import Pool from "@assets/icons/pool.svg?react";
 import LogoName from "@assets/icons/logo-name.svg?react";
 import Logo from "@assets/icons/logo.svg?react";
 import Metamask from "@assets/icons/metamask.svg?react";
+import Pool from "@assets/icons/pool.svg?react";
+import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap-coin.svg?react";
 import Wallet from "@assets/icons/wallet.svg?react";
 import WalletConnect from "@assets/icons/walletconnect.svg?react";
@@ -30,7 +31,7 @@ function Header() {
   const { address: account } = useAccount();
   const { isMainnet } = useChains();
   const { glq, eth } = useExchangeRates();
-  const { data: balanceRaw } = useBalance({
+  const { data: balanceRaw, isLoading: loadingBalance } = useBalance({
     address: account,
     token: isMainnet ? WGLQ_TOKEN.address.mainnet : undefined,
   });
@@ -137,8 +138,8 @@ function Header() {
         {account ? (
           <>
             {GLQBalance && (
-              <Pill icon={<GLQToken />} onClick={() => {}} add={true}>
-                {formatNumberToFixed(parseFloat(GLQBalance), 6) || "..."}
+              <Pill icon={<GLQToken />} add={true}>
+                {loadingBalance ? <Spinner/> : formatNumberToFixed(parseFloat(GLQBalance), 6) || "..."}
               </Pill>
             )}
             <Pill icon={<Wallet />}>{formatEthereumAddress(account)}</Pill>
