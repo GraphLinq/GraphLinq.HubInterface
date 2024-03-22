@@ -7,7 +7,7 @@ import GLQToken from "@assets/icons/glq-icon.svg?react";
 import LogoName from "@assets/icons/logo-name.svg?react";
 import Logo from "@assets/icons/logo.svg?react";
 import Metamask from "@assets/icons/metamask.svg?react";
-import Pool from "@assets/icons/pool.svg?react";
+// import Pool from "@assets/icons/pool.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap-coin.svg?react";
 import Wallet from "@assets/icons/wallet.svg?react";
