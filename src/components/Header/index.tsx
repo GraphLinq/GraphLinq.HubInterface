@@ -56,11 +56,11 @@ function Header() {
       label: "Dashboard",
       url: "/",
     },
-    {
-      icon: <Pool />,
-      label: "Pool",
-      url: "/pool",
-    },
+    // {
+    //   icon: <Pool />,
+    //   label: "Pool",
+    //   url: "/pool",
+    // },
     // {
     //   icon: <CoinInfo />,
     //   label: "Coin Info",
