@@ -6,6 +6,7 @@ export const TOKEN_NAME = "GLQ";
 export const MAINNET_EXPLORER = "https://etherscan.io";
 export const GLQ_EXPLORER = "https://explorer.graphlinq.io";
 export const BRIDGE_API_URL = "https://api-bridge.graphlinq.io/api/v1";
+export const DASHBOARD_API_URL = "https://api-hub.graphlinq.io";
 
 /* Swap */
 export const GLQCHAIN_SWAP_QUOTER_ADDRESS = "0x287a7beF47684D388fa56BFaB859501f9e515B9D"

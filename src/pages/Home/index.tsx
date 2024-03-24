@@ -1,98 +1,35 @@
 import "./_home.scss";
 import Arrow from "@assets/icons/arrow.svg?react";
-import Bridge from "@assets/icons/bridge.svg?react";
 import Swap from "@assets/icons/swap-coin.svg?react";
+import Info from "@assets/icons/info.svg?react";
 import HomeGraph from "@components/HomeGraph";
 import { SITE_NAME } from "@constants/index";
-import { formatNumberToDollars } from "@utils/number";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { Helmet } from "react-helmet-async";
+import { formatDistanceToNow } from "date-fns";
+
+import { getDashboardInformation } from "../../queries/api";
 
 const seoTitle = `${SITE_NAME} — Dashboard`;
 
 function HomePage() {
-
-
-  const [glqPrice] = useState("208.4546466");
-  const [glqPreviousPrice] = useState("203.79893566");
-
-  const glqPriceEvolution = parseFloat(glqPrice) - parseFloat(glqPreviousPrice);
-  const glqPriceEvolutionPerc =
-    (glqPriceEvolution / parseFloat(glqPreviousPrice)) * 100;
-  const glqPriceEvolutionColor = glqPriceEvolution > 0 ? "green" : "red";
-
-  const [glqPriceHigh] = useState("318.4878163");
-  const [glqPriceLow] = useState("192.9766984");
-  const [glqPriceVolume] = useState("192976516");
-
-  const [tvlPrice] = useState("2146008");
-  const [totalSwap] = useState("7699854");
-  const [preferredPool] = useState("WETH/WGLQ");
-
-  const [lastTx] = useState([
-    {
-      type: "swap",
-      date: new Date(),
-      pair: "ETH/WETH",
-      value: "2000 ETH",
-      gasPrice: "1.5",
-    },
-    {
-      type: "bridge",
-      date: new Date(),
-      pair: "GLQ/WGLQ",
-      value: "15000 GLQ",
-      gasPrice: "1.3",
-    },
-    {
-      type: "swap",
-      date: new Date(),
-      pair: "BTC/ETH",
-      value: "3000 BTC",
-      gasPrice: "1.6",
-    },
-    {
-      type: "swap",
-      date: new Date(),
-      pair: "XRP/USD",
-      value: "5000 XRP",
-      gasPrice: "1.5",
-    },
-    {
-      type: "bridge",
-      date: new Date(),
-      pair: "BNB/WBNB",
-      value: "8000 BNB",
-      gasPrice: "1.4",
-    },
-    {
-      type: "bridge",
-      date: new Date(),
-      pair: "DOT/GBP",
-      value: "6000 DOT",
-      gasPrice: "1.4",
-    },
-    {
-      type: "bridge",
-      date: new Date(),
-      pair: "LTC/USD",
-      value: "7000 LTC",
-      gasPrice: "1.3",
-    },
-    {
-      type: "swap",
-      date: new Date(),
-      pair: "ADA/EUR",
-      value: "4000 ADA",
-      gasPrice: "1.6",
-    },
-  ]);
-
-  const dateFormatterUS = new Intl.DateTimeFormat("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "2-digit",
+  const qDashboardInformation = useQuery({
+    queryKey: ["dashboardInformation"],
+    queryFn: getDashboardInformation,
+    refetchInterval: 60000,
   });
+
+  const glqPriceEvolution = qDashboardInformation.data
+    ? parseFloat(qDashboardInformation.data.analytics.closePrice) -
+      parseFloat(qDashboardInformation.data.analytics.entryPrice)
+    : 0;
+  const glqPriceEvolutionPerc = qDashboardInformation.data
+    ? (glqPriceEvolution /
+        parseFloat(qDashboardInformation.data.analytics.entryPrice)) *
+      100
+    : 0;
+  const glqPriceEvolutionColor = glqPriceEvolution >= 0 ? "green" : "red";
 
   return (
     <>
@@ -102,33 +39,77 @@ function HomePage() {
         <meta property="twitter:title" content={seoTitle} />
       </Helmet>
       <div className="main-page home">
+        <div className="home-bubbles">
+          <div className="home-bubble" data-gradient="1">
+            <div className="home-bubble-value">
+              {qDashboardInformation.data?.stakingTVL &&
+                formatNumberToDollars(
+                  parseFloat(qDashboardInformation.data?.stakingTVL),
+                  2
+                )}
+            </div>
+            <div className="home-bubble-label">
+              <span>Total Value Locked</span>
+              <Info />
+            </div>
+            <div className="home-bubble-tooltip">
+              Total Value Locked (TVL) represents the total worth of assets
+              locked in the GLQ Chain, reflecting the level of user engagement
+              and economic activity on the GLQ Chain
+            </div>
+          </div>
+          <div className="home-bubble" data-gradient="2">
+            <div className="home-bubble-value">
+              {qDashboardInformation.data?.totalLiquidAssetsOnChain &&
+                formatNumberToDollars(
+                  parseFloat(
+                    qDashboardInformation.data?.totalLiquidAssetsOnChain
+                  ),
+                  2
+                )}
+            </div>
+            <div className="home-bubble-label">
+              <span>Total On-Chain Liquid Assets</span>
+              <Info />
+            </div>
+            <div className="home-bubble-tooltip">
+              Total On-Chain Liquid Assets refers to the combined value of
+              liquid assets held directly on the GLQ Chain, showcasing the
+              available funds for immediate use or transactions.
+            </div>
+          </div>
+          <div className="home-bubble">
+            <div className="home-bubble-value">
+              {qDashboardInformation.data?.analytics.WGLQSwap24h &&
+                formatNumberToDollars(
+                  qDashboardInformation.data?.analytics.WGLQSwap24h,
+                  2
+                )}
+            </div>
+            <div className="home-bubble-label">24h WGLQ swap</div>
+          </div>
+          <div className="home-bubble">
+            <div className="home-bubble-value">
+              {qDashboardInformation.data?.preferedPool}
+            </div>
+            <div className="home-bubble-label">Preferred pool</div>
+          </div>
+        </div>
         <div className="home-wrapper">
           <div className="home-left">
-            <div className="home-bubbles">
-              <div className="home-bubble" data-gradient="1">
-                <div className="home-bubble-value">
-                  {formatNumberToDollars(parseFloat(tvlPrice), 2)}
-                </div>
-                <div className="home-bubble-label">Total Value Locked</div>
-              </div>
-              <div className="home-bubble" data-gradient="2">
-                <div className="home-bubble-value">
-                  {parseFloat(totalSwap).toLocaleString("en-US")}
-                </div>
-                <div className="home-bubble-label">24h WGLQ swap</div>
-              </div>
-              <div className="home-bubble">
-                <div className="home-bubble-value">{preferredPool}</div>
-                <div className="home-bubble-label">Preferred pool</div>
-              </div>
-            </div>
             <div className="main-card">
               <div className="main-card-title">Current evolution</div>
               <div className="main-card-content">
                 <div className="home-stats">
                   <div className="home-stat">
                     <div className="home-stat-value">
-                      {formatNumberToDollars(parseFloat(glqPrice))}
+                      {qDashboardInformation.data?.analytics.closePrice &&
+                        formatNumberToDollars(
+                          parseFloat(
+                            qDashboardInformation.data?.analytics.closePrice
+                          ),
+                          6
+                        )}
                     </div>
                     <div
                       className="home-stat-label"
@@ -136,27 +117,38 @@ function HomePage() {
                     >
                       <Arrow />
                       {glqPriceEvolutionPerc.toFixed(2)}% (
-                      {formatNumberToDollars(glqPriceEvolution, 2)})
+                      {formatNumberToDollars(glqPriceEvolution, 6)})
                     </div>
                   </div>
                   <div className="home-stats-sep"></div>
                   <div className="home-stat">
                     <div className="home-stat-value">
-                      {formatNumberToDollars(parseFloat(glqPriceHigh))}
+                      {qDashboardInformation.data?.analytics.highPrice &&
+                        formatNumberToDollars(
+                          qDashboardInformation.data?.analytics.highPrice
+                        )}
                     </div>
                     <div className="home-stat-label">24h high</div>
                   </div>
                   <div className="home-stats-sep"></div>
                   <div className="home-stat">
                     <div className="home-stat-value">
-                      {formatNumberToDollars(parseFloat(glqPriceLow))}
+                      {qDashboardInformation.data?.analytics.lowPrice &&
+                        formatNumberToDollars(
+                          qDashboardInformation.data?.analytics.lowPrice
+                        )}
                     </div>
                     <div className="home-stat-label">24h low</div>
                   </div>
                   <div className="home-stats-sep"></div>
                   <div className="home-stat">
                     <div className="home-stat-value">
-                      {formatNumberToDollars(parseFloat(glqPriceVolume), 2)}
+                      {qDashboardInformation.data?.analytics.volume &&
+                        formatNumberToDollars(
+                          parseFloat(
+                            qDashboardInformation.data?.analytics.volume
+                          )
+                        )}
                     </div>
                     <div className="home-stat-label">24h volume</div>
                   </div>
@@ -169,36 +161,56 @@ function HomePage() {
             <div className="main-card">
               <div className="main-card-title">Last transactions</div>
               <div className="main-card-content home-tx">
-                <table className="home-tx-table">
-                  <thead>
-                    <th data-type></th>
-                    <th data-date>Date</th>
-                    <th data-pair>Pair</th>
-                    <th data-value>Value</th>
-                    <th data-gasprice>Gas price</th>
-                  </thead>
-                  <tbody>
-                    {lastTx.map((tx) => (
-                      <tr>
-                        <td data-type={tx.type}>
-                          {tx.type === "swap" ? <Swap /> : <Bridge />}
-                        </td>
-                        <td data-date>{dateFormatterUS.format(tx.date)}</td>
-                        <td data-pair>{tx.pair}</td>
-                        <td data-value>{tx.value}</td>
-                        <td data-gasprice>
-                          {formatNumberToDollars(parseFloat(tx.gasPrice))}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                {qDashboardInformation.data &&
+                  qDashboardInformation.data.swaps.length > 0 && (
+                    <table className="home-tx-table">
+                      <thead>
+                        <th data-type></th>
+                        <th data-date>Date</th>
+                        <th data-pair>Pair</th>
+                        <th data-value>Value</th>
+                        <th data-gasprice>Gas price</th>
+                      </thead>
+                      <tbody>
+                        {qDashboardInformation.data?.swaps.map((swap, key) => (
+                          <tr key={key}>
+                            <td data-type={swap.type}>
+                              <Swap />
+                            </td>
+                            <td data-date>
+                              {formatDistanceToNow(
+                                new Date(swap.timestamp * 1000),
+                                { addSuffix: true }
+                              )}
+                            </td>
+                            <td data-pair>{swap.pool}</td>
+                            <td data-value>
+                              {formatNumberToFixed(
+                                parseFloat(swap.amount1.amount),
+                                2
+                              )}{" "}
+                              {swap.amount1.currency}
+                            </td>
+                            <td data-gasprice>
+                              {formatNumberToDollars(
+                                parseFloat(swap.gasCostUsed)
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                {(!qDashboardInformation.data ||
+                  qDashboardInformation.data.swaps.length === 0) && (
+                  <p className="home-empty">
+                    No transactions available at the moment.
+                  </p>
+                )}
               </div>
             </div>
           </div>
         </div>
-
-        
       </div>
     </>
   );

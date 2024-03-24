@@ -3,6 +3,7 @@
 
 .home {
   padding-top: 40px;
+  gap: 16px !important;
 
   @include max($mobile-s) {
     padding-top: 16px;
@@ -33,7 +34,6 @@
 
     @include max($desktop) {
       flex-direction: column;
-      gap: 40px;
     }
   }
 
@@ -42,6 +42,7 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+    max-width: calc(100% - 692px - 16px);
 
     @include max($desktop) {
       flex-direction: column-reverse;
@@ -147,6 +148,14 @@
   &-bubbles {
     display: flex;
     gap: 16px;
+    width: 1632px;
+    max-width: 100%;
+    padding: 0 16px;
+    margin: 0 auto;
+
+    @include max($tablet) {
+      flex-wrap: wrap;
+    }
 
     @include max($mobile-s) {
       flex-direction: column;
@@ -155,7 +164,10 @@
   }
 
   &-bubble {
-    width: calc(100% / 3 - 16px * 2 / 3);
+    $bubble: &;
+
+    position: relative;
+    width: calc(100% / 4 - 16px * 3 / 4);
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -165,15 +177,19 @@
     border-radius: 20px;
     background: rgba(#302b44, 0.2);
 
+    @include max($tablet) {
+      width: calc(100% / 2 - 16px * 1 / 2);
+    }
+
     @include max($mobile-s) {
       width: 100%;
     }
 
     &[data-gradient="1"] {
-      background: linear-gradient(180deg, #7a1fea, #5519ee);
+      background: linear-gradient(270deg, #7a1fea, #5519ee);
     }
     &[data-gradient="2"] {
-      background: linear-gradient(180deg, #9a23e6, #7a1fea);
+      background: linear-gradient(270deg, #9a23e6, #7a1fea);
     }
 
     &-value {
@@ -184,16 +200,57 @@
       @include max($mobile-s) {
         font-size: 16px;
       }
+
+
     }
 
     &-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       font-size: 16px;
       color: var(--c-fog);
 
       @include max($mobile-s) {
         font-size: 14px;
       }
+
+      svg {
+        width: 16px;
+      }
+
+      path {
+        fill: var(--c-fog);
+      }
     }
+
+    &-tooltip {
+      position: absolute;
+      z-index: 1;
+      top: calc(100% - 16px);
+      left: 8px;
+      right: 8px;
+      color: var(--c-white);
+      background-color: var(--c-martinique);
+      opacity: 0;
+      font-size: 12px;
+      border-radius: 10px;
+      padding: 12px 16px;
+      pointer-events: none;
+      transform: translateY(16px);
+      transition: transform .2s ease-out, opacity .2s ease-out;
+    }
+
+    &:hover {
+      #{$bubble}-tooltip {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  &-empty {
+    opacity: 0.4;
   }
 
   &-tx {
@@ -249,12 +306,12 @@
           height: 20px;
         }
 
-        &[data-type="swap"] {
+        &[data-type="sell"] {
           path {
-            fill: var(--c-denim);
+            fill: var(--c-mint-red);
           }
         }
-        &[data-type="bridge"] {
+        &[data-type="buy"] {
           path {
             fill: var(--c-mint-green);
           }
