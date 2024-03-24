@@ -2,6 +2,7 @@ import "./_home.scss";
 import Arrow from "@assets/icons/arrow.svg?react";
 import Swap from "@assets/icons/swap-coin.svg?react";
 import Info from "@assets/icons/info.svg?react";
+import Spinner from "@assets/icons/spinner.svg?react";
 import HomeGraph from "@components/HomeGraph";
 import { SITE_NAME } from "@constants/index";
 import { useQuery } from "@tanstack/react-query";
@@ -42,6 +43,7 @@ function HomePage() {
         <div className="home-bubbles">
           <div className="home-bubble" data-gradient="1">
             <div className="home-bubble-value">
+              {qDashboardInformation.isLoading && <Spinner/>}
               {qDashboardInformation.data?.stakingTVL &&
                 formatNumberToDollars(
                   parseFloat(qDashboardInformation.data?.stakingTVL),
@@ -60,6 +62,8 @@ function HomePage() {
           </div>
           <div className="home-bubble" data-gradient="2">
             <div className="home-bubble-value">
+            {qDashboardInformation.isLoading && <Spinner/>}
+
               {qDashboardInformation.data?.totalLiquidAssetsOnChain &&
                 formatNumberToDollars(
                   parseFloat(
@@ -80,6 +84,8 @@ function HomePage() {
           </div>
           <div className="home-bubble">
             <div className="home-bubble-value">
+            {qDashboardInformation.isLoading && <Spinner/>}
+
               {qDashboardInformation.data?.analytics.WGLQSwap24h &&
                 formatNumberToDollars(
                   qDashboardInformation.data?.analytics.WGLQSwap24h,
@@ -90,6 +96,8 @@ function HomePage() {
           </div>
           <div className="home-bubble">
             <div className="home-bubble-value">
+            {qDashboardInformation.isLoading && <Spinner/>}
+
               {qDashboardInformation.data?.preferedPool}
             </div>
             <div className="home-bubble-label">Preferred pool</div>
@@ -103,6 +111,8 @@ function HomePage() {
                 <div className="home-stats">
                   <div className="home-stat">
                     <div className="home-stat-value">
+              {qDashboardInformation.isLoading && <Spinner/>}
+
                       {qDashboardInformation.data?.analytics.closePrice &&
                         formatNumberToDollars(
                           parseFloat(
@@ -123,6 +133,8 @@ function HomePage() {
                   <div className="home-stats-sep"></div>
                   <div className="home-stat">
                     <div className="home-stat-value">
+              {qDashboardInformation.isLoading && <Spinner/>}
+
                       {qDashboardInformation.data?.analytics.highPrice &&
                         formatNumberToDollars(
                           qDashboardInformation.data?.analytics.highPrice
@@ -133,6 +145,8 @@ function HomePage() {
                   <div className="home-stats-sep"></div>
                   <div className="home-stat">
                     <div className="home-stat-value">
+              {qDashboardInformation.isLoading && <Spinner/>}
+
                       {qDashboardInformation.data?.analytics.lowPrice &&
                         formatNumberToDollars(
                           qDashboardInformation.data?.analytics.lowPrice
@@ -143,11 +157,14 @@ function HomePage() {
                   <div className="home-stats-sep"></div>
                   <div className="home-stat">
                     <div className="home-stat-value">
+              {qDashboardInformation.isLoading && <Spinner/>}
+
                       {qDashboardInformation.data?.analytics.volume &&
                         formatNumberToDollars(
                           parseFloat(
                             qDashboardInformation.data?.analytics.volume
-                          )
+                          ),
+                          2
                         )}
                     </div>
                     <div className="home-stat-label">24h volume</div>
@@ -161,6 +178,8 @@ function HomePage() {
             <div className="main-card">
               <div className="main-card-title">Last transactions</div>
               <div className="main-card-content home-tx">
+              {qDashboardInformation.isLoading && <Spinner/>}
+
                 {qDashboardInformation.data &&
                   qDashboardInformation.data.swaps.length > 0 && (
                     <table className="home-tx-table">
@@ -172,7 +191,7 @@ function HomePage() {
                         <th data-gasprice>Gas price</th>
                       </thead>
                       <tbody>
-                        {qDashboardInformation.data?.swaps.map((swap, key) => (
+                        {[...qDashboardInformation.data.swaps].reverse().map((swap, key) => (
                           <tr key={key}>
                             <td data-type={swap.type}>
                               <Swap />
@@ -202,7 +221,7 @@ function HomePage() {
                     </table>
                   )}
                 {(!qDashboardInformation.data ||
-                  qDashboardInformation.data.swaps.length === 0) && (
+                  (qDashboardInformation.data.swaps.length === 0 && !qDashboardInformation.isLoading)) && (
                   <p className="home-empty">
                     No transactions available at the moment.
                   </p>
