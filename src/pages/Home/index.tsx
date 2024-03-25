@@ -33,10 +33,10 @@ function HomePage() {
   const glqPriceEvolutionColor = glqPriceEvolution >= 0 ? "green" : "red";
 
   const handleOpenTx = (hash: string) => {
-    console.log('ici');
+    console.log("ici");
     const explorerUrl = `${GLQ_EXPLORER}/tx/${hash}`;
-    window.open(explorerUrl, '_blank');
-  }
+    window.open(explorerUrl, "_blank");
+  };
 
   return (
     <>
@@ -133,7 +133,7 @@ function HomePage() {
                     >
                       <Arrow />
                       {glqPriceEvolutionPerc.toFixed(2)}% (
-                      {formatNumberToDollars(glqPriceEvolution, 6)})
+                      {formatNumberToDollars(glqPriceEvolution, 4)})
                     </div>
                   </div>
                   <div className="home-stats-sep"></div>
@@ -200,7 +200,10 @@ function HomePage() {
                         {[...qDashboardInformation.data.swaps]
                           .reverse()
                           .map((swap, key) => (
-                            <tr key={key} onClick={() => handleOpenTx(swap.hash)}>
+                            <tr
+                              key={key}
+                              onClick={() => handleOpenTx(swap.hash)}
+                            >
                               <td data-type={swap.type}>
                                 <Swap />
                               </td>
@@ -228,13 +231,13 @@ function HomePage() {
                       </tbody>
                     </table>
                   )}
-                {((!qDashboardInformation.data ||
-                  qDashboardInformation.data.swaps.length === 0)) &&
+                {(!qDashboardInformation.data ||
+                  qDashboardInformation.data.swaps.length === 0) &&
                   !qDashboardInformation.isLoading && (
-                  <p className="home-empty">
-                    No transactions available at the moment.
-                  </p>
-                )}
+                    <p className="home-empty">
+                      No transactions available at the moment.
+                    </p>
+                  )}
               </div>
             </div>
           </div>
