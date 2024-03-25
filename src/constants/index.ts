@@ -1,7 +1,7 @@
 export const isTestnet = false;
 
 /* Commons */
-export const SITE_NAME = "GLQ Hub";
+export const SITE_NAME = "Graphlinq Hub";
 export const TOKEN_NAME = "GLQ";
 export const MAINNET_EXPLORER = "https://etherscan.io";
 export const GLQ_EXPLORER = "https://explorer.graphlinq.io";

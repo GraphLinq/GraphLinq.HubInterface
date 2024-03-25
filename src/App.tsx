@@ -28,18 +28,18 @@ function App() {
     <HelmetProvider>
       <Helmet>
         <link rel="canonical" href={HUB_URL} />
-        <meta name="description" content="Explore the GraphLinq Hub, built around decentralized exchanges, offering a range of enticing features for both experienced traders and beginners alike. Enjoy a smooth, easy, and rewarding experience." />
+        <meta name="description" content="Explore the hub, where everything happens over the Graphlinq ecosystem, through our app, connect and build around the Graphlinq chain: bridge, swap, launch a token, create and manage LP and much more!" />
 
         <meta property="og:type" content="website" />
         <meta property="og:url" content={HUB_URL} />
-        <meta property="og:title" content="GLQ Hub" />
-        <meta property="og:description" content="Explore the GraphLinq Hub, built around decentralized exchanges, offering a range of enticing features for both experienced traders and beginners alike. Enjoy a smooth, easy, and rewarding experience." />
+        <meta property="og:title" content="Graphlinq Hub" />
+        <meta property="og:description" content="Explore the hub, where everything happens over the Graphlinq ecosystem, through our app, connect and build around the Graphlinq chain: bridge, swap, launch a token, create and manage LP and much more!" />
         <meta property="og:image" content="https://assets-global.website-files.com/65de56ee9ed70741bfc4efc6/65e64a264313f5bc8aac595e_opengraph.webp" />
 
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content={HUB_URL} />
-        <meta property="twitter:title" content="GLQ Hub" />
-        <meta property="twitter:description" content="Explore the GraphLinq Hub, built around decentralized exchanges, offering a range of enticing features for both experienced traders and beginners alike. Enjoy a smooth, easy, and rewarding experience." />
+        <meta property="twitter:title" content="Graphlinq Hub" />
+        <meta property="twitter:description" content="Explore the hub, where everything happens over the Graphlinq ecosystem, through our app, connect and build around the Graphlinq chain: bridge, swap, launch a token, create and manage LP and much more!" />
         <meta property="twitter:image" content="https://assets-global.website-files.com/65de56ee9ed70741bfc4efc6/65e64a264313f5bc8aac595e_opengraph.webp" />
       </Helmet>
       <AppContextProvider>
