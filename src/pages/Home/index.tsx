@@ -43,7 +43,7 @@ function HomePage() {
         <div className="home-bubbles">
           <div className="home-bubble" data-gradient="1">
             <div className="home-bubble-value">
-              {qDashboardInformation.isLoading && <Spinner/>}
+              {qDashboardInformation.isLoading && <Spinner />}
               {qDashboardInformation.data?.stakingTVL &&
                 formatNumberToDollars(
                   parseFloat(qDashboardInformation.data?.stakingTVL),
@@ -62,7 +62,7 @@ function HomePage() {
           </div>
           <div className="home-bubble" data-gradient="2">
             <div className="home-bubble-value">
-            {qDashboardInformation.isLoading && <Spinner/>}
+              {qDashboardInformation.isLoading && <Spinner />}
 
               {qDashboardInformation.data?.totalLiquidAssetsOnChain &&
                 formatNumberToDollars(
@@ -84,7 +84,7 @@ function HomePage() {
           </div>
           <div className="home-bubble">
             <div className="home-bubble-value">
-            {qDashboardInformation.isLoading && <Spinner/>}
+              {qDashboardInformation.isLoading && <Spinner />}
 
               {qDashboardInformation.data?.analytics.WGLQSwap24h &&
                 formatNumberToDollars(
@@ -96,7 +96,7 @@ function HomePage() {
           </div>
           <div className="home-bubble">
             <div className="home-bubble-value">
-            {qDashboardInformation.isLoading && <Spinner/>}
+              {qDashboardInformation.isLoading && <Spinner />}
 
               {qDashboardInformation.data?.preferedPool}
             </div>
@@ -111,7 +111,7 @@ function HomePage() {
                 <div className="home-stats">
                   <div className="home-stat">
                     <div className="home-stat-value">
-              {qDashboardInformation.isLoading && <Spinner/>}
+                      {qDashboardInformation.isLoading && <Spinner />}
 
                       {qDashboardInformation.data?.analytics.closePrice &&
                         formatNumberToDollars(
@@ -133,7 +133,7 @@ function HomePage() {
                   <div className="home-stats-sep"></div>
                   <div className="home-stat">
                     <div className="home-stat-value">
-              {qDashboardInformation.isLoading && <Spinner/>}
+                      {qDashboardInformation.isLoading && <Spinner />}
 
                       {qDashboardInformation.data?.analytics.highPrice &&
                         formatNumberToDollars(
@@ -145,7 +145,7 @@ function HomePage() {
                   <div className="home-stats-sep"></div>
                   <div className="home-stat">
                     <div className="home-stat-value">
-              {qDashboardInformation.isLoading && <Spinner/>}
+                      {qDashboardInformation.isLoading && <Spinner />}
 
                       {qDashboardInformation.data?.analytics.lowPrice &&
                         formatNumberToDollars(
@@ -157,7 +157,7 @@ function HomePage() {
                   <div className="home-stats-sep"></div>
                   <div className="home-stat">
                     <div className="home-stat-value">
-              {qDashboardInformation.isLoading && <Spinner/>}
+                      {qDashboardInformation.isLoading && <Spinner />}
 
                       {qDashboardInformation.data?.analytics.volume &&
                         formatNumberToDollars(
@@ -178,7 +178,7 @@ function HomePage() {
             <div className="main-card">
               <div className="main-card-title">Last transactions</div>
               <div className="main-card-content home-tx">
-              {qDashboardInformation.isLoading && <Spinner/>}
+                {qDashboardInformation.isLoading && <Spinner />}
 
                 {qDashboardInformation.data &&
                   qDashboardInformation.data.swaps.length > 0 && (
@@ -191,37 +191,40 @@ function HomePage() {
                         <th data-gasprice>Gas price</th>
                       </thead>
                       <tbody>
-                        {[...qDashboardInformation.data.swaps].reverse().map((swap, key) => (
-                          <tr key={key}>
-                            <td data-type={swap.type}>
-                              <Swap />
-                            </td>
-                            <td data-date>
-                              {formatDistanceToNow(
-                                new Date(swap.timestamp * 1000),
-                                { addSuffix: true }
-                              )}
-                            </td>
-                            <td data-pair>{swap.pool}</td>
-                            <td data-value>
-                              {formatNumberToFixed(
-                                parseFloat(swap.amount1.amount),
-                                2
-                              )}{" "}
-                              {swap.amount1.currency}
-                            </td>
-                            <td data-gasprice>
-                              {formatNumberToDollars(
-                                parseFloat(swap.gasCostUsed)
-                              )}
-                            </td>
-                          </tr>
-                        ))}
+                        {[...qDashboardInformation.data.swaps]
+                          .reverse()
+                          .map((swap, key) => (
+                            <tr key={key}>
+                              <td data-type={swap.type}>
+                                <Swap />
+                              </td>
+                              <td data-date>
+                                {formatDistanceToNow(
+                                  new Date(swap.timestamp * 1000),
+                                  { addSuffix: true }
+                                )}
+                              </td>
+                              <td data-pair>{swap.pool}</td>
+                              <td data-value>
+                                {formatNumberToFixed(
+                                  parseFloat(swap.amount1.amount),
+                                  2
+                                )}{" "}
+                                {swap.amount1.currency}
+                              </td>
+                              <td data-gasprice>
+                                {formatNumberToDollars(
+                                  parseFloat(swap.gasCostUsed)
+                                )}
+                              </td>
+                            </tr>
+                          ))}
                       </tbody>
                     </table>
                   )}
                 {(!qDashboardInformation.data ||
-                  (qDashboardInformation.data.swaps.length === 0 && !qDashboardInformation.isLoading)) && (
+                  (qDashboardInformation.data.swaps.length === 0 &&
+                    !qDashboardInformation.isLoading)) && (
                   <p className="home-empty">
                     No transactions available at the moment.
                   </p>
