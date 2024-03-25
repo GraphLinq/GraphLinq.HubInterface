@@ -4,7 +4,7 @@ import Swap from "@assets/icons/swap-coin.svg?react";
 import Info from "@assets/icons/info.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import HomeGraph from "@components/HomeGraph";
-import { SITE_NAME } from "@constants/index";
+import { GLQ_EXPLORER, SITE_NAME } from "@constants/index";
 import { useQuery } from "@tanstack/react-query";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { Helmet } from "react-helmet-async";
@@ -31,6 +31,12 @@ function HomePage() {
       100
     : 0;
   const glqPriceEvolutionColor = glqPriceEvolution >= 0 ? "green" : "red";
+
+  const handleOpenTx = (hash: string) => {
+    console.log('ici');
+    const explorerUrl = `${GLQ_EXPLORER}/tx/${hash}`;
+    window.open(explorerUrl, '_blank');
+  }
 
   return (
     <>
@@ -194,7 +200,7 @@ function HomePage() {
                         {[...qDashboardInformation.data.swaps]
                           .reverse()
                           .map((swap, key) => (
-                            <tr key={key}>
+                            <tr key={key} onClick={() => handleOpenTx(swap.hash)}>
                               <td data-type={swap.type}>
                                 <Swap />
                               </td>
@@ -222,9 +228,9 @@ function HomePage() {
                       </tbody>
                     </table>
                   )}
-                {(!qDashboardInformation.data ||
-                  (qDashboardInformation.data.swaps.length === 0 &&
-                    !qDashboardInformation.isLoading)) && (
+                {((!qDashboardInformation.data ||
+                  qDashboardInformation.data.swaps.length === 0)) &&
+                  !qDashboardInformation.isLoading && (
                   <p className="home-empty">
                     No transactions available at the moment.
                   </p>
