@@ -84,7 +84,7 @@ function PoolPage() {
             {!account ? (
               <>
                 <div className="main-card-notlogged">
-                  Please login to manage your pools.
+                  Please connect to manage your pools.
                 </div>
               </>
             ) : (

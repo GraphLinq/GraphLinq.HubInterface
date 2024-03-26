@@ -330,7 +330,7 @@ function SwapPage() {
             {!account ? (
               <>
                 <div className="main-card-notlogged">
-                  Please login to swap assets.
+                  Please connect to swap assets.
                 </div>
               </>
             ) : (

@@ -137,7 +137,7 @@ function PoolNewPage() {
             {!account ? (
               <>
                 <div className="main-card-notlogged">
-                  Please login to add your liquidity.
+                  Please connect to add your liquidity.
                 </div>
               </>
             ) : (

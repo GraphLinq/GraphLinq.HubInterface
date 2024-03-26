@@ -22,7 +22,7 @@ function Footer() {
         </a>
       </div>
       <div className="footer-add">
-        <p>Here you can add GraphLinq chains and tokens.</p>
+        <p>Here you can add GraphLinq chain and tokens.</p>
         <div className="footer-add-row">
           <div className="footer-add-col">
             <div className="footer-add-col-title">

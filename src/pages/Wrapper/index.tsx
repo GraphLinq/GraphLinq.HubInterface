@@ -200,7 +200,7 @@ function WrapperPage() {
             {!account ? (
               <>
                 <div className="main-card-notlogged">
-                  Please login to wrap or unwrap assets.
+                  Please connect to wrap or unwrap assets.
                 </div>
               </>
             ) : (

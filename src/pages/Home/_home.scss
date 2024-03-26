@@ -46,6 +46,7 @@
 
     @include max($desktop) {
       flex-direction: column-reverse;
+      max-width: 100%;
     }
 
     .main-card {
@@ -271,6 +272,9 @@
         &[data-type] {
           width: 0;
           padding-right: 0;
+        }
+        &[data-date] {
+          white-space: nowrap;
         }
         &[data-pair] {
           color: var(--c-fog);

@@ -284,7 +284,7 @@ function BridgePage() {
           {!account ? (
             <>
               <div className="main-card-notlogged">
-                Please login to transfer assets.
+                Please connect to transfer assets.
               </div>
             </>
           ) : (
