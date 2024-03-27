@@ -38,5 +38,10 @@
       margin-top: 0 !important;
       justify-content: center;
     }
+
+    .highcharts-tooltip text {
+      color: #ffffff !important;
+      fill: #ffffff !important;
+    }
   }
 }
