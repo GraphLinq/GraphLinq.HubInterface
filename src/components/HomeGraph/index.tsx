@@ -72,7 +72,7 @@ function HomeGraph() {
           __html: `<coingecko-coin-compare-chart-widget
         coin-ids="graphlinq-protocol"
         currency="usd"
-        locale="us"
+        locale="en"
       ></coingecko-coin-compare-chart-widget>`,
         }}
       ></div>
