@@ -11,9 +11,12 @@ import { useAccount, useChainId } from "wagmi";
 import useNetwork from "../../composables/useNetwork";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
+import useChains from "../../composables/useChains";
+import { GLQ_EXPLORER, MAINNET_EXPLORER } from "@constants/index";
 
 const TxProgress = () => {
   const { address: account } = useAccount();
+  const { isMainnet } = useChains();
   const chainId = useChainId();
   const { switchToGraphLinqMainnet, switchToMainnet } = useNetwork();
   const { isWaitingTxData, setWaitingTxData } = useAppContext();
@@ -34,7 +37,7 @@ const TxProgress = () => {
       return;
     }
 
-    let info;
+    let info: TrackingInformation | undefined;
 
     if (trackingInfo) {
       info = qTrackingInformation.data.find(
@@ -43,8 +46,9 @@ const TxProgress = () => {
     } else {
       info = qTrackingInformation.data.find(
         (transfer) =>
-          transfer.from === account && (transfer.executionState === ExecutionState.PENDING ||
-          transfer.executionState === ExecutionState.IN_EXECUTION)
+          transfer.from === account &&
+          (transfer.executionState === ExecutionState.PENDING ||
+            transfer.executionState === ExecutionState.IN_EXECUTION)
       );
     }
 
@@ -59,7 +63,9 @@ const TxProgress = () => {
       return (
         <div className="txProgress">
           {isWaitingTxData && (
-            <Alert type="warning"><Spinner/> <span>Waiting for tx data...</span></Alert>
+            <Alert type="warning">
+              <Spinner /> <span>Waiting for tx data...</span>
+            </Alert>
           )}
         </div>
       );
@@ -84,6 +90,10 @@ const TxProgress = () => {
       switchToGraphLinqMainnet();
     }
   };
+
+  const trackingExplorer = `${isMainnet ? GLQ_EXPLORER : MAINNET_EXPLORER}/tx/${
+    trackingInfo && trackingInfo.bridge_tx
+  }`;
 
   return (
     <div className="txProgress">
@@ -113,10 +123,18 @@ const TxProgress = () => {
           </b>{" "}
           to <b>{networkDestination}</b> network is now <b>completed</b>.
           <br />
+          <p className="small" style={{ marginTop: 8 }}>
+            <a href={trackingExplorer} target="_blank">
+              <small>Tx hash: {trackingInfo.bridge_tx}</small>
+            </a>
+          </p>
           {needSwitch && (
-            <span className="underline" onClick={handleSwitchNetwork}>
-              Switch to <b>{networkDestination}</b> network
-            </span>
+            <>
+              <br />
+              <span className="underline" onClick={handleSwitchNetwork}>
+                Switch to <b>{networkDestination}</b> network
+              </span>
+            </>
           )}
         </Alert>
       )}
