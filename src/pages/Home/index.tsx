@@ -190,11 +190,13 @@ function HomePage() {
                   qDashboardInformation.data.swaps.length > 0 && (
                     <table className="home-tx-table">
                       <thead>
-                        <th data-type></th>
-                        <th data-date>Date</th>
-                        <th data-pair>Pair</th>
-                        <th data-value>Value</th>
-                        <th data-gasprice>Gas price</th>
+                        <tr>
+                          <th data-type></th>
+                          <th data-date>Date</th>
+                          <th data-pair>Pair</th>
+                          <th data-value>Value</th>
+                          <th data-gasprice>Gas price</th>
+                        </tr>
                       </thead>
                       <tbody>
                         {[...qDashboardInformation.data.swaps]

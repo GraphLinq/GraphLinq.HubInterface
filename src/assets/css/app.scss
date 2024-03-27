@@ -67,12 +67,12 @@ body {
   }
 
   > * + * {
-    margin-top: 16px;
+    margin-top: 24px;
   }
 
   &-content {
     > * + * {
-      margin-top: 16px;
+      margin-top: 24px;
     }
 
     &[data-disabled="true"] {
@@ -111,10 +111,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 24px;
-    color: #FF69C3;
+    color: #ff69c3;
   }
 
   &-notlogged {
-    color: #FF69C3;
+    color: #ff69c3;
   }
 }

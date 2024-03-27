@@ -157,7 +157,11 @@ function BridgePage() {
       bridgeCost = await bridgeContract.getFeesInETH();
 
       let allowance = ethers.BigNumber.from(0);
-      if ((!isMainnet || isMainnet && activeCurrency.address.mainnet !== undefined) && activeTokenContract) {
+      if (
+        (!isMainnet ||
+          (isMainnet && activeCurrency.address.mainnet !== undefined)) &&
+        activeTokenContract
+      ) {
         const amountInWei = ethers.utils.parseEther(amount.toString());
         const requiredAmount = amountInWei.add(bridgeCost);
 
@@ -194,7 +198,10 @@ function BridgePage() {
       }
 
       let value: string;
-      if (!isMainnet || (isMainnet && activeCurrency.address.mainnet !== undefined)) {
+      if (
+        !isMainnet ||
+        (isMainnet && activeCurrency.address.mainnet !== undefined)
+      ) {
         value = bridgeCost.toString();
       } else {
         const amountInWei = ethers.utils.parseEther(amount.toString());
@@ -206,12 +213,12 @@ function BridgePage() {
         ethers.utils.parseEther(amount.toString()).toString(),
         activeCurrency.chainDestination[isMainnet ? "mainnet" : "glq"],
         {
-          value: value
+          value: value,
         }
       );
 
       setPending("Waiting for confirmations...");
-        
+
       await resultTx.wait();
 
       setPending(
@@ -265,11 +272,10 @@ function BridgePage() {
       if (info.executionState === ExecutionState.EXECUTED) {
         setSuccess("Transfer complete.");
         setFormDisabled(false);
-        playSound('sound_2');
+        playSound("sound_2");
       }
     }
   }, [qTrackingInformation.data]);
-
 
   return (
     <>
@@ -408,9 +414,12 @@ function BridgePage() {
                   </div>
                   <div className="bridge-amount-cost">
                     Bridge fee :{" "}
-                    {bridgeCost ? calculatePrice(parseFloat(
-                                ethers.utils.formatEther(bridgeCost)
-                              ), "eth") : "$0.0000"}
+                    {bridgeCost
+                      ? calculatePrice(
+                          parseFloat(ethers.utils.formatEther(bridgeCost)),
+                          "eth"
+                        )
+                      : "$0.0000"}
                   </div>
                   <div className="bridge-amount-submit">
                     <Button onClick={handleSend} icon={loading && <Spinner />}>

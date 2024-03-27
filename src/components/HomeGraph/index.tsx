@@ -1,79 +1,18 @@
+import "./_homeGraph.scss";
 import { useEffect } from "react";
 
 function HomeGraph() {
-  const applyCss = () => {
-    setTimeout(() => {
-      const host = (document as any)?.querySelector(
-        "coingecko-coin-compare-chart-widget"
-      )?.shadowRoot;
-      if (
-        host == null ||
-        host.querySelector(".highcharts-background") == null
-      ) {
-        applyCss();
-        return;
-      }
-
-      (document.querySelector("coingecko-coin-compare-chart-widget") as HTMLElement).style.opacity='1';
-
-      const sheet = new CSSStyleSheet();
-      host.adoptedStyleSheets = [sheet];
-      host.querySelector(
-        ".cg-container .cg-widget .cg-absolute"
-      ).style.display = "none";
-      host.querySelector("style").innerHTML += `
-                .cg-container{border:0 !important;margin-top: -40px;}
-                [data-loading]{display: none!important;}
-                .highcharts-credits,
-                .highcharts-scrollbar,
-                .highcharts-title, 
-                .highcharts-subtitle, 
-                .highcharts-exporting-group{display:none!important;}
-                .highcharts-yaxis-grid .highcharts-grid-line{stroke:#201b40!important;}
-                .highcharts-series path{stroke:#9A23E6!important;fill:none!important;stroke-width:1px!important}
-                .highcharts-tick{stroke:#897FAC!important;fill:none!important;stroke-width:1px!important;}
-                .highcharts-axis-line,
-                .highcharts-plot-lines-0 path{stroke:none!important;fill:none!important;stroke-width:0!important}
-                .highcharts-background{fill:none!important;}
-                .highcharts-button rect{stroke:#302B44!important;}
-                .highcharts-button text{fill:#897FAC!important;}
-                .highcharts-button-pressed rect{fill:#302B44!important;}
-                .highcharts-button-pressed text{fill:#ffffff!important;}
-                .highcharts-xaxis-labels{transform:translateY(4px)!important}
-                .highcharts-axis-labels text{fill:#897FAC!important}
-                .highcharts-halo{fill:#9A23E6!important}
-                .highcharts-crosshair{stroke:#DED2FF!important}
-                .highcharts-markers > *{stroke:none!important}
-                .highcharts-markers > *{fill:#DED2FF!important}
-                .highcharts-tooltip-box > *:not(text){fill:#201b40!important;stroke:none;!important;}
-                .highcharts-tooltip-box > text{fill:#DED2FF!important;stroke:none!important;}
-                .highcharts-tooltip-box > text tspan:last-child{fill:#DED2FF!important;stroke:none!important;}
-            `;
-    }, 10);
-
-    setTimeout(() => {
-      const property = (document as any).querySelector(".grph");
-      if (property != null) {
-        property.style.opacity = 1;
-      }
-    }, 1000);
-  };
   useEffect(() => {
     const vendor = document.createElement("script");
-    vendor.src =
-      "https://widgets.coingecko.com/coingecko-coin-compare-chart-widget.js";
+    vendor.src = "https://static.coinstats.app/widgets/coin-chart-widget.js";
     document.body.appendChild(vendor);
-    applyCss();
   }, []);
   return (
     <>
       <div
+        className="homeGraph"
         dangerouslySetInnerHTML={{
-          __html: `<coingecko-coin-compare-chart-widget
-        coin-ids="graphlinq-protocol"
-        currency="usd"
-        locale="en"
-      ></coingecko-coin-compare-chart-widget>`,
+          __html: `<coin-stats-chart-widget type="medium" coin-id="graphlinq-protocol" width="650" chart-height="300" currency="USD" locale="en" bg-color="rgba(48,43,68,0.2)" text-color="#897FAC" status-up-color="#69FFA5" status-down-color="#ff4935" buttons-color="rgba(255,255,255,0)" chart-color="#9A23E6" chart-gradient-from="rgba(154,35,230,0.2)" chart-gradient-to="rgba(85,25,238,0.2)" chart-label-background="#302B44" candle-grids-color="#302B44" border-color="rgba(255,255,255,0)" font="Roboto, Arial, Helvetica" btc-color="#F7931A" eth-color="#627EEA"></coin-stats-chart-widget>`,
         }}
       ></div>
     </>

@@ -1,0 +1,37 @@
+.homeGraph {
+  coin-stats-chart-widget {
+    * {
+      font-family: var(--ff-base);
+      font-weight: 600;
+    }
+    > div {
+      > div:first-child {
+        max-width: initial !important;
+        style + div {
+          display: none !important;
+        }
+      }
+      > div:last-child {
+        display: none;
+      }
+    }
+
+    .cs-chart-round-button {
+      padding: 2px 8px;
+      border: 2px solid var(--c-martinique);
+
+      &.type-switcher {
+        background: linear-gradient(270deg, #7a1fea, #5519ee);
+        border-color: transparent;
+
+        path {
+          fill: var(--c-white);
+        }
+      }
+    }
+    .cs-chart-selected-button {
+      background-color: var(--c-martinique);
+      color: var(--c-white);
+    }
+  }
+}
