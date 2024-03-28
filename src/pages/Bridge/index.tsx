@@ -417,7 +417,7 @@ function BridgePage() {
                     {bridgeCost
                       ? calculatePrice(
                           parseFloat(ethers.utils.formatEther(bridgeCost)),
-                          "eth"
+                          isMainnet ? "eth" : "glq"
                         )
                       : "$0.0000"}
                   </div>
