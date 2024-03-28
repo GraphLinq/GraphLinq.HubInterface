@@ -1,12 +1,11 @@
-import { WETH_TOKEN, WGLQ_TOKEN } from "@constants/index";
 import { formatNumberToDollars } from "@utils/number";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 
+import { getDashboardInformation } from "../queries/api";
+
 import { useEthersSigner } from "./useEthersProvider";
-import useUniswap from "./useUniswap";
 import useRpcProvider from "./useRpcProvider";
-import { ethers } from "ethers";
 
 interface CoinbaseExchangeRates {
   loading: boolean;
@@ -23,7 +22,6 @@ const useExchangeRates = () => {
     eth: null,
     glq: null,
   });
-  const { quoteSwap } = useUniswap();
   const rpcProvider = useRpcProvider();
   const injectedProvider = useEthersSigner();
   const provider = injectedProvider ?? rpcProvider;
@@ -37,22 +35,15 @@ const useExchangeRates = () => {
         const ethData = await ethResponse.json();
         const ethRate = parseFloat(ethData.data.rates.USD);
 
-        const glqPerETH = await quoteSwap(
-          WETH_TOKEN.address.glq!,
-          WGLQ_TOKEN.address.glq!,
-          0.01
-        );
+        const glqData = await getDashboardInformation();
+        const glqRate = parseFloat(glqData.analytics.closePrice);
 
-        if (glqPerETH) {
-          const glqRate = ethRate / (parseFloat(ethers.utils.formatEther(glqPerETH)) * 100);
-
-          setExchangeRates({
-            loading: false,
-            error: null,
-            eth: ethRate,
-            glq: glqRate,
-          });
-        }
+        setExchangeRates({
+          loading: false,
+          error: null,
+          eth: ethRate,
+          glq: glqRate,
+        });
       } catch (error) {
         setExchangeRates({
           loading: false,
