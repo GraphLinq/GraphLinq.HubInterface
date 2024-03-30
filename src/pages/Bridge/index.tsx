@@ -53,11 +53,15 @@ function BridgePage() {
   const { isMainnet } = useChains();
   const { switchToGraphLinqMainnet, switchToMainnet } = useNetwork();
   const { calculatePrice } = useExchangeRates();
-  const { setWaitingTxData } = useAppContext();
+  const { setWaitingTxData, isTxInProgress } = useAppContext();
   const { playSound } = useSound();
 
   const [loading, setLoading] = useState(false);
   const [formDisabled, setFormDisabled] = useState(false);
+
+  useEffect(() => {
+    setFormDisabled(isTxInProgress);
+  }, [isTxInProgress]);
 
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
@@ -143,9 +147,15 @@ function BridgePage() {
 
     resetFeedback();
 
-    if (parseFloat(amount) <= 0) {
+    if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
       setError(
-        `Invalid amount to send on the contract: ${amount} ${activeCurrency.name}`
+        `Invalid amount to send on the contract: ${
+          amount !== "" ? amount : "0"
+        } ${
+          activeCurrency.name === "WGLQ" && isMainnet
+            ? "GLQ"
+            : activeCurrency.name
+        }`
       );
       return;
     }
@@ -154,6 +164,16 @@ function BridgePage() {
     setLoading(true);
 
     try {
+      if (tokenBalance && parseFloat(amount) > parseFloat(tokenBalance)) {
+        setPending("");
+        setError(
+          `You only have ${tokenBalance} ${activeCurrency.name} in your wallet.`
+        );
+        setFormDisabled(false);
+        setLoading(false);
+        return;
+      }
+
       bridgeCost = await bridgeContract.getFeesInETH();
 
       let allowance = ethers.BigNumber.from(0);
@@ -162,8 +182,7 @@ function BridgePage() {
           (isMainnet && activeCurrency.address.mainnet !== undefined)) &&
         activeTokenContract
       ) {
-        const amountInWei = ethers.utils.parseEther(amount.toString());
-        const requiredAmount = amountInWei.add(bridgeCost);
+        const requiredAmount = ethers.utils.parseEther(amount.toString());
 
         allowance = await activeTokenContract.allowance(
           account,
@@ -185,16 +204,6 @@ function BridgePage() {
             "Allowance successfully increased, waiting for deposit transaction..."
           );
         }
-      }
-
-      if (tokenBalance && parseFloat(amount) > parseFloat(tokenBalance)) {
-        setPending("");
-        setError(
-          `You only have ${tokenBalance} ${activeCurrency.name} in your wallet.`
-        );
-        setFormDisabled(false);
-        setLoading(false);
-        return;
       }
 
       let value: string;
@@ -228,7 +237,7 @@ function BridgePage() {
       );
       fetchBalance();
       setWaitingTxData(true);
-      setFormDisabled(false);
+      // setFormDisabled(false);
       setLoading(false);
     } catch (error: any) {
       resetFeedback();
@@ -321,7 +330,10 @@ function BridgePage() {
                   active={activeOption}
                   options={currencyOptions.map((opt) => (
                     <>
-                      {opt.icon} <span>{opt.name}</span>
+                      {opt.icon}{" "}
+                      <span>
+                        {opt.name === "WGLQ" && isMainnet ? "GLQ" : opt.name}
+                      </span>
                       {chainId && <span>{getChainName(chainId)}</span>}
                     </>
                   ))}
@@ -358,7 +370,9 @@ function BridgePage() {
                         {formatNumberToFixed(parseFloat(tokenBalance), 6)}
                       </span>
                     )}
-                    {activeCurrency.name}
+                    {activeCurrency.name === "WGLQ" && isMainnet
+                      ? "GLQ"
+                      : activeCurrency.name}
                     {tokenBalance && (
                       <span>
                         {calculatePrice(

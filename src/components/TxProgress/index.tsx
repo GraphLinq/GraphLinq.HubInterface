@@ -19,7 +19,8 @@ const TxProgress = () => {
   const { isMainnet } = useChains();
   const chainId = useChainId();
   const { switchToGraphLinqMainnet, switchToMainnet } = useNetwork();
-  const { isWaitingTxData, setWaitingTxData } = useAppContext();
+  const { isWaitingTxData, setWaitingTxData, setTxInProgress } =
+    useAppContext();
 
   const [trackingInfo, setTrackingInfo] = useState<TrackingInformation | null>(
     null
@@ -54,6 +55,10 @@ const TxProgress = () => {
 
     if (info) {
       setTrackingInfo(info);
+      setTxInProgress(
+        info.executionState === ExecutionState.PENDING ||
+          info.executionState === ExecutionState.IN_EXECUTION
+      );
       setWaitingTxData(false);
     }
   }, [qTrackingInformation.data]);

@@ -33,7 +33,6 @@ function HomePage() {
   const glqPriceEvolutionColor = glqPriceEvolution >= 0 ? "green" : "red";
 
   const handleOpenTx = (hash: string) => {
-    console.log("ici");
     const explorerUrl = `${GLQ_EXPLORER}/tx/${hash}`;
     window.open(explorerUrl, "_blank");
   };
