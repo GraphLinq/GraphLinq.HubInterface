@@ -1,10 +1,15 @@
-import { GLQCHAIN_POOL_NFT_ADDRESS, NULL_ADDRESS, UNISWAP_POOL_FACTORY_ADDRESS } from "@constants/index";
+import {
+  GLQCHAIN_POOL_NFT_ADDRESS,
+  NULL_ADDRESS,
+  UNISWAP_POOL_FACTORY_ADDRESS,
+} from "@constants/index";
+import univ3prices from "@thanpolas/univ3prices";
+import { abi as IUniswapV3FactoryABI } from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Factory.sol/IUniswapV3Factory.json";
+import { abi as IUniswapV3PoolABI } from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
 import { Contract, ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
-import univ3prices from '@thanpolas/univ3prices';
-import { abi as IUniswapV3FactoryABI } from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Factory.sol/IUniswapV3Factory.json';
-import { abi as IUniswapV3PoolABI } from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json';
+
 import ERC20 from "../contracts/ERC20.json";
 
 import { useEthersSigner } from "./useEthersProvider";
@@ -21,18 +26,16 @@ const usePool = () => {
   const injectedProvider = useEthersSigner();
   const provider = injectedProvider ? injectedProvider : rpcProvider;
 
-
-
   const [tokenIds, setTokenIds] = useState<string[]>([]);
 
   useEffect(() => {
     const findAllTokenIds = async () => {
       try {
         const nftContract = new Contract(
-            GLQCHAIN_POOL_NFT_ADDRESS,
-            nftContractABI,
-            provider
-          );
+          GLQCHAIN_POOL_NFT_ADDRESS,
+          nftContractABI,
+          provider
+        );
 
         const balance = await nftContract.balanceOf(account);
         const ids = [];
@@ -51,7 +54,11 @@ const usePool = () => {
     findAllTokenIds();
   }, [account, provider]);
 
-  const askForAllowance = async (tokenAddress: string, amount: string, targetContract: ethers.Contract) => {
+  const askForAllowance = async (
+    tokenAddress: string,
+    amount: string,
+    targetContract: ethers.Contract
+  ) => {
     let allowance = "0";
     const tokenContract = new Contract(tokenAddress, ERC20, provider);
     if (tokenContract) {
@@ -70,7 +77,7 @@ const usePool = () => {
         //   "Allowance pending, please allow the use of your token balance for the contract..."
         // );
         const approveTx = await tokenContract.approve(
-            targetContract.address,
+          targetContract.address,
           ethers.utils.parseEther(requiredAmount.toString())
         );
         // setPending("Waiting for confirmations...");
@@ -80,9 +87,15 @@ const usePool = () => {
         // );
       }
     }
-  }
+  };
 
-  const deployOrGetPool = async (tokenA: string, tokenB: string, amountA: string, amountB: string, feeInPercent: string) => {
+  const deployOrGetPool = async (
+    tokenA: string,
+    tokenB: string,
+    amountA: string,
+    amountB: string,
+    feeInPercent: string
+  ) => {
     try {
       const tokens = tokenA < tokenB ? [tokenA, tokenB] : [tokenB, tokenA];
       const fee = parseFloat(feeInPercent) * 10000;
@@ -95,37 +108,62 @@ const usePool = () => {
         provider
       );
 
-      const existingPoolAddress = await uniswapFactoryContract.getPool(tokens[0], tokens[1], fee, {gasLimit: 40000});
+      const existingPoolAddress = await uniswapFactoryContract.getPool(
+        tokens[0],
+        tokens[1],
+        fee,
+        { gasLimit: 40000 }
+      );
       console.log(existingPoolAddress);
       if (existingPoolAddress !== NULL_ADDRESS) {
         console.log(`Pool already exists at address: ${existingPoolAddress}`);
-        const poolContract = new Contract(existingPoolAddress, IUniswapV3PoolABI, provider);
+        const poolContract = new Contract(
+          existingPoolAddress,
+          IUniswapV3PoolABI,
+          provider
+        );
 
-        console.log('askForAllowance tokenA');
+        console.log("askForAllowance tokenA");
         await askForAllowance(tokenA, amountA, poolContract);
-        console.log('askForAllowance tokenB');
+        console.log("askForAllowance tokenB");
         await askForAllowance(tokenB, amountB, poolContract);
-        console.log('askForAllowance end');
+        console.log("askForAllowance end");
 
-        const sqrtPrice = univ3prices.utils.encodeSqrtRatioX96(amountAFormatted, amountBFormatted);
-        const tx = await poolContract.initialize(sqrtPrice.toString(), {gasLimit: 40000});
+        const sqrtPrice = univ3prices.utils.encodeSqrtRatioX96(
+          amountAFormatted,
+          amountBFormatted
+        );
+        const tx = await poolContract.initialize(sqrtPrice.toString(), {
+          gasLimit: 40000,
+        });
         await tx.wait();
 
-        console.log(`Pool successfully initialized with base price ${amountAFormatted} VS ${amountBFormatted} !`);
+        console.log(
+          `Pool successfully initialized with base price ${amountAFormatted} VS ${amountBFormatted} !`
+        );
       } else {
-        console.log('Deploying pool...');
-        const tx = await uniswapFactoryContract.createPool(tokens[0], tokens[1], fee, {gasLimit: 40000});
+        console.log("Deploying pool...");
+        const tx = await uniswapFactoryContract.createPool(
+          tokens[0],
+          tokens[1],
+          fee,
+          { gasLimit: 40000 }
+        );
         const receipt = await tx.wait();
 
-        const poolAddressEvent = receipt.events?.find((e) => e.event === 'PoolCreated');
+        const poolAddressEvent = receipt.events?.find(
+          (e: any) => e.event === "PoolCreated"
+        );
         if (poolAddressEvent) {
-          console.log(`Pool deployed at address: ${poolAddressEvent.args.pool}`);
+          console.log(
+            `Pool deployed at address: ${poolAddressEvent.args.pool}`
+          );
         } else {
-          console.log('PoolCreated event not found in transaction receipt.');
+          console.log("PoolCreated event not found in transaction receipt.");
         }
       }
     } catch (error) {
-      console.error('Failed to deploy/get pool:', error);
+      console.error("Failed to deploy/get pool:", error);
     }
   };
 

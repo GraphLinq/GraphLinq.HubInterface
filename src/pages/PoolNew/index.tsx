@@ -1,23 +1,29 @@
 import ArrowBack from "@assets/icons/arrow-back.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
+import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
-import MultiRangeSlider, { ChangeResult } from "multi-range-slider-react";
 import Button from "@components/Button";
-import "./_poolNew.scss";
+import InputNumber from "@components/InputNumber";
+import InputRadioGroup from "@components/InputRadioGroup";
+import Select from "@components/Select";
 import { GLQCHAIN_CURRENCIES, SITE_NAME } from "@constants/index";
-import { useState } from "react";
+import MultiRangeSlider, { ChangeResult } from "multi-range-slider-react";
+import "./_poolNew.scss";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAccount, useBalance } from "wagmi";
-import Spinner from "@assets/icons/spinner.svg?react";
+
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
-import Select from "@components/Select";
-import InputRadioGroup from "@components/InputRadioGroup";
-import InputNumber from "@components/InputNumber";
 import usePool from "../../composables/usePool";
+
 import { ethers } from "ethers";
-import { useTokenContract } from "../../composables/useContract";
+
+// import { useTokenContract } from "../../composables/useContract";
+import useUniswap from "../../composables/useUniswap";
+
+import { formatBigNumberToFixed, formatNumberToFixed } from "@utils/number";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -56,6 +62,7 @@ function PoolNewPage() {
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
   const { deployOrGetPool } = usePool();
+  const { quoteSwap } = useUniswap();
 
   const [firstCurrencyOption, setFirstCurrencyOption] = useState(0);
   const [secondCurrencyOption, setSecondCurrencyOption] = useState(1);
@@ -68,8 +75,12 @@ function PoolNewPage() {
   const firstCurrency = firstCurrencyOptions[firstCurrencyOption];
   const secondCurrency = secondCurrencyOptions[secondCurrencyOption];
 
-  const firstCurrencyTokenContract = useTokenContract(firstCurrency.address.glq);
-  const secondCurrencyTokenContract = useTokenContract(secondCurrency.address.glq);
+  // const firstCurrencyTokenContract = useTokenContract(
+  //   firstCurrency.address.glq
+  // );
+  // const secondCurrencyTokenContract = useTokenContract(
+  //   secondCurrency.address.glq
+  // );
 
   const [firstCurrencyAmount, setFirstCurrencyAmount] = useState("");
   const [secondCurrencyAmount, setSecondCurrencyAmount] = useState("");
@@ -77,17 +88,17 @@ function PoolNewPage() {
   const { data: firstCurrencyBalanceRaw } = useBalance({
     address: account,
     token: firstCurrency.address.glq,
-  });  
+  });
   const firstCurrencyBalance = firstCurrencyBalanceRaw?.value
-  ? ethers.utils.formatEther(firstCurrencyBalanceRaw?.value)
-  : "0";
+    ? ethers.utils.formatEther(firstCurrencyBalanceRaw?.value)
+    : "0";
   const { data: secondCurrencyBalanceRaw } = useBalance({
     address: account,
     token: secondCurrency.address.glq,
   });
   const secondCurrencyBalance = secondCurrencyBalanceRaw?.value
-  ? ethers.utils.formatEther(secondCurrencyBalanceRaw?.value)
-  : "0";
+    ? ethers.utils.formatEther(secondCurrencyBalanceRaw?.value)
+    : "0";
 
   const handleCurrencySelectChange = (
     active: number,
@@ -124,21 +135,27 @@ function PoolNewPage() {
 
   const [fees, setFees] = useState(feesOptions[2].value);
 
-  const [rangeMin, setRangeMin] = useState("35000");
-  const [rangeMax, setRangeMax] = useState("45000");
+  const [baseQuoteAmount, setBaseQuoteAmount] = useState(
+    ethers.BigNumber.from(0)
+  );
 
-  const [loading] = useState(false);
+  const [rangeMin, setRangeMin] = useState(-1);
+  const [rangeMax, setRangeMax] = useState(1);
+
+  const rangeMinAmount =
+    (parseFloat(ethers.utils.formatEther(baseQuoteAmount)) * (100 + rangeMin)) /
+    100;
+  const rangeMaxAmount =
+    (parseFloat(ethers.utils.formatEther(baseQuoteAmount)) * (100 + rangeMax)) /
+    100;
 
   const handleInput = (e: ChangeResult) => {
-    setRangeMin(e.minValue.toString());
-    setRangeMax(e.maxValue.toString());
+    setRangeMin(e.minValue);
+    setRangeMax(e.maxValue);
   };
-
-
 
   const handleSubmit = async () => {
     console.log("submit start");
-    
 
     await deployOrGetPool(
       firstCurrency.address.glq!,
@@ -149,6 +166,59 @@ function PoolNewPage() {
     );
     console.log("submit end");
   };
+
+  const [loadingQuote, setLoadingQuote] = useState(false);
+
+  let quoteQueue: Promise<void | unknown> = Promise.resolve();
+
+  const getQuote = async () => {
+    setLoadingQuote(true);
+
+    const quotePromise = new Promise(async (resolve, reject) => {
+      try {
+        if (!firstCurrency) return;
+
+        const base = await quoteSwap(
+          secondCurrency.address.glq!,
+          firstCurrency.address.glq!,
+          1
+        );
+
+        if (base) {
+          setBaseQuoteAmount(base);
+        }
+
+        resolve(base);
+      } catch (error) {
+        reject(error);
+      } finally {
+        setLoadingQuote(false);
+      }
+    });
+
+    quoteQueue = quoteQueue.then(() => quotePromise);
+
+    return quotePromise;
+  };
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    const debouncedGetQuote = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (account) {
+          getQuote();
+        }
+      }, 500);
+    };
+
+    debouncedGetQuote();
+
+    return () => clearTimeout(timer);
+  }, [account, firstCurrency, firstCurrencyAmount]);
+
+  const loading = loadingQuote;
 
   return (
     <>
@@ -166,7 +236,10 @@ function PoolNewPage() {
             <div className="main-card-title">Add liquidity</div>
           </div>
 
-          <div className="main-card-content">
+          <div
+            className="main-card-content poolNew-content"
+            data-disabled={loading}
+          >
             {!account ? (
               <>
                 <div className="main-card-notlogged">
@@ -225,35 +298,40 @@ function PoolNewPage() {
                       <div className="poolNew-block-title">
                         Price Range{" "}
                         <span>
+                          {formatBigNumberToFixed(baseQuoteAmount, 6)}{" "}
                           {firstCurrency.name} per {secondCurrency.name}
                         </span>
                       </div>
                       <div className="poolNew-block-content poolNew-range">
                         <div className="poolNew-range-price">
                           <div className="poolNew-range-value">
-                            {parseFloat(rangeMin).toLocaleString("en-US")}
+                            {formatNumberToFixed(rangeMinAmount, 7)}
                           </div>
                           <div className="poolNew-range-label">Low price</div>
                         </div>
                         <div className="poolNew-range-price">
                           <div className="poolNew-range-value">
-                            {parseFloat(rangeMax).toLocaleString("en-US")}
+                            {formatNumberToFixed(rangeMaxAmount, 7)}
                           </div>
                           <div className="poolNew-range-label">High price</div>
                         </div>
                         <div className="poolNew-range-input">
                           <MultiRangeSlider
-                            min={25000}
-                            max={50000}
-                            step={1000}
-                            minValue={parseFloat(rangeMin)}
-                            maxValue={parseFloat(rangeMax)}
+                            min={-1}
+                            max={1}
+                            step={0.1}
+                            minValue={rangeMin}
+                            maxValue={rangeMax}
                             stepOnly={true}
                             ruler={false}
                             label={false}
                             onInput={(e: ChangeResult) => {
                               handleInput(e);
                             }}
+                            minCaption={`${rangeMin}%`}
+                            maxCaption={`${
+                              rangeMax > 0 ? `+${rangeMax}` : rangeMax
+                            }%`}
                           />
                         </div>
                       </div>
