@@ -5,7 +5,7 @@ import SearchEmpty from "@assets/icons/search-empty.svg?react";
 import VisiblityOff from "@assets/icons/visibility-off.svg?react";
 import Visiblity from "@assets/icons/visibility.svg?react";
 import Button from "@components/Button";
-import "./_pool.scss";
+import "./style.scss";
 import Pill from "@components/Pill";
 import {
   ETH_TOKEN,

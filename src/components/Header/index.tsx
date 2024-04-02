@@ -1,4 +1,4 @@
-import "./_header.scss";
+import "./style.scss";
 import Bridge from "@assets/icons/bridge.svg?react";
 import Connect from "@assets/icons/connect-wallet.svg?react";
 import Dashboard from "@assets/icons/dashboard.svg?react";

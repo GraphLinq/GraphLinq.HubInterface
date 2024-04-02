@@ -9,7 +9,7 @@ import InputRadioGroup from "@components/InputRadioGroup";
 import Select from "@components/Select";
 import { GLQCHAIN_CURRENCIES, SITE_NAME } from "@constants/index";
 import MultiRangeSlider, { ChangeResult } from "multi-range-slider-react";
-import "./_poolNew.scss";
+import "./style.scss";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAccount, useBalance } from "wagmi";

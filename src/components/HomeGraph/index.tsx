@@ -1,4 +1,4 @@
-import "./_homeGraph.scss";
+import "./style.scss";
 import { useEffect } from "react";
 
 function HomeGraph() {

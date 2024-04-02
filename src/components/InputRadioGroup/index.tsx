@@ -1,5 +1,5 @@
 import React from "react";
-import "./_inputRadioGroup.scss";
+import "./style.scss";
 
 interface Option {
   label: string;

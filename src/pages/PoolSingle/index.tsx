@@ -1,5 +1,5 @@
 import Button from "@components/Button";
-import "./_poolSingle.scss";
+import "./style.scss";
 import {
   SITE_NAME,
 } from "@constants/index";

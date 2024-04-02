@@ -1,4 +1,4 @@
-import "./_swap.scss";
+import "./style.scss";
 import Arrow from "@assets/icons/arrow.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";

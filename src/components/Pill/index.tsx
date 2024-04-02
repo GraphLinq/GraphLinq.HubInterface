@@ -1,6 +1,8 @@
-import React from 'react';
-import "./_pill.scss";
 import Plus from "@assets/icons/plus.svg?react";
+import React from 'react';
+
+import "./style.scss";
+
 
 interface PillProps {
   onClick?: () => void;

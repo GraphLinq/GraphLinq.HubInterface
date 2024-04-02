@@ -1,4 +1,4 @@
-import "./_bridge.scss";
+import "./style.scss";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
@@ -18,6 +18,7 @@ import {
 import { useAppContext } from "@context/AppContext";
 import { useQuery } from "@tanstack/react-query";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
+import { getErrorMessage } from "@utils/errors";
 import { formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
@@ -31,10 +32,9 @@ import {
 } from "../../composables/useContract";
 import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
+import useSound from "../../composables/useSound";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
-import { getErrorMessage } from "@utils/errors";
-import useSound from "../../composables/useSound";
 
 const tokenIcons = {
   GLQ: <GLQToken />,

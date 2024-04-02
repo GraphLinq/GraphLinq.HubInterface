@@ -1,7 +1,7 @@
 import Alert from "@components/Alert";
 import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
-import "./_wrapper.scss";
+import "./style.scss";
 import {
   GLQ_EXPLORER,
   GLQ_TOKEN,

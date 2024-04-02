@@ -1,6 +1,7 @@
-import "./_txProgress.scss";
+import "./style.scss";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Alert from "@components/Alert";
+import { GLQ_EXPLORER, MAINNET_EXPLORER } from "@constants/index";
 import { useAppContext } from "@context/AppContext";
 import { useQuery } from "@tanstack/react-query";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID } from "@utils/chains";
@@ -8,11 +9,10 @@ import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useAccount, useChainId } from "wagmi";
 
+import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
-import useChains from "../../composables/useChains";
-import { GLQ_EXPLORER, MAINNET_EXPLORER } from "@constants/index";
 
 const TxProgress = () => {
   const { address: account } = useAccount();
