@@ -21,6 +21,7 @@ import { WagmiProvider } from "wagmi";
 
 import { config } from "./config";
 import { HUB_URL } from "./libs/constants";
+import PoolSinglePage from "@pages/PoolSingle";
 
 function App() {
   const queryClient = new QueryClient();
@@ -89,6 +90,10 @@ function App() {
         {
           path: "/pool/new",
           element: <PoolNewPage />,
+        },
+        {
+          path: "/pool/:id",
+          element: <PoolSinglePage />,
         },
         {
           path: "/bridge",
