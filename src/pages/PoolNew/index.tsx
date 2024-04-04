@@ -24,6 +24,8 @@ import { ethers } from "ethers";
 import useUniswap from "../../composables/useUniswap";
 
 import { formatBigNumberToFixed, formatNumberToFixed } from "@utils/number";
+import { Token } from "@uniswap/sdk-core";
+import { GLQ_CHAIN_ID } from "@utils/chains";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -61,7 +63,7 @@ function PoolNewPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
-  const { deployOrGetPool } = usePool();
+  const { deployOrGetPool, addLiquidity } = usePool();
   const { quoteSwap } = useUniswap();
 
   const [firstCurrencyOption, setFirstCurrencyOption] = useState(0);
@@ -155,15 +157,40 @@ function PoolNewPage() {
   };
 
   const handleSubmit = async () => {
-    console.log("submit start");
+    console.log("handleSubmit");
+    console.log("deployOrGetPool start");
 
-    await deployOrGetPool(
+    const poolAddress = await deployOrGetPool(
       firstCurrency.address.glq!,
       secondCurrency.address.glq!,
       firstCurrencyAmount,
       secondCurrencyAmount,
       fees
     );
+    console.log("deployOrGetPool end");
+
+    console.log("check poolAddress", poolAddress);
+    if (poolAddress) {
+      console.log("addLiquidity start");
+      await addLiquidity(
+        poolAddress,
+        new Token(
+          GLQ_CHAIN_ID,
+          firstCurrency.address.glq!,
+          firstCurrency.decimals
+        ),
+        new Token(
+          GLQ_CHAIN_ID,
+          secondCurrency.address.glq!,
+          secondCurrency.decimals
+        ),
+        firstCurrencyAmount,
+        secondCurrencyAmount,
+        rangeMinAmount,
+        rangeMaxAmount
+      );
+      console.log("addLiquidity end");
+    }
     console.log("submit end");
   };
 

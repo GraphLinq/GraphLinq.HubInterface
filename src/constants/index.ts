@@ -55,6 +55,7 @@ export type Token = {
     glq: string;
   };
   exchangeRate: "eth" | "glq";
+  decimals: number;
 };
 
 export const GLQ_TOKEN: Token = {
@@ -72,6 +73,7 @@ export const GLQ_TOKEN: Token = {
     mainnet: "WGLQ_GLQCHAIN",
   },
   exchangeRate: "glq",
+  decimals: 18,
 };
 
 export const WGLQ_TOKEN: Token = {
@@ -93,6 +95,7 @@ export const WGLQ_TOKEN: Token = {
     mainnet: "WGLQ_GLQCHAIN",
   },
   exchangeRate: "glq",
+  decimals: 18,
 };
 
 export const ETH_TOKEN: Token = {
@@ -112,6 +115,7 @@ export const ETH_TOKEN: Token = {
     mainnet: "WETH_GLQCHAIN",
   },
   exchangeRate: "eth",
+  decimals: 18,
 };
 
 export const WETH_TOKEN: Token = {
@@ -131,6 +135,7 @@ export const WETH_TOKEN: Token = {
     mainnet: "WETH_GLQCHAIN",
   },
   exchangeRate: "eth",
+  decimals: 18,
 };
 
 export const MAINNET_CURRENCIES = [ETH_TOKEN, WGLQ_TOKEN];
