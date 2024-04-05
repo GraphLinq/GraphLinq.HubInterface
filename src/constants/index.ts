@@ -38,7 +38,7 @@ export const GLQCHAIN_BRIDGE_OUT_WGLQ =
 export const GLQCHAIN_WRAPPER = "0xEB567ec41738c2bAb2599A1070FC5B727721b3B6";
 
 /* Tokens */
-export type Token = {
+export type AppToken = {
   icon: JSX.Element | null;
   name: "GLQ" | "WGLQ" | "ETH" | "WETH";
   address: {
@@ -58,7 +58,7 @@ export type Token = {
   decimals: number;
 };
 
-export const GLQ_TOKEN: Token = {
+export const GLQ_TOKEN: AppToken = {
   icon: null,
   name: "GLQ",
   address: {
@@ -76,7 +76,7 @@ export const GLQ_TOKEN: Token = {
   decimals: 18,
 };
 
-export const WGLQ_TOKEN: Token = {
+export const WGLQ_TOKEN: AppToken = {
   icon: null,
   name: "WGLQ",
   address: {
@@ -98,7 +98,7 @@ export const WGLQ_TOKEN: Token = {
   decimals: 18,
 };
 
-export const ETH_TOKEN: Token = {
+export const ETH_TOKEN: AppToken = {
   icon: null,
   name: "ETH",
   address: {
@@ -118,7 +118,7 @@ export const ETH_TOKEN: Token = {
   decimals: 18,
 };
 
-export const WETH_TOKEN: Token = {
+export const WETH_TOKEN: AppToken = {
   icon: null,
   name: "WETH",
   address: {
@@ -140,3 +140,18 @@ export const WETH_TOKEN: Token = {
 
 export const MAINNET_CURRENCIES = [ETH_TOKEN, WGLQ_TOKEN];
 export const GLQCHAIN_CURRENCIES = [WGLQ_TOKEN, WETH_TOKEN];
+
+export const getTokenByAddress = (
+  address: `0x${string}`,
+  chain: "eth" | "glq"
+) => {
+  if (chain === "eth") {
+    return MAINNET_CURRENCIES.find(
+      (currency) => currency.address.mainnet === address
+    );
+  } else {
+    return GLQCHAIN_CURRENCIES.find(
+      (currency) => currency.address.glq === address
+    );
+  }
+};

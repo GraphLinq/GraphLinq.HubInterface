@@ -7,11 +7,7 @@ import Visiblity from "@assets/icons/visibility.svg?react";
 import Button from "@components/Button";
 import "./style.scss";
 import Pill from "@components/Pill";
-import {
-  ETH_TOKEN,
-  GLQ_TOKEN,
-  SITE_NAME,
-} from "@constants/index";
+import { ETH_TOKEN, GLQ_TOKEN, SITE_NAME } from "@constants/index";
 import { formatNumberToFixed } from "@utils/number";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
@@ -20,6 +16,7 @@ import { useAccount } from "wagmi";
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
+import { Position, PositionStatus } from "../../model/pool";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -34,41 +31,13 @@ function PoolPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
-  const { tokenIds } = usePool();
-
-  console.log(tokenIds);
-
-  enum PositionStatus {
-    IN_RANGE,
-    CLOSED,
-  }
-
-  const positions = [
-    {
-      pair: {
-        first: GLQ_TOKEN,
-        second: ETH_TOKEN,
-      },
-      fees: 1,
-      min: 0,
-      max: Infinity,
-      status: PositionStatus.IN_RANGE,
-    },
-    {
-      pair: {
-        first: GLQ_TOKEN,
-        second: ETH_TOKEN,
-      },
-      fees: 0.3,
-      min: 54990.2,
-      max: 1000000,
-      status: PositionStatus.CLOSED,
-    },
-  ];
+  const { ownPositions } = usePool();
 
   const [displayClosedPositions, setDisplayClosedPositions] = useState(true);
 
-  const filteredPositions = !displayClosedPositions ? positions.filter((pos) => pos.status !== PositionStatus.CLOSED) : positions;
+  const filteredPositions = !displayClosedPositions
+    ? ownPositions.filter((pos) => pos.status !== PositionStatus.CLOSED)
+    : ownPositions;
 
   return (
     <>
@@ -96,7 +65,7 @@ function PoolPage() {
                 {isGLQChain ? (
                   <>
                     <div className="pool-amount">
-                      {positions.length === 0 ? (
+                      {ownPositions.length === 0 ? (
                         <>
                           <div className="pool-empty">
                             <div className="pool-empty-info">
@@ -111,7 +80,7 @@ function PoolPage() {
                         <>
                           <div className="pool-list-header">
                             <div className="pool-list-header-left">
-                              Your Positions <span>{positions.length}</span>
+                              Your Positions <span>{ownPositions.length}</span>
                             </div>
                             <div className="pool-list-header-right">
                               <Pill
@@ -166,7 +135,9 @@ function PoolPage() {
                                       <div className="pool-list-item-range-max">
                                         Max:{" "}
                                         <span>
-                                          {pos.max === Infinity ? "∞" : formatNumberToFixed(pos.max)}
+                                          {pos.max === Infinity
+                                            ? "∞"
+                                            : formatNumberToFixed(pos.max)}
                                         </span>{" "}
                                         {pos.pair.first.name} per{" "}
                                         {pos.pair.second.name}

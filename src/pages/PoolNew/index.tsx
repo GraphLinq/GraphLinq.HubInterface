@@ -63,7 +63,7 @@ function PoolNewPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
-  const { deployOrGetPool, addLiquidity } = usePool();
+  const { deployOrGetPool, mintLiquidity } = usePool();
   const { quoteSwap } = useUniswap();
 
   const [firstCurrencyOption, setFirstCurrencyOption] = useState(0);
@@ -144,11 +144,16 @@ function PoolNewPage() {
   const [rangeMin, setRangeMin] = useState(-1);
   const [rangeMax, setRangeMax] = useState(1);
 
+  const rangeMinPerc = rangeMin * 10;
+  const rangeMaxPerc = rangeMax * 10;
+
   const rangeMinAmount =
-    (parseFloat(ethers.utils.formatEther(baseQuoteAmount)) * (100 + rangeMin)) /
+    (parseFloat(ethers.utils.formatEther(baseQuoteAmount)) *
+      (100 + rangeMinPerc)) /
     100;
   const rangeMaxAmount =
-    (parseFloat(ethers.utils.formatEther(baseQuoteAmount)) * (100 + rangeMax)) /
+    (parseFloat(ethers.utils.formatEther(baseQuoteAmount)) *
+      (100 + rangeMaxPerc)) /
     100;
 
   const handleInput = (e: ChangeResult) => {
@@ -171,8 +176,8 @@ function PoolNewPage() {
 
     console.log("check poolAddress", poolAddress);
     if (poolAddress) {
-      console.log("addLiquidity start");
-      await addLiquidity(
+      console.log("mintLiquidity start");
+      await mintLiquidity(
         poolAddress,
         new Token(
           GLQ_CHAIN_ID,
@@ -186,10 +191,10 @@ function PoolNewPage() {
         ),
         firstCurrencyAmount,
         secondCurrencyAmount,
-        rangeMinAmount,
-        rangeMaxAmount
+        rangeMinPerc,
+        rangeMaxPerc
       );
-      console.log("addLiquidity end");
+      console.log("mintLiquidity end");
     }
     console.log("submit end");
   };
@@ -355,9 +360,11 @@ function PoolNewPage() {
                             onInput={(e: ChangeResult) => {
                               handleInput(e);
                             }}
-                            minCaption={`${rangeMin}%`}
+                            minCaption={`${rangeMinPerc.toFixed(2)}%`}
                             maxCaption={`${
-                              rangeMax > 0 ? `+${rangeMax}` : rangeMax
+                              rangeMax > 0
+                                ? `+${rangeMaxPerc.toFixed(2)}`
+                                : rangeMaxPerc.toFixed(2)
                             }%`}
                           />
                         </div>

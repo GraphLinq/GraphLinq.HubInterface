@@ -2,6 +2,7 @@ import {
   GLQCHAIN_POOL_NFT_ADDRESS,
   NULL_ADDRESS,
   UNISWAP_POOL_FACTORY_ADDRESS,
+  getTokenByAddress,
 } from "@constants/index";
 import univ3prices from "@thanpolas/univ3prices";
 import {
@@ -14,27 +15,30 @@ import {
 } from "@uniswap/sdk-core";
 import { abi as IUniswapV3FactoryABI } from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Factory.sol/IUniswapV3Factory.json";
 import { abi as IUniswapV3PoolABI } from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
+import { abi as NonfungiblePositionManagerABI } from "@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json";
 import {
   NonfungiblePositionManager,
   Pool,
-  Position,
+  Position as UniPosition,
   nearestUsableTick,
   priceToClosestTick,
+  tickToPrice,
 } from "@uniswap/v3-sdk";
 import { Contract, ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 
 import ERC20 from "../contracts/ERC20.json";
-import { PoolState } from "../model/pool";
+import { PoolState, Position, PositionStatus } from "../model/pool";
 
 import { useEthersSigner } from "./useEthersProvider";
 import useRpcProvider from "./useRpcProvider";
+import { GLQ_CHAIN_ID } from "@utils/chains";
 
-const nftContractABI = [
-  "function balanceOf(address owner) external view returns (uint256 balance)",
-  "function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256 tokenId)",
-];
+// const nftContractABI = [
+//   "function balanceOf(address owner) external view returns (uint256 balance)",
+//   "function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256 tokenId)",
+// ];
 
 const usePool = () => {
   const { address: account } = useAccount();
@@ -42,32 +46,103 @@ const usePool = () => {
   const injectedProvider = useEthersSigner();
   const provider = injectedProvider ?? rpcProvider;
 
-  const [tokenIds, setTokenIds] = useState<string[]>([]);
+  const [ownPositionIds, setOwnPositionIds] = useState<string[]>([]);
+  const [ownPositions, setOwnPositions] = useState<Position[]>([]);
+
+  const uniswapFactoryContract = new Contract(
+    UNISWAP_POOL_FACTORY_ADDRESS,
+    IUniswapV3FactoryABI,
+    provider
+  );
+  const nftPositionManagerContract = new Contract(
+    GLQCHAIN_POOL_NFT_ADDRESS,
+    NonfungiblePositionManagerABI,
+    provider
+  );
 
   useEffect(() => {
-    const findAllTokenIds = async () => {
+    const findAllPositions = async () => {
       try {
-        const nftContract = new Contract(
-          GLQCHAIN_POOL_NFT_ADDRESS,
-          nftContractABI,
-          provider
-        );
-
-        const balance = await nftContract.balanceOf(account);
-        const ids = [];
+        const balance = await nftPositionManagerContract.balanceOf(account);
+        const ids: string[] = [];
+        const positions: Position[] = [];
 
         for (let index = 0; index < balance.toNumber(); index++) {
-          const tokenId = await nftContract.tokenOfOwnerByIndex(account, index);
+          const tokenId = await nftPositionManagerContract.tokenOfOwnerByIndex(
+            account,
+            index
+          );
           ids.push(tokenId.toString());
+
+          const tempPosition =
+            await nftPositionManagerContract.positions(tokenId);
+
+          const firstAppToken = getTokenByAddress(tempPosition.token0, "glq");
+          const secondAppToken = getTokenByAddress(tempPosition.token1, "glq");
+
+          const poolAddress = uniswapFactoryContract.getPool(
+            tempPosition.token0,
+            tempPosition.token1,
+            tempPosition.fee
+          );
+          const poolState = await getPoolState(poolAddress);
+          if (firstAppToken && secondAppToken && poolState) {
+            const token0 = new Token(
+              GLQ_CHAIN_ID,
+              firstAppToken.address.glq!,
+              firstAppToken.decimals
+            );
+            const token1 = new Token(
+              GLQ_CHAIN_ID,
+              secondAppToken.address.glq!,
+              secondAppToken.decimals
+            );
+
+            const minPrice = parseFloat(
+              tickToPrice(
+                token0,
+                token1,
+                tempPosition.tickLower
+              ).toSignificant()
+            );
+            const maxPrice = parseFloat(
+              tickToPrice(
+                token0,
+                token1,
+                tempPosition.tickUpper
+              ).toSignificant()
+            );
+            const currentPrice = parseFloat(
+              tickToPrice(token0, token1, poolState.tick).toSignificant()
+            );
+
+            console.log(poolAddress);
+            console.log(minPrice, currentPrice, maxPrice);
+
+            positions.push({
+              pair: {
+                first: secondAppToken,
+                second: firstAppToken,
+              },
+              fees: tempPosition.fee / 10000,
+              min: minPrice,
+              max: maxPrice,
+              status:
+                currentPrice >= minPrice && currentPrice <= maxPrice
+                  ? PositionStatus.IN_RANGE
+                  : PositionStatus.CLOSED,
+            });
+          }
         }
 
-        setTokenIds(ids);
+        setOwnPositionIds(ids);
+        setOwnPositions(positions);
       } catch (error) {
-        console.error("Error getting pools :", error);
+        console.error("Error getting positions :", error);
       }
     };
 
-    findAllTokenIds();
+    findAllPositions();
   }, [account, provider]);
 
   const getPoolState = async (
@@ -145,12 +220,6 @@ const usePool = () => {
       const amountAFormatted = ethers.utils.parseEther(amountA);
       const amountBFormatted = ethers.utils.parseEther(amountB);
 
-      const uniswapFactoryContract = new Contract(
-        UNISWAP_POOL_FACTORY_ADDRESS,
-        IUniswapV3FactoryABI,
-        provider
-      );
-
       existingPoolAddress = await uniswapFactoryContract.getPool(
         tokens[0],
         tokens[1],
@@ -209,17 +278,17 @@ const usePool = () => {
     return existingPoolAddress;
   };
 
-  const addLiquidity = async (
+  const mintLiquidity = async (
     addressPool: string,
     tokenA: Token,
     tokenB: Token,
     amountA: string,
     amountB: string,
-    priceMin: number,
-    priceMax: number
+    minPriceFromCurrent: number,
+    maxPriceFromCurrent: number
   ) => {
     try {
-      const [state] = await Promise.all([getPoolState(addressPool)]);
+      const state = await getPoolState(addressPool);
 
       if (!state || !account) return;
 
@@ -247,10 +316,10 @@ const usePool = () => {
       const currentPrice = pool.token0Price;
 
       const minTargetFraction = currentPrice.asFraction.multiply(
-        new Fraction(100 - 5, 100)
+        new Fraction(100 + minPriceFromCurrent, 100)
       );
       const maxTargetFraction = currentPrice.asFraction.multiply(
-        new Fraction(100 + 5, 100)
+        new Fraction(100 + maxPriceFromCurrent, 100)
       );
 
       const minTargetPrice = new Price(
@@ -275,7 +344,7 @@ const usePool = () => {
         state.tickSpacing
       );
 
-      const position = Position.fromAmounts({
+      const position = UniPosition.fromAmounts({
         pool,
         tickLower: tickMin,
         tickUpper: tickMax,
@@ -302,12 +371,6 @@ const usePool = () => {
         data: calldata,
       };
 
-      const nftPositionManagerContract = new Contract(
-        GLQCHAIN_POOL_NFT_ADDRESS,
-        IUniswapV3PoolABI,
-        provider
-      );
-
       await askForAllowance(
         tokenA.address,
         amountA,
@@ -329,7 +392,13 @@ const usePool = () => {
     }
   };
 
-  return { tokenIds, getPoolState, deployOrGetPool, addLiquidity };
+  return {
+    ownPositionIds,
+    ownPositions,
+    getPoolState,
+    deployOrGetPool,
+    mintLiquidity,
+  };
 };
 
 export default usePool;
