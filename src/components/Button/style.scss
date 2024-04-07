@@ -22,13 +22,14 @@
     fill: var(--c-white);
   }
 
-  &:active {
+  &:not([data-disabled="true"]):active {
     transform: scale(0.95);
   }
 
   &[data-disabled="true"] {
     position: relative;
     opacity: 0.5;
+    cursor: not-allowed;
 
     &:before {
       content: "";
@@ -48,7 +49,7 @@
       transition: 0.2s fill ease-out;
     }
 
-    &:hover {
+    &:not([data-disabled="true"]):hover {
       color: var(--c-white);
 
       path {
@@ -68,7 +69,7 @@
       transition: 0.2s fill ease-out;
     }
 
-    &:hover {
+    &:not([data-disabled="true"]):hover {
       color: var(--c-white);
       border-color: var(--c-lavender);
 

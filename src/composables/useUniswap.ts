@@ -85,7 +85,7 @@ const useUniswap = () => {
         sqrtPriceLimitX96: 0,
       };
 
-      return await swapRouter.exactInputSingle(params, { gasLimit: 400000 });
+      return await swapRouter.exactInputSingle(params, { gasLimit: 5000000 });
     } catch (error: any) {
       console.error("Failed to execute swap:", error);
       throw new Error(error);

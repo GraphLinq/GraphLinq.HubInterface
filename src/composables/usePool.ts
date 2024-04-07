@@ -264,7 +264,7 @@ const usePool = () => {
         tokens[0],
         tokens[1],
         fee,
-        { gasLimit: 40000 }
+        { gasLimit: 5000000 }
       );
       if (existingPoolAddress !== NULL_ADDRESS) {
         console.log(`Pool already exists at address: ${existingPoolAddress}`);
@@ -477,13 +477,17 @@ const usePool = () => {
     const collectParams = {
       tokenId: position.id,
       recipient: account,
-      amount0Max: ethers.constants.MaxUint256,
-      amount1Max: ethers.constants.MaxUint256,
+      amount0Max: position.claimableFees.first,
+      amount1Max: position.claimableFees.second,
     };
 
+    console.log(collectParams);
+
     try {
-      const txResponse =
-        await nftPositionManagerContract.collect(collectParams);
+      const txResponse = await nftPositionManagerContract.collect(
+        collectParams,
+        { gasLimit: 5000000 }
+      );
       const receipt = await txResponse.wait();
       console.log(
         `Fees collected. Transaction hash: ${receipt.transactionHash}`

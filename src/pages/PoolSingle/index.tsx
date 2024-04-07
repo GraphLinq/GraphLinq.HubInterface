@@ -12,7 +12,11 @@ import { useAccount } from "wagmi";
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
-import { formatBigNumberToFixed, formatNumberToFixed } from "@utils/number";
+import {
+  formatBigNumberToFixed,
+  formatNumberToDollars,
+  formatNumberToFixed,
+} from "@utils/number";
 import { PositionStatus } from "../../model/pool";
 
 const tokenIcons = {
@@ -44,7 +48,7 @@ function PoolSinglePage() {
   const position = ownPositions.find((pos) => pos.id === poolId);
 
   const handleClaim = async () => {
-    if (position) {
+    if (position && !position.claimableFees.total.isZero()) {
       console.log("claim start");
       await claimFees(position);
       console.log("claim end");
@@ -111,8 +115,13 @@ function PoolSinglePage() {
                           <div className="poolSingle-subtitle">Liquidity</div>
                           <div className="poolSingle-value">
                             <span>
-                              {formatBigNumberToFixed(
-                                position.liquidity.total,
+                              {formatNumberToDollars(
+                                parseFloat(
+                                  formatBigNumberToFixed(
+                                    position.liquidity.total,
+                                    2
+                                  )
+                                ),
                                 2
                               )}
                             </span>
@@ -167,8 +176,13 @@ function PoolSinglePage() {
                               </div>
                               <div className="poolSingle-value">
                                 <span>
-                                  {formatBigNumberToFixed(
-                                    position.claimableFees.total,
+                                  {formatNumberToDollars(
+                                    parseFloat(
+                                      formatBigNumberToFixed(
+                                        position.claimableFees.total,
+                                        2
+                                      )
+                                    ),
                                     2
                                   )}
                                 </span>
@@ -176,7 +190,11 @@ function PoolSinglePage() {
                             </div>
 
                             <div className="poolSingle-block-right">
-                              <Button onClick={handleClaim} type="tertiary">
+                              <Button
+                                onClick={handleClaim}
+                                type="tertiary"
+                                disabled={position.claimableFees.total.isZero()}
+                              >
                                 Collect fees
                               </Button>
                             </div>

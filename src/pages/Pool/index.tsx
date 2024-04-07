@@ -1,4 +1,5 @@
 import Canceled from "@assets/icons/canceled.svg?react";
+import Spinner from "@assets/icons/spinner.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import SearchEmpty from "@assets/icons/search-empty.svg?react";
@@ -69,7 +70,14 @@ function PoolPage() {
                       {ownPositions.length === 0 ? (
                         <>
                           {loadingPositions ? (
-                            <>Loading...</>
+                            <div className="pool-empty">
+                              <div className="pool-empty-info">
+                                <Spinner />
+                                <div className="pool-empty-label">
+                                  Loading positions...
+                                </div>
+                              </div>
+                            </div>
                           ) : (
                             <>
                               <div className="pool-empty">
