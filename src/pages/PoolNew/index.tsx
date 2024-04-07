@@ -166,8 +166,16 @@ function PoolNewPage() {
     console.log("deployOrGetPool start");
 
     const poolAddress = await deployOrGetPool(
-      firstCurrency.address.glq!,
-      secondCurrency.address.glq!,
+      new Token(
+        GLQ_CHAIN_ID,
+        firstCurrency.address.glq!,
+        firstCurrency.decimals
+      ),
+      new Token(
+        GLQ_CHAIN_ID,
+        secondCurrency.address.glq!,
+        secondCurrency.decimals
+      ),
       firstCurrencyAmount,
       secondCurrencyAmount,
       fees
@@ -394,9 +402,10 @@ function PoolNewPage() {
                               onClick={() => {
                                 if (firstCurrencyBalance) {
                                   setFirstCurrencyAmount(
-                                    (
-                                      parseFloat(firstCurrencyBalance) / 4
-                                    ).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(firstCurrencyBalance) / 4,
+                                      6
+                                    )
                                   );
                                 }
                               }}
@@ -407,9 +416,10 @@ function PoolNewPage() {
                               onClick={() => {
                                 if (firstCurrencyBalance) {
                                   setFirstCurrencyAmount(
-                                    (
-                                      parseFloat(firstCurrencyBalance) / 2
-                                    ).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(firstCurrencyBalance) / 2,
+                                      6
+                                    )
                                   );
                                 }
                               }}
@@ -420,7 +430,10 @@ function PoolNewPage() {
                               onClick={() => {
                                 if (firstCurrencyBalance) {
                                   setFirstCurrencyAmount(
-                                    parseFloat(firstCurrencyBalance).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(firstCurrencyBalance),
+                                      6
+                                    )
                                   );
                                 }
                               }}
@@ -449,9 +462,10 @@ function PoolNewPage() {
                               onClick={() => {
                                 if (firstCurrencyBalance) {
                                   setSecondCurrencyAmount(
-                                    (
-                                      parseFloat(secondCurrencyBalance) / 4
-                                    ).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(secondCurrencyBalance) / 4,
+                                      6
+                                    )
                                   );
                                 }
                               }}
@@ -462,9 +476,10 @@ function PoolNewPage() {
                               onClick={() => {
                                 if (firstCurrencyBalance) {
                                   setSecondCurrencyAmount(
-                                    (
-                                      parseFloat(secondCurrencyBalance) / 2
-                                    ).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(secondCurrencyBalance) / 2,
+                                      6
+                                    )
                                   );
                                 }
                               }}
@@ -475,7 +490,10 @@ function PoolNewPage() {
                               onClick={() => {
                                 if (firstCurrencyBalance) {
                                   setSecondCurrencyAmount(
-                                    parseFloat(secondCurrencyBalance).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(secondCurrencyBalance),
+                                      6
+                                    )
                                   );
                                 }
                               }}

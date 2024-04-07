@@ -29,13 +29,22 @@ function PoolSinglePage() {
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
   const { id: poolId } = useParams();
-  const { loadingPositions, ownPositionIds, ownPositions } = usePool();
+  const { loadedPositions, ownPositionIds, ownPositions, widthdrawLiquidity } =
+    usePool();
   const navigate = useNavigate();
 
-  if (!loadingPositions && poolId && !ownPositionIds.includes(poolId)) {
+  if (loadedPositions && poolId && !ownPositionIds.includes(poolId)) {
     navigate("/pool");
   }
   const position = ownPositions.find((pos) => pos.id === poolId);
+
+  const handleWithdraw = async () => {
+    if (position) {
+      console.log("withdraw start");
+      await widthdrawLiquidity(position);
+      console.log("withdraw end");
+    }
+  };
 
   return (
     <>
@@ -260,10 +269,12 @@ function PoolSinglePage() {
                         </div>
 
                         <div className="poolSingle-actions">
-                          <Button onClick={() => {}} type="tertiary">
+                          <Button link={"/pool/new"} type="tertiary">
                             Increase liquidity
                           </Button>
-                          <Button onClick={() => {}}>Remove liquidity</Button>
+                          <Button onClick={handleWithdraw}>
+                            Remove liquidity
+                          </Button>
                         </div>
                       </>
                     )}

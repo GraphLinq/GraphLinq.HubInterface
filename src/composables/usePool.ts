@@ -34,6 +34,7 @@ import { PoolState, Position, PositionStatus } from "../model/pool";
 import { useEthersSigner } from "./useEthersProvider";
 import useRpcProvider from "./useRpcProvider";
 import { GLQ_CHAIN_ID } from "@utils/chains";
+import { getErrorMessage } from "@utils/errors";
 
 // const nftContractABI = [
 //   "function balanceOf(address owner) external view returns (uint256 balance)",
@@ -48,7 +49,10 @@ const usePool = () => {
 
   const [ownPositionIds, setOwnPositionIds] = useState<string[]>([]);
   const [ownPositions, setOwnPositions] = useState<Position[]>([]);
-  const [loadingPositions, setLoadingPositions] = useState(true);
+  const [loadingPositions, setLoadingPositions] = useState(false);
+  const [loadedPositions, setLoadedPositions] = useState(false);
+
+  const [error, setError] = useState<string | null>(null);
 
   const uniswapFactoryContract = new Contract(
     UNISWAP_POOL_FACTORY_ADDRESS,
@@ -63,7 +67,11 @@ const usePool = () => {
 
   useEffect(() => {
     const findAllPositions = async () => {
+      if (!account || !provider || loadedPositions) {
+        return;
+      }
       try {
+        setLoadingPositions(true);
         const balance = await nftPositionManagerContract.balanceOf(account);
         const ids: string[] = [];
         const positions: Position[] = [];
@@ -117,12 +125,16 @@ const usePool = () => {
               tickToPrice(token0, token1, poolState.tick).toSignificant()
             );
 
+            if (tempPosition.fee / 10000 == 0.01) {
+              console.log(tempPosition);
+            }
+
             positions.push({
               id: tokenId.toString(),
               liquidity: {
                 total: tempPosition.liquidity,
-                first: tempPosition.tokensOwed0,
-                second: tempPosition.tokensOwed1,
+                first: tempPosition.tokensOwed0, // Wrong data
+                second: tempPosition.tokensOwed1, // Wrong data
               },
               pair: {
                 first: secondAppToken,
@@ -150,8 +162,10 @@ const usePool = () => {
         setOwnPositionIds(ids);
         setOwnPositions(positions);
         setLoadingPositions(false);
+        setLoadedPositions(true);
       } catch (error) {
         console.error("Error getting positions :", error);
+        setError(getErrorMessage(error));
         setLoadingPositions(false);
       }
     };
@@ -184,6 +198,7 @@ const usePool = () => {
         tick: Number(slot[1]),
       };
     } catch (error) {
+      setError(getErrorMessage(error));
       console.error("Error getting pool state:", error);
       return null;
     }
@@ -218,8 +233,8 @@ const usePool = () => {
   };
 
   const deployOrGetPool = async (
-    tokenA: string,
-    tokenB: string,
+    tokenA: Token,
+    tokenB: Token,
     amountA: string,
     amountB: string,
     feeInPercent: string
@@ -227,12 +242,23 @@ const usePool = () => {
     let existingPoolAddress = null;
 
     try {
-      const tokens = tokenA < tokenB ? [tokenA, tokenB] : [tokenB, tokenA];
+      const tokens =
+        tokenA.address > tokenB.address
+          ? [tokenA.address, tokenB.address]
+          : [tokenB.address, tokenA.address];
 
       const fee = parseFloat(feeInPercent) * 10000;
 
-      const amountAFormatted = ethers.utils.parseEther(amountA);
-      const amountBFormatted = ethers.utils.parseEther(amountB);
+      const amountAFormatted = ethers.utils.parseUnits(
+        amountA,
+        tokenA.decimals
+      );
+      const amountBFormatted = ethers.utils.parseUnits(
+        amountB,
+        tokenB.decimals
+      );
+
+      console.log(tokens);
 
       existingPoolAddress = await uniswapFactoryContract.getPool(
         tokens[0],
@@ -248,8 +274,8 @@ const usePool = () => {
           provider
         );
 
-        await askForAllowance(tokenA, amountA, poolContract);
-        await askForAllowance(tokenB, amountB, poolContract);
+        await askForAllowance(tokenA.address, amountA, poolContract);
+        await askForAllowance(tokenB.address, amountB, poolContract);
 
         const sqrtPrice = univ3prices.utils.encodeSqrtRatioX96(
           amountAFormatted,
@@ -286,6 +312,7 @@ const usePool = () => {
         }
       }
     } catch (error) {
+      setError(getErrorMessage(error));
       console.error("Failed to deploy/get pool:", error);
     }
 
@@ -294,20 +321,38 @@ const usePool = () => {
 
   const mintLiquidity = async (
     addressPool: string,
-    tokenA: Token,
-    tokenB: Token,
-    amountA: string,
-    amountB: string,
+    tempTokenA: Token,
+    tempTokenB: Token,
+    tempAmountA: string,
+    tempAmountB: string,
     minPriceFromCurrent: number,
     maxPriceFromCurrent: number
   ) => {
     try {
       const state = await getPoolState(addressPool);
+      let tokenA, tokenB, amountA, amountB;
+      if (tempTokenA.address > tempTokenB.address) {
+        tokenA = tempTokenA;
+        amountA = tempAmountA;
+        tokenB = tempTokenB;
+        amountB = tempAmountB;
+      } else {
+        tokenA = tempTokenB;
+        amountA = tempAmountB;
+        tokenB = tempTokenA;
+        amountB = tempAmountA;
+      }
 
       if (!state || !account) return;
 
-      const amountAFormatted = ethers.utils.parseEther(amountA);
-      const amountBFormatted = ethers.utils.parseEther(amountB);
+      const amountAFormatted = ethers.utils.parseUnits(
+        amountA,
+        tokenA.decimals
+      );
+      const amountBFormatted = ethers.utils.parseUnits(
+        amountB,
+        tokenB.decimals
+      );
 
       const amountToken0 = CurrencyAmount.fromRawAmount(
         tokenA,
@@ -379,10 +424,10 @@ const usePool = () => {
       );
 
       const transaction = {
-        from: account,
+        data: calldata,
         to: GLQCHAIN_POOL_NFT_ADDRESS,
         value: value,
-        data: calldata,
+        from: account,
       };
 
       await askForAllowance(
@@ -401,18 +446,43 @@ const usePool = () => {
       console.log(`Transaction successful: ${receipt.transactionHash}`);
       return receipt.transactionHash;
     } catch (error) {
+      setError(getErrorMessage(error));
       console.error(`Failed to add liquidity: ${error}`);
       return null;
     }
   };
 
+  const widthdrawLiquidity = async (position: Position) => {
+    try {
+      const txResponse = await nftPositionManagerContract.decreaseLiquidity(
+        {
+          tokenId: position.id,
+          liquidity: position.liquidity,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: Math.floor(Date.now() / 1000) + 60 * 10, // deadline: 10 minutes from now
+        },
+        { from: account, gasLimit: 5000000 }
+      );
+      const receipt = await txResponse.wait(1);
+      console.log(`Transaction successful: ${receipt.transactionHash}`);
+      return receipt.transactionHash;
+    } catch (error) {
+      setError(getErrorMessage(error));
+      console.error(`Failed to widthdraw liquidity: ${error}`);
+    }
+  };
+
   return {
     loadingPositions,
+    loadedPositions,
     ownPositionIds,
     ownPositions,
     getPoolState,
     deployOrGetPool,
     mintLiquidity,
+    widthdrawLiquidity,
+    error,
   };
 };
 

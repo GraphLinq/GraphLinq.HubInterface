@@ -32,7 +32,7 @@ function PoolPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
-  const { ownPositions } = usePool();
+  const { ownPositions, loadingPositions } = usePool();
 
   const [displayClosedPositions, setDisplayClosedPositions] = useState(true);
 
@@ -68,14 +68,20 @@ function PoolPage() {
                     <div className="pool-amount">
                       {ownPositions.length === 0 ? (
                         <>
-                          <div className="pool-empty">
-                            <div className="pool-empty-info">
-                              <SearchEmpty />
-                              <div className="pool-empty-label">
-                                No active positions
+                          {loadingPositions ? (
+                            <>Loading...</>
+                          ) : (
+                            <>
+                              <div className="pool-empty">
+                                <div className="pool-empty-info">
+                                  <SearchEmpty />
+                                  <div className="pool-empty-label">
+                                    No active positions
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
+                            </>
+                          )}
                         </>
                       ) : (
                         <>

@@ -397,7 +397,10 @@ function BridgePage() {
                         onClick={() => {
                           if (tokenBalance) {
                             setAmount(
-                              (parseFloat(tokenBalance) / 4).toString()
+                              formatNumberToFixed(
+                                parseFloat(tokenBalance) / 4,
+                                6
+                              )
                             );
                           }
                         }}
@@ -408,7 +411,10 @@ function BridgePage() {
                         onClick={() => {
                           if (tokenBalance) {
                             setAmount(
-                              (parseFloat(tokenBalance) / 2).toString()
+                              formatNumberToFixed(
+                                parseFloat(tokenBalance) / 2,
+                                6
+                              )
                             );
                           }
                         }}
@@ -418,7 +424,9 @@ function BridgePage() {
                       <Button
                         onClick={() => {
                           if (tokenBalance) {
-                            setAmount(parseFloat(tokenBalance).toString());
+                            setAmount(
+                              formatNumberToFixed(parseFloat(tokenBalance), 6)
+                            );
                           }
                         }}
                       >

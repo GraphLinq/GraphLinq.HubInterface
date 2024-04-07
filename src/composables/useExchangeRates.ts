@@ -6,6 +6,7 @@ import { getDashboardInformation } from "../queries/api";
 
 import { useEthersSigner } from "./useEthersProvider";
 import useRpcProvider from "./useRpcProvider";
+import { getErrorMessage } from "@utils/errors";
 
 interface CoinbaseExchangeRates {
   loading: boolean;
@@ -25,6 +26,7 @@ const useExchangeRates = () => {
   const rpcProvider = useRpcProvider();
   const injectedProvider = useEthersSigner();
   const provider = injectedProvider ?? rpcProvider;
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchExchangeRates = async () => {
@@ -45,6 +47,7 @@ const useExchangeRates = () => {
           glq: glqRate,
         });
       } catch (error) {
+        setError(getErrorMessage(error));
         setExchangeRates({
           loading: false,
           error: "Failed to fetch exchange rates",
@@ -70,7 +73,7 @@ const useExchangeRates = () => {
     return formatNumberToDollars(amount * exchangeRates[currency]!, 4);
   };
 
-  return { ...exchangeRates, calculatePrice };
+  return { ...exchangeRates, calculatePrice, error };
 };
 
 export default useExchangeRates;
