@@ -1,121 +1,161 @@
 @import "../../assets/css/mixins/styles";
 @import "../../assets/css/mixins/medias";
 
-.pool {
-  &-empty {
+.poolSingle {
+  &-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin: 120px 0;
+    gap: 32px;
 
-    &-info {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      padding: 40px;
-      border: 1px solid var(--c-martinique);
-      border-radius: 24px;
+    .button path {
+      fill: none !important;
     }
 
-    &-label {
+    &-infos {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 48px;
+      line-height: 1;
+      font-weight: 600;
+
+      @include max($mobile-s) {
+        font-size: 32px;
+      }
+    }
+
+    &-icons {
+      display: flex;
+      gap: 4px;
+
+      svg {
+        width: 32px;
+      }
+      path {
+        fill: var(--c-lavender);
+      }
+    }
+
+    &-pair {
+      span {
+        color: var(--c-white);
+      }
+    }
+
+    &-fees {
       color: var(--c-lavender);
+      opacity: 0.4;
     }
   }
 
-  &-list {
+  &-subtitle {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    color: var(--c-lavender);
+    font-weight: 600;
+
+    span {
+      color: var(--c-white);
+    }
+  }
+  &-value {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    color: var(--c-lavender);
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 1;
+
+    span {
+      color: var(--c-white);
+    }
+  }
+  &-block {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    margin-top: 16px;
-    margin-bottom: 40px;
-    max-height: 400px;
-    overflow: auto;
-
+    gap: 8px;
     &-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+  }
+  &-table {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+    padding: 20px;
+    border-radius: 24px;
+    background-color: rgba(48, 43, 68, 0.4);
 
-      &-left {
-        color: var(--c-lavender);
-        font-size: 18px;
-        line-height: 24px;
+    &-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    &-col {
+      display: flex;
+      gap: 8px;
+      color: var(--c-lavender);
+      font-weight: 600;
 
-        span {
-          color: var(--c-white);
-        }
+      span {
+        color: var(--c-white);
+      }
+
+      svg {
+        max-width: 20px;
+      }
+
+      path {
+        fill: var(--c-lavender);
+      }
+    }
+  }
+  &-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--c-martinique);
+    border-radius: 24px;
+    padding: 8px 16px;
+
+    &-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--c-mint-green);
+    }
+  }
+
+  &-range {
+    display: flex;
+    color: var(--c-lavender);
+    font-weight: 600;
+
+    &-col {
+      width: 50%;
+
+      & + & {
+        border-left: 1px solid var(--c-cinder);
+        padding-left: 16px;
       }
     }
 
-    &-item {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      padding: 20px;
-      border: 1px solid var(--c-martinique);
-      border-radius: 24px;
+    span {
+      color: var(--c-white);
+    }
+  }
 
-      @include max($mobile-s) {
-        flex-direction: column-reverse;
-        gap: 16px;
-      }
+  &-actions {
+    display: flex;
+    gap: 24px;
 
-      &-left {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        color: var(--c-lavender);
-      }
-
-      &-infos {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      &-icons {
-        display: flex;
-        gap: 4px;
-        svg {
-          max-width: 20px;
-        }
-        path {
-          fill: var(--c-lavender);
-        }
-      }
-
-      &-pair {
-        span {
-          color: var(--c-white);
-        }
-      }
-
-      &-range {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        span {
-          color: var(--c-white);
-        }
-      }
-
-      &-status {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background-color: var(--c-martinique);
-        border-radius: 24px;
-        padding: 8px 16px;
-
-        &-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background-color: var(--c-mint-green);
-        }
-      }
+    .button {
+      width: 100%;
     }
   }
 }

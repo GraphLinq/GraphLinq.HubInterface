@@ -17,6 +17,7 @@ import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
 import { Position, PositionStatus } from "../../model/pool";
+import { NavLink } from "react-router-dom";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -105,64 +106,62 @@ function PoolPage() {
                           </div>
                           <div className="pool-list">
                             {filteredPositions.map((pos, key) => (
-                              <>
-                                <div
-                                  className="pool-list-item"
-                                  data-status={pos.status}
-                                  key={key}
-                                >
-                                  <div className="pool-list-item-left">
-                                    <div className="pool-list-item-infos">
-                                      <div className="pool-list-item-icons">
-                                        {tokenIcons[pos.pair.first.name]}
-                                        {tokenIcons[pos.pair.second.name]}
-                                      </div>
-                                      <div className="pool-list-item-pair">
-                                        <span>{pos.pair.first.name}</span> /{" "}
-                                        <span>{pos.pair.second.name}</span>
-                                      </div>
-                                      <div className="pool-list-item-fees">
-                                        {pos.fees.toFixed(2)}% Fee Tier
-                                      </div>
+                              <NavLink
+                                to={`/pool/${pos.id}`}
+                                className="pool-list-item"
+                                data-status={pos.status}
+                                key={key}
+                              >
+                                <div className="pool-list-item-left">
+                                  <div className="pool-list-item-infos">
+                                    <div className="pool-list-item-icons">
+                                      {tokenIcons[pos.pair.first.name]}
+                                      {tokenIcons[pos.pair.second.name]}
                                     </div>
-                                    <div className="pool-list-item-range">
-                                      <div className="pool-list-item-range-min">
-                                        Min:{" "}
-                                        <span>
-                                          {formatNumberToFixed(pos.min)}
-                                        </span>
-                                      </div>
-                                      <div className="pool-list-item-range-max">
-                                        Max:{" "}
-                                        <span>
-                                          {pos.max === Infinity
-                                            ? "∞"
-                                            : formatNumberToFixed(pos.max)}
-                                        </span>{" "}
-                                        {pos.pair.first.name} per{" "}
-                                        {pos.pair.second.name}
-                                      </div>
+                                    <div className="pool-list-item-pair">
+                                      <span>{pos.pair.first.name}</span> /{" "}
+                                      <span>{pos.pair.second.name}</span>
+                                    </div>
+                                    <div className="pool-list-item-fees">
+                                      {pos.fees.toFixed(2)}% Fee Tier
                                     </div>
                                   </div>
-                                  <div className="pool-list-item-right">
-                                    <div className="pool-list-item-status">
-                                      {pos.status ===
-                                        PositionStatus.IN_RANGE && (
-                                        <>
-                                          <div className="pool-list-item-status-dot"></div>
-                                          In range
-                                        </>
-                                      )}
-                                      {pos.status === PositionStatus.CLOSED && (
-                                        <>
-                                          <Canceled />
-                                          Closed
-                                        </>
-                                      )}
+                                  <div className="pool-list-item-range">
+                                    <div className="pool-list-item-range-min">
+                                      Min:{" "}
+                                      <span>
+                                        {formatNumberToFixed(pos.min, 6)}
+                                      </span>
+                                    </div>
+                                    <div className="pool-list-item-range-max">
+                                      Max:{" "}
+                                      <span>
+                                        {pos.max === Infinity
+                                          ? "∞"
+                                          : formatNumberToFixed(pos.max, 6)}
+                                      </span>{" "}
+                                      {pos.pair.first.name} per{" "}
+                                      {pos.pair.second.name}
                                     </div>
                                   </div>
                                 </div>
-                              </>
+                                <div className="pool-list-item-right">
+                                  <div className="pool-list-item-status">
+                                    {pos.status === PositionStatus.IN_RANGE && (
+                                      <>
+                                        <div className="pool-list-item-status-dot"></div>
+                                        In range
+                                      </>
+                                    )}
+                                    {pos.status === PositionStatus.CLOSED && (
+                                      <>
+                                        <Canceled />
+                                        Closed
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </NavLink>
                             ))}
                           </div>
                         </>

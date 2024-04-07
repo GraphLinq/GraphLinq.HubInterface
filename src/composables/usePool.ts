@@ -48,6 +48,7 @@ const usePool = () => {
 
   const [ownPositionIds, setOwnPositionIds] = useState<string[]>([]);
   const [ownPositions, setOwnPositions] = useState<Position[]>([]);
+  const [loadingPositions, setLoadingPositions] = useState(true);
 
   const uniswapFactoryContract = new Contract(
     UNISWAP_POOL_FACTORY_ADDRESS,
@@ -116,13 +117,23 @@ const usePool = () => {
               tickToPrice(token0, token1, poolState.tick).toSignificant()
             );
 
-            console.log(poolAddress);
-            console.log(minPrice, currentPrice, maxPrice);
-
             positions.push({
+              id: tokenId.toString(),
+              liquidity: {
+                total: tempPosition.liquidity,
+                first: tempPosition.tokensOwed0,
+                second: tempPosition.tokensOwed1,
+              },
               pair: {
                 first: secondAppToken,
                 second: firstAppToken,
+              },
+              claimableFees: {
+                total: tempPosition.feeGrowthInside0LastX128.add(
+                  tempPosition.feeGrowthInside1LastX128
+                ),
+                first: tempPosition.feeGrowthInside0LastX128,
+                second: tempPosition.feeGrowthInside1LastX128,
               },
               fees: tempPosition.fee / 10000,
               min: minPrice,
@@ -131,14 +142,17 @@ const usePool = () => {
                 currentPrice >= minPrice && currentPrice <= maxPrice
                   ? PositionStatus.IN_RANGE
                   : PositionStatus.CLOSED,
+              poolCurrentPrice: currentPrice,
             });
           }
         }
 
         setOwnPositionIds(ids);
         setOwnPositions(positions);
+        setLoadingPositions(false);
       } catch (error) {
         console.error("Error getting positions :", error);
+        setLoadingPositions(false);
       }
     };
 
@@ -393,6 +407,7 @@ const usePool = () => {
   };
 
   return {
+    loadingPositions,
     ownPositionIds,
     ownPositions,
     getPoolState,

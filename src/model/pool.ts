@@ -35,12 +35,24 @@ export enum PositionStatus {
 }
 
 export interface Position {
+  id: string;
+  liquidity: {
+    total: ethers.BigNumber;
+    first: ethers.BigNumber;
+    second: ethers.BigNumber;
+  };
   pair: {
     first: AppToken;
     second: AppToken;
+  };
+  claimableFees: {
+    total: ethers.BigNumber;
+    first: ethers.BigNumber;
+    second: ethers.BigNumber;
   };
   fees: number;
   min: number;
   max: number;
   status: PositionStatus;
+  poolCurrentPrice: number;
 }
