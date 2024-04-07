@@ -473,6 +473,28 @@ const usePool = () => {
     }
   };
 
+  const claimFees = async (position: Position) => {
+    const collectParams = {
+      tokenId: position.id,
+      recipient: account,
+      amount0Max: ethers.constants.MaxUint256,
+      amount1Max: ethers.constants.MaxUint256,
+    };
+
+    try {
+      const txResponse =
+        await nftPositionManagerContract.collect(collectParams);
+      const receipt = await txResponse.wait();
+      console.log(
+        `Fees collected. Transaction hash: ${receipt.transactionHash}`
+      );
+      return receipt.transactionHash;
+    } catch (error) {
+      setError(getErrorMessage(error));
+      console.error(`Failed to collect fees: ${error}`);
+    }
+  };
+
   return {
     loadingPositions,
     loadedPositions,
@@ -482,6 +504,7 @@ const usePool = () => {
     deployOrGetPool,
     mintLiquidity,
     widthdrawLiquidity,
+    claimFees,
     error,
   };
 };

@@ -29,14 +29,27 @@ function PoolSinglePage() {
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
   const { id: poolId } = useParams();
-  const { loadedPositions, ownPositionIds, ownPositions, widthdrawLiquidity } =
-    usePool();
+  const {
+    loadedPositions,
+    ownPositionIds,
+    ownPositions,
+    widthdrawLiquidity,
+    claimFees,
+  } = usePool();
   const navigate = useNavigate();
 
   if (loadedPositions && poolId && !ownPositionIds.includes(poolId)) {
     navigate("/pool");
   }
   const position = ownPositions.find((pos) => pos.id === poolId);
+
+  const handleClaim = async () => {
+    if (position) {
+      console.log("claim start");
+      await claimFees(position);
+      console.log("claim end");
+    }
+  };
 
   const handleWithdraw = async () => {
     if (position) {
@@ -163,7 +176,7 @@ function PoolSinglePage() {
                             </div>
 
                             <div className="poolSingle-block-right">
-                              <Button onClick={() => {}} type="tertiary">
+                              <Button onClick={handleClaim} type="tertiary">
                                 Collect fees
                               </Button>
                             </div>
