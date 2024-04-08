@@ -31,4 +31,8 @@ export interface DashboardInformation {
   totalLiquidAssetsOnChain: string;
   stakingTVL: string;
   preferedPool: string;
+  prices: {
+    ETH: number;
+    GLQ: string;
+  };
 }

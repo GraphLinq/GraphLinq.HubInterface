@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@utils/errors";
 import { formatNumberToDollars } from "@utils/number";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
@@ -6,7 +7,6 @@ import { getDashboardInformation } from "../queries/api";
 
 import { useEthersSigner } from "./useEthersProvider";
 import useRpcProvider from "./useRpcProvider";
-import { getErrorMessage } from "@utils/errors";
 
 interface CoinbaseExchangeRates {
   loading: boolean;
@@ -31,14 +31,9 @@ const useExchangeRates = () => {
   useEffect(() => {
     const fetchExchangeRates = async () => {
       try {
-        const ethResponse = await fetch(
-          "https://api.coinbase.com/v2/exchange-rates?currency=ETH"
-        );
-        const ethData = await ethResponse.json();
-        const ethRate = parseFloat(ethData.data.rates.USD);
-
-        const glqData = await getDashboardInformation();
-        const glqRate = parseFloat(glqData.analytics.closePrice);
+        const data = await getDashboardInformation();
+        const glqRate = parseFloat(data.analytics.closePrice);
+        const ethRate = data.prices.ETH;
 
         setExchangeRates({
           loading: false,
