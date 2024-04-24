@@ -61,11 +61,16 @@ const useExchangeRates = () => {
     };
   }, [account, provider]);
 
-  const calculatePrice = (amount: number, currency: "eth" | "glq") => {
+  const calculatePrice = (
+    amount: number,
+    currency: "eth" | "glq",
+    type = "price"
+  ) => {
     if (!exchangeRates[currency]) {
       return;
     }
-    return formatNumberToDollars(amount * exchangeRates[currency]!, 4);
+    const priceNb = amount * exchangeRates[currency]!;
+    return type === "price" ? formatNumberToDollars(priceNb, 4) : priceNb;
   };
 
   return { ...exchangeRates, calculatePrice, error };

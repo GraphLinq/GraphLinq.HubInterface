@@ -6,7 +6,6 @@ import {
 } from "@constants/index";
 import univ3prices from "@thanpolas/univ3prices";
 import {
-  Currency,
   CurrencyAmount,
   Fraction,
   Percent,
@@ -24,6 +23,8 @@ import {
   priceToClosestTick,
   tickToPrice,
 } from "@uniswap/v3-sdk";
+import { GLQ_CHAIN_ID } from "@utils/chains";
+import { getErrorMessage } from "@utils/errors";
 import { Contract, ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
@@ -33,8 +34,6 @@ import { PoolState, Position, PositionStatus } from "../model/pool";
 
 import { useEthersSigner } from "./useEthersProvider";
 import useRpcProvider from "./useRpcProvider";
-import { GLQ_CHAIN_ID } from "@utils/chains";
-import { getErrorMessage } from "@utils/errors";
 
 // const nftContractABI = [
 //   "function balanceOf(address owner) external view returns (uint256 balance)",
@@ -65,111 +64,157 @@ const usePool = () => {
     provider
   );
 
-  useEffect(() => {
-    const findAllPositions = async () => {
-      if (!account || !provider || loadedPositions) {
-        return;
-      }
-      try {
-        setLoadingPositions(true);
-        const balance = await nftPositionManagerContract.balanceOf(account);
-        const ids: string[] = [];
-        const positions: Position[] = [];
+  const Q96 = ethers.BigNumber.from(2).pow(96);
 
-        for (let index = 0; index < balance.toNumber(); index++) {
-          const tokenId = await nftPositionManagerContract.tokenOfOwnerByIndex(
-            account,
-            index
-          );
-          ids.push(tokenId.toString());
+  function getTickAtSqrtPrice(sqrtPriceX96: ethers.BigNumber) {
+    const tick = Math.floor(
+      // @ts-ignore
+      Math.log((sqrtPriceX96 / Q96) ** 2) / Math.log(1.0001)
+    );
+    return tick;
+  }
+  async function getTokenAmounts(
+    liquidity: ethers.BigNumber,
+    sqrtPriceX96: ethers.BigNumber,
+    tickLow: number,
+    tickHigh: number
+  ) {
+    const sqrtRatioA = Math.sqrt(1.0001 ** tickLow);
+    const sqrtRatioB = Math.sqrt(1.0001 ** tickHigh);
+    const currentTick = getTickAtSqrtPrice(sqrtPriceX96);
+    // @ts-ignore
+    const sqrtPrice = sqrtPriceX96 / Q96;
 
-          const tempPosition =
-            await nftPositionManagerContract.positions(tokenId);
+    let amount0 = 0;
+    let amount1 = 0;
+    if (currentTick < tickLow) {
+      amount0 = Math.floor(
+        // @ts-ignore
+        liquidity * ((sqrtRatioB - sqrtRatioA) / (sqrtRatioA * sqrtRatioB))
+      );
+    } else if (currentTick >= tickHigh) {
+      // @ts-ignore
+      amount1 = Math.floor(liquidity * (sqrtRatioB - sqrtRatioA));
+    } else if (currentTick >= tickLow && currentTick < tickHigh) {
+      amount0 = Math.floor(
+        // @ts-ignore
+        liquidity * ((sqrtRatioB - sqrtPrice) / (sqrtPrice * sqrtRatioB))
+      );
+      // @ts-ignore
+      amount1 = Math.floor(liquidity * (sqrtPrice - sqrtRatioA));
+    }
 
-          const firstAppToken = getTokenByAddress(tempPosition.token0, "glq");
-          const secondAppToken = getTokenByAddress(tempPosition.token1, "glq");
+    return [
+      ethers.BigNumber.from(amount1.toString()),
+      ethers.BigNumber.from(amount0.toString()),
+    ];
+  }
 
-          const poolAddress = uniswapFactoryContract.getPool(
-            tempPosition.token0,
-            tempPosition.token1,
-            tempPosition.fee
-          );
-          const poolState = await getPoolState(poolAddress);
-          if (firstAppToken && secondAppToken && poolState) {
-            const token0 = new Token(
-              GLQ_CHAIN_ID,
-              firstAppToken.address.glq!,
-              firstAppToken.decimals
-            );
-            const token1 = new Token(
-              GLQ_CHAIN_ID,
-              secondAppToken.address.glq!,
-              secondAppToken.decimals
-            );
+  const getPositionByIndex = async (index: number) => {
+    const tokenId = await nftPositionManagerContract.tokenOfOwnerByIndex(
+      account,
+      index
+    );
+    const tempPosition = await nftPositionManagerContract.positions(tokenId);
 
-            const minPrice = parseFloat(
-              tickToPrice(
-                token0,
-                token1,
-                tempPosition.tickLower
-              ).toSignificant()
-            );
-            const maxPrice = parseFloat(
-              tickToPrice(
-                token0,
-                token1,
-                tempPosition.tickUpper
-              ).toSignificant()
-            );
-            const currentPrice = parseFloat(
-              tickToPrice(token0, token1, poolState.tick).toSignificant()
-            );
+    const firstAppToken = getTokenByAddress(tempPosition.token0, "glq");
+    const secondAppToken = getTokenByAddress(tempPosition.token1, "glq");
 
-            if (tempPosition.fee / 10000 == 0.01) {
-              console.log(tempPosition);
-            }
+    const poolAddress = uniswapFactoryContract.getPool(
+      tempPosition.token0,
+      tempPosition.token1,
+      tempPosition.fee
+    );
+    const poolState = await getPoolState(poolAddress);
+    if (firstAppToken && secondAppToken && poolState) {
+      const token0 = new Token(
+        GLQ_CHAIN_ID,
+        firstAppToken.address.glq!,
+        firstAppToken.decimals
+      );
+      const token1 = new Token(
+        GLQ_CHAIN_ID,
+        secondAppToken.address.glq!,
+        secondAppToken.decimals
+      );
 
-            positions.push({
-              id: tokenId.toString(),
-              liquidity: {
-                total: tempPosition.liquidity,
-                first: tempPosition.tokensOwed0, // Wrong data
-                second: tempPosition.tokensOwed1, // Wrong data
-              },
-              pair: {
-                first: secondAppToken,
-                second: firstAppToken,
-              },
-              claimableFees: {
-                total: tempPosition.feeGrowthInside0LastX128.add(
-                  tempPosition.feeGrowthInside1LastX128
-                ),
-                first: tempPosition.feeGrowthInside0LastX128,
-                second: tempPosition.feeGrowthInside1LastX128,
-              },
-              fees: tempPosition.fee / 10000,
-              min: minPrice,
-              max: maxPrice,
-              status:
-                currentPrice >= minPrice && currentPrice <= maxPrice
-                  ? PositionStatus.IN_RANGE
-                  : PositionStatus.CLOSED,
-              poolCurrentPrice: currentPrice,
-            });
-          }
+      const minPrice = parseFloat(
+        tickToPrice(token0, token1, tempPosition.tickLower).toSignificant()
+      );
+      const maxPrice = parseFloat(
+        tickToPrice(token0, token1, tempPosition.tickUpper).toSignificant()
+      );
+      const currentPrice = parseFloat(
+        tickToPrice(token0, token1, poolState.tick).toSignificant()
+      );
+
+      const tokenAmounts = await getTokenAmounts(
+        tempPosition.liquidity,
+        poolState.sqrtPriceX96,
+        tempPosition.tickLower,
+        tempPosition.tickUpper
+      );
+
+      return {
+        id: tokenId.toString(),
+        liquidity: {
+          total: tempPosition.liquidity,
+          first: tokenAmounts[0],
+          second: tokenAmounts[1],
+        },
+        pair: {
+          first: secondAppToken,
+          second: firstAppToken,
+        },
+        claimableFees: {
+          total: tempPosition.feeGrowthInside0LastX128.add(
+            tempPosition.feeGrowthInside1LastX128
+          ),
+          first: tempPosition.feeGrowthInside0LastX128,
+          second: tempPosition.feeGrowthInside1LastX128,
+        },
+        fees: tempPosition.fee / 10000,
+        min: minPrice,
+        max: maxPrice,
+        status:
+          currentPrice >= minPrice && currentPrice <= maxPrice
+            ? PositionStatus.IN_RANGE
+            : PositionStatus.CLOSED,
+        poolCurrentPrice: currentPrice,
+      };
+    }
+  };
+
+  const findAllPositions = async () => {
+    if (!account || !provider || loadedPositions) {
+      return;
+    }
+    try {
+      setLoadingPositions(true);
+      const balance = await nftPositionManagerContract.balanceOf(account);
+      const ids: string[] = [];
+      const positions: Position[] = [];
+
+      for (let index = 0; index < balance.toNumber(); index++) {
+        const position = await getPositionByIndex(index);
+        if (position) {
+          positions.push(position);
+          ids.push(position.id);
         }
-
-        setOwnPositionIds(ids);
-        setOwnPositions(positions);
-        setLoadingPositions(false);
-        setLoadedPositions(true);
-      } catch (error) {
-        console.error("Error getting positions :", error);
-        setError(getErrorMessage(error));
-        setLoadingPositions(false);
       }
-    };
 
+      setOwnPositionIds(ids);
+      setOwnPositions(positions);
+      setLoadingPositions(false);
+      setLoadedPositions(true);
+    } catch (error) {
+      console.error("Error getting positions :", error);
+      setError(getErrorMessage(error));
+      setLoadingPositions(false);
+    }
+  };
+
+  useEffect(() => {
     findAllPositions();
   }, [account, provider]);
 
@@ -257,8 +302,6 @@ const usePool = () => {
         amountB,
         tokenB.decimals
       );
-
-      console.log(tokens);
 
       existingPoolAddress = await uniswapFactoryContract.getPool(
         tokens[0],
@@ -423,7 +466,7 @@ const usePool = () => {
         mintOptions
       );
 
-      const transaction = {
+      const transaction: any = {
         data: calldata,
         to: GLQCHAIN_POOL_NFT_ADDRESS,
         value: value,
@@ -504,6 +547,7 @@ const usePool = () => {
     loadedPositions,
     ownPositionIds,
     ownPositions,
+    getPositionByIndex,
     getPoolState,
     deployOrGetPool,
     mintLiquidity,

@@ -5,18 +5,20 @@ import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Button from "@components/Button";
 import "./style.scss";
 import { SITE_NAME } from "@constants/index";
-import { Helmet } from "react-helmet-async";
-import { useNavigate, useParams } from "react-router-dom";
-import { useAccount } from "wagmi";
-
-import useChains from "../../composables/useChains";
-import useNetwork from "../../composables/useNetwork";
-import usePool from "../../composables/usePool";
 import {
   formatBigNumberToFixed,
   formatNumberToDollars,
   formatNumberToFixed,
 } from "@utils/number";
+import { ethers } from "ethers";
+import { Helmet } from "react-helmet-async";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAccount } from "wagmi";
+
+import useChains from "../../composables/useChains";
+import useExchangeRates from "../../composables/useExchangeRates";
+import useNetwork from "../../composables/useNetwork";
+import usePool from "../../composables/usePool";
 import { PositionStatus } from "../../model/pool";
 
 const tokenIcons = {
@@ -32,20 +34,39 @@ function PoolSinglePage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
-  const { id: poolId } = useParams();
+  const { id: positionId } = useParams();
+  const { calculatePrice } = useExchangeRates();
   const {
     loadedPositions,
-    ownPositionIds,
     ownPositions,
+    ownPositionIds,
     widthdrawLiquidity,
     claimFees,
   } = usePool();
   const navigate = useNavigate();
 
-  if (loadedPositions && poolId && !ownPositionIds.includes(poolId)) {
+  if (loadedPositions && positionId && !ownPositionIds.includes(positionId)) {
     navigate("/pool");
   }
-  const position = ownPositions.find((pos) => pos.id === poolId);
+
+  const position = ownPositions.find((pos) => pos.id === positionId);
+  const priceFirst = position
+    ? (calculatePrice(
+        parseFloat(ethers.utils.formatEther(position.liquidity.first)),
+        "glq",
+        "number"
+      ) as number)
+    : 0;
+  const priceSecond = position
+    ? (calculatePrice(
+        parseFloat(ethers.utils.formatEther(position.liquidity.second)),
+        "eth",
+        "number"
+      ) as number)
+    : 0;
+  const totalPrice = position ? priceFirst + priceSecond : 0;
+  const percPartFirst = (priceFirst / totalPrice) * 100;
+  const percPartSecond = (priceSecond / totalPrice) * 100;
 
   const handleClaim = async () => {
     if (position && !position.claimableFees.total.isZero()) {
@@ -114,17 +135,7 @@ function PoolSinglePage() {
                         <div className="poolSingle-block">
                           <div className="poolSingle-subtitle">Liquidity</div>
                           <div className="poolSingle-value">
-                            <span>
-                              {formatNumberToDollars(
-                                parseFloat(
-                                  formatBigNumberToFixed(
-                                    position.liquidity.total,
-                                    2
-                                  )
-                                ),
-                                2
-                              )}
-                            </span>
+                            <span>{formatNumberToDollars(totalPrice)}</span>
                           </div>
                           <div className="poolSingle-table">
                             <div className="poolSingle-table-row">
@@ -139,11 +150,7 @@ function PoolSinglePage() {
                                     6
                                   )}
                                 </span>
-                                {position.liquidity.first
-                                  .div(position.liquidity.total)
-                                  .mul(100)
-                                  .toString()}
-                                %
+                                {percPartFirst.toFixed(2)}%
                               </div>
                             </div>
                             <div className="poolSingle-table-row">
@@ -158,11 +165,7 @@ function PoolSinglePage() {
                                     6
                                   )}
                                 </span>
-                                {position.liquidity.second
-                                  .div(position.liquidity.total)
-                                  .mul(100)
-                                  .toString()}
-                                %
+                                {percPartSecond.toFixed(2)}%
                               </div>
                             </div>
                           </div>
