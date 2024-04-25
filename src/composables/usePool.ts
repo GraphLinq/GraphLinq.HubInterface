@@ -495,12 +495,12 @@ const usePool = () => {
     }
   };
 
-  const widthdrawLiquidity = async (position: Position) => {
+  const withdrawLiquidity = async (position: Position) => {
     try {
       const txResponse = await nftPositionManagerContract.decreaseLiquidity(
         {
           tokenId: position.id,
-          liquidity: position.liquidity,
+          liquidity: position.liquidity.total,
           amount0Min: 0,
           amount1Min: 0,
           deadline: Math.floor(Date.now() / 1000) + 60 * 10, // deadline: 10 minutes from now
@@ -512,7 +512,7 @@ const usePool = () => {
       return receipt.transactionHash;
     } catch (error) {
       setError(getErrorMessage(error));
-      console.error(`Failed to widthdraw liquidity: ${error}`);
+      console.error(`Failed to withdraw liquidity: ${error}`);
     }
   };
 
@@ -551,7 +551,7 @@ const usePool = () => {
     getPoolState,
     deployOrGetPool,
     mintLiquidity,
-    widthdrawLiquidity,
+    withdrawLiquidity,
     claimFees,
     error,
   };

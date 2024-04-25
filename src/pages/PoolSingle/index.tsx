@@ -40,7 +40,7 @@ function PoolSinglePage() {
     loadedPositions,
     ownPositions,
     ownPositionIds,
-    widthdrawLiquidity,
+    withdrawLiquidity,
     claimFees,
   } = usePool();
   const navigate = useNavigate();
@@ -79,7 +79,7 @@ function PoolSinglePage() {
   const handleWithdraw = async () => {
     if (position) {
       console.log("withdraw start");
-      await widthdrawLiquidity(position);
+      await withdrawLiquidity(position);
       console.log("withdraw end");
     }
   };
