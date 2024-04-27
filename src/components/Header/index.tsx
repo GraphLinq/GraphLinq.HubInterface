@@ -6,6 +6,7 @@ import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import LogoName from "@assets/icons/logo-name.svg?react";
 import Logo from "@assets/icons/logo.svg?react";
+import Medal from "@assets/icons/medal.svg?react";
 import Metamask from "@assets/icons/metamask.svg?react";
 // import Pool from "@assets/icons/pool.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
@@ -86,6 +87,11 @@ function Header() {
       label: "Wrapper",
       url: "/wrapper",
     },
+    {
+      icon: <Medal />,
+      label: "Rewards",
+      url: "/rewards",
+    },
   ];
 
   const [scroll, setScroll] = useState(false);
@@ -139,7 +145,11 @@ function Header() {
           <>
             {GLQBalance && (
               <Pill icon={<GLQToken />} add={true}>
-                {loadingBalance ? <Spinner/> : formatNumberToFixed(parseFloat(GLQBalance), 6) || "..."}
+                {loadingBalance ? (
+                  <Spinner />
+                ) : (
+                  formatNumberToFixed(parseFloat(GLQBalance), 6) || "..."
+                )}
               </Pill>
             )}
             <Pill icon={<Wallet />}>{formatEthereumAddress(account)}</Pill>

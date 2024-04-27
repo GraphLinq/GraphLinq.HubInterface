@@ -1,0 +1,226 @@
+@import "../../assets/css/mixins/styles";
+@import "../../assets/css/mixins/medias";
+
+.rewards {
+  display: flex;
+  align-items: normal;
+  flex-direction: row;
+  gap: 24px;
+  margin-top: 40px;
+
+  @include max($tablet) {
+    flex-direction: column;
+  }
+
+  .main-card {
+    position: relative;
+    background: #15121c;
+    backdrop-filter: blur(50px);
+    width: 100%;
+    height: 100%;
+    margin-top: 0;
+
+    &:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: url(../../assets/img/reward_bg.png) no-repeat center/cover;
+      @include max($tablet) {
+        opacity: 0.1;
+      }
+    }
+  }
+
+  &-left,
+  &-right {
+    width: 50%;
+
+    @include max($tablet) {
+      width: 100%;
+    }
+  }
+
+  &-right {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  &-total {
+    display: flex;
+    flex-direction: column;
+    margin-top: 4px;
+
+    &-subtitle {
+      color: var(--c-lavender);
+      font-size: 16px;
+    }
+    &-value {
+      color: var(--c-white);
+      font-size: 24px;
+    }
+
+    &-progress {
+      display: flex;
+      gap: 16px;
+      margin-top: 28px;
+
+      &-text {
+        font-size: 14px;
+        color: var(--c-lavender);
+        flex-shrink: 0;
+      }
+    }
+
+    &-bar {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+      height: 20px;
+
+      &-bg {
+        height: 100%;
+        width: 100%;
+        border-radius: 12px;
+        opacity: 0.6;
+        background-color: var(--c-martinique);
+      }
+
+      &-progress {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 20px;
+        border-radius: 12px;
+        background: linear-gradient(270deg, #9a23e6, #5519ee);
+        box-shadow: 0px 0px 24px 0px rgba(154, 35, 230, 0.4);
+
+        span {
+          position: absolute;
+          top: 4px;
+          bottom: 4px;
+          right: 4px;
+          width: 12px;
+          border-radius: 50%;
+          background: linear-gradient(253deg, #5519ee, #302b44);
+        }
+      }
+    }
+  }
+
+  &-challenge {
+    width: calc(100% / 2 - 16px * 1 / 2);
+    border-radius: 20px;
+    backdrop-filter: blur(50px);
+    background: #15121c;
+    padding: 1px;
+
+    @include max($desktop-s) {
+      width: 100%;
+    }
+
+    &[data-status="1"] {
+      background: linear-gradient(253deg, #9a23e6, #5519ee);
+    }
+    &[data-status="2"] {
+      background: var(--c-mint-green);
+    }
+
+    &-bg {
+      display: flex;
+      height: 100%;
+      gap: 8px;
+      padding: 8px;
+      background: #15121c;
+      border-radius: 20px;
+    }
+
+    .button {
+      padding: 4px 16px;
+
+      &-label {
+        font-size: 14px;
+      }
+    }
+
+    &-left {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px 24px;
+
+      @include max($desktop-s) {
+        padding: 8px 16px;
+      }
+    }
+
+    &-right {
+      flex-shrink: 0;
+    }
+
+    &-progress {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      &-text {
+        font-size: 14px;
+        color: var(--c-lavender);
+      }
+
+      &-done {
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--c-mint-green);
+      }
+    }
+
+    &-bar {
+      position: relative;
+      width: 100%;
+      height: 10px;
+
+      &-bg {
+        height: 100%;
+        width: 100%;
+        border-radius: 10px;
+        opacity: 0.6;
+        background-color: var(--c-martinique);
+      }
+    }
+
+    &-amount {
+      position: relative;
+      height: 100%;
+      border-radius: 15px;
+      background: linear-gradient(180deg, #0f0a14, #302b44);
+      padding: 8px;
+      text-align: center;
+
+      &:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        top: 0;
+        background: url(../../assets/img/reward_single.png) no-repeat center
+          bottom;
+      }
+
+      &-label {
+        font-size: 10px;
+        color: var(--c-fog);
+      }
+
+      &-value {
+        font-size: 16px;
+        color: var(--c-white);
+      }
+    }
+  }
+}
