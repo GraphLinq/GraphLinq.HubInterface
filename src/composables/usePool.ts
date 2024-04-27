@@ -52,6 +52,8 @@ const usePool = () => {
   const [loadedPositions, setLoadedPositions] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const uniswapFactoryContract = new Contract(
     UNISWAP_POOL_FACTORY_ADDRESS,
@@ -497,44 +499,48 @@ const usePool = () => {
 
   const withdrawLiquidity = async (position: Position) => {
     try {
+      setPending("Removing liquidity from your position...");
       const txResponse = await nftPositionManagerContract.decreaseLiquidity(
         {
           tokenId: position.id,
-          liquidity: position.liquidity.total,
+          liquidity: 0 || position.liquidity.total,
           amount0Min: 0,
           amount1Min: 0,
           deadline: Math.floor(Date.now() / 1000) + 60 * 10, // deadline: 10 minutes from now
         },
         { from: account, gasLimit: 5000000 }
       );
+
+      setPending("Waiting for confirmations...");
       const receipt = await txResponse.wait(1);
       console.log(`Transaction successful: ${receipt.transactionHash}`);
-      return receipt.transactionHash;
+      return await claimFees(position, false);
     } catch (error) {
       setError(getErrorMessage(error));
       console.error(`Failed to withdraw liquidity: ${error}`);
     }
   };
 
-  const claimFees = async (position: Position) => {
+  const claimFees = async (position: Position, fees = true) => {
     const collectParams = {
       tokenId: position.id,
       recipient: account,
-      amount0Max: position.claimableFees.first,
-      amount1Max: position.claimableFees.second,
+      amount0Max: ethers.utils.parseEther("100000000"),
+      amount1Max: ethers.utils.parseEther("100000000"),
     };
 
-    console.log(collectParams);
-
     try {
+      setPending(
+        fees ? "Collecting your fees..." : "Collecting your liquidity..."
+      );
+
       const txResponse = await nftPositionManagerContract.collect(
         collectParams,
         { gasLimit: 5000000 }
       );
+      setPending("Waiting for confirmations...");
       const receipt = await txResponse.wait();
-      console.log(
-        `Fees collected. Transaction hash: ${receipt.transactionHash}`
-      );
+      setSuccess(receipt.transactionHash);
       return receipt.transactionHash;
     } catch (error) {
       setError(getErrorMessage(error));
@@ -554,6 +560,8 @@ const usePool = () => {
     withdrawLiquidity,
     claimFees,
     error,
+    pending,
+    success,
   };
 };
 

@@ -1,10 +1,11 @@
 import ArrowBack from "@assets/icons/arrow-back.svg?react";
 import Canceled from "@assets/icons/canceled.svg?react";
+import Spinner from "@assets/icons/spinner.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Button from "@components/Button";
 import "./style.scss";
-import { SITE_NAME } from "@constants/index";
+import { GLQ_EXPLORER, SITE_NAME } from "@constants/index";
 import {
   formatBigNumberToFixed,
   formatNumberToDollars,
@@ -20,6 +21,8 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
 import { PositionStatus } from "../../model/pool";
+import { useEffect, useState } from "react";
+import Alert from "@components/Alert";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -42,8 +45,17 @@ function PoolSinglePage() {
     ownPositionIds,
     withdrawLiquidity,
     claimFees,
+    pending: poolPending,
+    error: poolError,
+    success: poolSuccess,
   } = usePool();
   const navigate = useNavigate();
+
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [formDisabled, setFormDisabled] = useState(false);
 
   if (loadedPositions && positionId && !ownPositionIds.includes(positionId)) {
     navigate("/pool");
@@ -68,21 +80,52 @@ function PoolSinglePage() {
   const percPartFirst = (priceFirst / totalPrice) * 100;
   const percPartSecond = (priceSecond / totalPrice) * 100;
 
+  const resetFeedback = () => {
+    setError("");
+    setPending("");
+    setSuccess("");
+  };
+
   const handleClaim = async () => {
-    if (position && !position.claimableFees.total.isZero()) {
-      console.log("claim start");
+    resetFeedback();
+
+    if (position) {
+      setLoading(true);
+      setFormDisabled(true);
       await claimFees(position);
-      console.log("claim end");
+      setLoading(false);
+      setFormDisabled(false);
     }
   };
 
   const handleWithdraw = async () => {
+    resetFeedback();
+
     if (position) {
-      console.log("withdraw start");
+      setLoading(true);
+      setFormDisabled(true);
       await withdrawLiquidity(position);
-      console.log("withdraw end");
+      setLoading(false);
+      setFormDisabled(false);
     }
   };
+
+  useEffect(() => {
+    resetFeedback();
+    setPending(poolPending);
+  }, [poolPending]);
+
+  useEffect(() => {
+    resetFeedback();
+    setError(poolError);
+  }, [poolError]);
+
+  useEffect(() => {
+    resetFeedback();
+    setSuccess(poolSuccess);
+  }, [poolSuccess]);
+
+  const trackingExplorer = `${GLQ_EXPLORER}/tx/${success}`;
 
   return (
     <>
@@ -115,7 +158,7 @@ function PoolSinglePage() {
               </>
             ) : (
               <>
-                <div className="main-card-title">Pool</div>
+                <div className="main-card-title">Position</div>
               </>
             )}
           </div>
@@ -130,7 +173,7 @@ function PoolSinglePage() {
               <>
                 {isGLQChain ? (
                   <>
-                    {position && (
+                    {position ? (
                       <>
                         <div className="poolSingle-block">
                           <div className="poolSingle-subtitle">Liquidity</div>
@@ -196,7 +239,7 @@ function PoolSinglePage() {
                               <Button
                                 onClick={handleClaim}
                                 type="tertiary"
-                                disabled={position.claimableFees.total.isZero()}
+                                disabled={formDisabled}
                               >
                                 Collect fees
                               </Button>
@@ -302,15 +345,58 @@ function PoolSinglePage() {
                           </div>
                         </div>
 
-                        <div className="poolSingle-actions">
-                          <Button link={"/pool/new"} type="tertiary">
+                        <div
+                          className="poolSingle-actions"
+                          data-disabled={formDisabled}
+                        >
+                          <Button
+                            link={"/pool/new"}
+                            type="tertiary"
+                            disabled={formDisabled}
+                          >
                             Increase liquidity
                           </Button>
-                          <Button onClick={handleWithdraw}>
+                          <Button
+                            onClick={handleWithdraw}
+                            disabled={formDisabled}
+                            icon={loading && <Spinner />}
+                          >
                             Remove liquidity
                           </Button>
                         </div>
+
+                        {error && (
+                          <Alert type="error">
+                            <p>{error}</p>
+                          </Alert>
+                        )}
+                        {pending && (
+                          <Alert type="warning">
+                            <p>{pending}</p>
+                          </Alert>
+                        )}
+                        {success && (
+                          <Alert type="success">
+                            <p>
+                              Your withdrawal is now successfully completed.
+                            </p>
+                            <p className="small" style={{ marginTop: 8 }}>
+                              <a href={trackingExplorer} target="_blank">
+                                <small>Tx hash: {success}</small>
+                              </a>
+                            </p>
+                          </Alert>
+                        )}
                       </>
+                    ) : (
+                      <div className="pool-empty">
+                        <div className="pool-empty-info">
+                          <Spinner />
+                          <div className="pool-empty-label">
+                            Loading position...
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </>
                 ) : (

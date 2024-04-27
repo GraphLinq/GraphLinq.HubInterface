@@ -154,6 +154,18 @@
     display: flex;
     gap: 24px;
 
+    &[data-disabled="true"] {
+      position: relative;
+      opacity: 0.5;
+
+      &:before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+      }
+    }
+
     .button {
       width: 100%;
     }
