@@ -157,14 +157,19 @@ function PoolNewPage() {
     100;
 
   const handleInput = (e: ChangeResult) => {
+    if (rangeMin === e.minValue && rangeMax === e.maxValue) {
+      return;
+    }
     setRangeMin(e.minValue);
     setRangeMax(e.maxValue);
+    if (firstCurrencyAmount) {
+      setSecondCurrencyAmount(
+        (parseFloat(firstCurrencyAmount) / e.maxValue).toString()
+      );
+    }
   };
 
   const handleSubmit = async () => {
-    console.log("handleSubmit");
-    console.log("deployOrGetPool start");
-
     const poolAddress = await deployOrGetPool(
       new Token(
         GLQ_CHAIN_ID,
@@ -180,11 +185,8 @@ function PoolNewPage() {
       secondCurrencyAmount,
       fees
     );
-    console.log("deployOrGetPool end");
 
-    console.log("check poolAddress", poolAddress);
     if (poolAddress) {
-      console.log("mintLiquidity start");
       await mintLiquidity(
         poolAddress,
         new Token(
@@ -202,9 +204,7 @@ function PoolNewPage() {
         rangeMinPerc,
         rangeMaxPerc
       );
-      console.log("mintLiquidity end");
     }
-    console.log("submit end");
   };
 
   const [loadingQuote, setLoadingQuote] = useState(false);
@@ -214,6 +214,7 @@ function PoolNewPage() {
   const getQuote = async () => {
     setLoadingQuote(true);
 
+    // eslint-disable-next-line no-async-promise-executor
     const quotePromise = new Promise(async (resolve, reject) => {
       try {
         if (!firstCurrency) return;
@@ -394,7 +395,15 @@ function PoolNewPage() {
                                   ? parseFloat(firstCurrencyBalance)
                                   : 0
                               }
-                              onChange={(val) => setFirstCurrencyAmount(val)}
+                              onChange={(val) => {
+                                setFirstCurrencyAmount(val);
+                                setSecondCurrencyAmount(
+                                  formatNumberToFixed(
+                                    parseFloat(val) / rangeMaxAmount,
+                                    6
+                                  )
+                                );
+                              }}
                             />
                           </div>
                           <div className="poolNew-amounts-swap-actions">
@@ -404,6 +413,14 @@ function PoolNewPage() {
                                   setFirstCurrencyAmount(
                                     formatNumberToFixed(
                                       parseFloat(firstCurrencyBalance) / 4,
+                                      6
+                                    )
+                                  );
+                                  setSecondCurrencyAmount(
+                                    formatNumberToFixed(
+                                      parseFloat(firstCurrencyBalance) /
+                                        4 /
+                                        rangeMaxAmount,
                                       6
                                     )
                                   );
@@ -421,6 +438,14 @@ function PoolNewPage() {
                                       6
                                     )
                                   );
+                                  setSecondCurrencyAmount(
+                                    formatNumberToFixed(
+                                      parseFloat(firstCurrencyBalance) /
+                                        2 /
+                                        rangeMaxAmount,
+                                      6
+                                    )
+                                  );
                                 }
                               }}
                             >
@@ -432,6 +457,13 @@ function PoolNewPage() {
                                   setFirstCurrencyAmount(
                                     formatNumberToFixed(
                                       parseFloat(firstCurrencyBalance),
+                                      6
+                                    )
+                                  );
+                                  setSecondCurrencyAmount(
+                                    formatNumberToFixed(
+                                      parseFloat(firstCurrencyBalance) /
+                                        rangeMaxAmount,
                                       6
                                     )
                                   );
@@ -454,7 +486,15 @@ function PoolNewPage() {
                                   ? parseFloat(secondCurrencyBalance)
                                   : 0
                               }
-                              onChange={(val) => setSecondCurrencyAmount(val)}
+                              onChange={(val) => {
+                                setSecondCurrencyAmount(val);
+                                setFirstCurrencyAmount(
+                                  formatNumberToFixed(
+                                    parseFloat(val) * rangeMaxAmount,
+                                    6
+                                  )
+                                );
+                              }}
                             />
                           </div>
                           <div className="poolNew-amounts-swap-actions">
@@ -464,6 +504,14 @@ function PoolNewPage() {
                                   setSecondCurrencyAmount(
                                     formatNumberToFixed(
                                       parseFloat(secondCurrencyBalance) / 4,
+                                      6
+                                    )
+                                  );
+                                  setFirstCurrencyAmount(
+                                    formatNumberToFixed(
+                                      parseFloat(secondCurrencyBalance) /
+                                        4 /
+                                        rangeMaxAmount,
                                       6
                                     )
                                   );
@@ -481,6 +529,14 @@ function PoolNewPage() {
                                       6
                                     )
                                   );
+                                  setFirstCurrencyAmount(
+                                    formatNumberToFixed(
+                                      parseFloat(secondCurrencyBalance) /
+                                        2 /
+                                        rangeMaxAmount,
+                                      6
+                                    )
+                                  );
                                 }
                               }}
                             >
@@ -492,6 +548,13 @@ function PoolNewPage() {
                                   setSecondCurrencyAmount(
                                     formatNumberToFixed(
                                       parseFloat(secondCurrencyBalance),
+                                      6
+                                    )
+                                  );
+                                  setFirstCurrencyAmount(
+                                    formatNumberToFixed(
+                                      parseFloat(secondCurrencyBalance) /
+                                        rangeMaxAmount,
                                       6
                                     )
                                   );

@@ -55,4 +55,6 @@ export interface Position {
   max: number;
   status: PositionStatus;
   poolCurrentPrice: number;
+  tickLower: number;
+  tickUpper: number;
 }

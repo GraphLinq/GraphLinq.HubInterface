@@ -112,7 +112,9 @@ const usePool = () => {
     ];
   }
 
-  const getPositionByIndex = async (index: number) => {
+  const getPositionByIndex = async (
+    index: number
+  ): Promise<Position | undefined> => {
     const tokenId = await nftPositionManagerContract.tokenOfOwnerByIndex(
       account,
       index
@@ -183,6 +185,8 @@ const usePool = () => {
             ? PositionStatus.IN_RANGE
             : PositionStatus.CLOSED,
         poolCurrentPrice: currentPrice,
+        tickUpper: tempPosition.tickUpper,
+        tickLower: tempPosition.tickLower,
       };
     }
   };
@@ -503,7 +507,7 @@ const usePool = () => {
       const txResponse = await nftPositionManagerContract.decreaseLiquidity(
         {
           tokenId: position.id,
-          liquidity: 0 || position.liquidity.total,
+          liquidity: position.liquidity.total,
           amount0Min: 0,
           amount1Min: 0,
           deadline: Math.floor(Date.now() / 1000) + 60 * 10, // deadline: 10 minutes from now
@@ -518,6 +522,71 @@ const usePool = () => {
     } catch (error) {
       setError(getErrorMessage(error));
       console.error(`Failed to withdraw liquidity: ${error}`);
+    }
+  };
+
+  const increaseLiquidity = async (
+    position: Position,
+    tempAmountA: string,
+    tempAmountB: string
+  ) => {
+    try {
+      let tokenA, tokenB, amountA, amountB;
+      if (
+        position.pair.first.address.glq! > position.pair.second.address.glq!
+      ) {
+        tokenA = position.pair.first;
+        amountA = tempAmountA;
+        tokenB = position.pair.second;
+        amountB = tempAmountB;
+      } else {
+        tokenA = position.pair.second;
+        amountA = tempAmountB;
+        tokenB = position.pair.first;
+        amountB = tempAmountA;
+      }
+
+      const amountAFormatted = ethers.utils.parseUnits(
+        amountA,
+        position.pair.first.decimals
+      );
+      const amountBFormatted = ethers.utils.parseUnits(
+        amountB,
+        position.pair.second.decimals
+      );
+
+      await askForAllowance(
+        tokenA.address.glq!,
+        amountA,
+        nftPositionManagerContract
+      );
+      await askForAllowance(
+        tokenB.address.glq!,
+        amountB,
+        nftPositionManagerContract
+      );
+
+      setPending("Increasing liquidity from your position...");
+      const txResponse = await nftPositionManagerContract.increaseLiquidity(
+        {
+          tokenId: position.id,
+          amount0Desired: amountAFormatted,
+          amount1Desired: amountBFormatted,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: Math.floor(Date.now() / 1000) + 60 * 10, // deadline: 10 minutes from now
+        },
+        { from: account, gasLimit: 5000000 }
+      );
+
+      setPending("Waiting for confirmations...");
+      const receipt = await txResponse.wait(1);
+      console.log(`Transaction successful: ${receipt.transactionHash}`);
+      setSuccess(receipt.transactionHash);
+      return txResponse.transactionHash;
+    } catch (error) {
+      setError(getErrorMessage(error));
+      console.error(`Failed to increase liquidity: ${error}`);
     }
   };
 
@@ -557,6 +626,7 @@ const usePool = () => {
     getPoolState,
     deployOrGetPool,
     mintLiquidity,
+    increaseLiquidity,
     withdrawLiquidity,
     claimFees,
     error,

@@ -1,8 +1,10 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import ArrowBack from "@assets/icons/arrow-back.svg?react";
 import Canceled from "@assets/icons/canceled.svg?react";
-import Spinner from "@assets/icons/spinner.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
+import Spinner from "@assets/icons/spinner.svg?react";
+import Alert from "@components/Alert";
 import Button from "@components/Button";
 import "./style.scss";
 import { GLQ_EXPLORER, SITE_NAME } from "@constants/index";
@@ -12,6 +14,7 @@ import {
   formatNumberToFixed,
 } from "@utils/number";
 import { ethers } from "ethers";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAccount } from "wagmi";
@@ -21,8 +24,6 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
 import { PositionStatus } from "../../model/pool";
-import { useEffect, useState } from "react";
-import Alert from "@components/Alert";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -62,6 +63,7 @@ function PoolSinglePage() {
   }
 
   const position = ownPositions.find((pos) => pos.id === positionId);
+
   const priceFirst = position
     ? (calculatePrice(
         parseFloat(ethers.utils.formatEther(position.liquidity.first)),
@@ -76,9 +78,10 @@ function PoolSinglePage() {
         "number"
       ) as number)
     : 0;
-  const totalPrice = position ? priceFirst + priceSecond : 0;
-  const percPartFirst = (priceFirst / totalPrice) * 100;
-  const percPartSecond = (priceSecond / totalPrice) * 100;
+  const totalPrice = priceFirst + priceSecond;
+  const percPartFirst = totalPrice !== 0 ? (priceFirst / totalPrice) * 100 : 0;
+  const percPartSecond =
+    totalPrice !== 0 ? (priceSecond / totalPrice) * 100 : 0;
 
   const resetFeedback = () => {
     setError("");
@@ -350,7 +353,7 @@ function PoolSinglePage() {
                           data-disabled={formDisabled}
                         >
                           <Button
-                            link={"/pool/new"}
+                            link={`/pool/${positionId}/add`}
                             type="tertiary"
                             disabled={formDisabled}
                           >
