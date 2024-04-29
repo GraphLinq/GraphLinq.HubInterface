@@ -201,13 +201,28 @@ const usePool = () => {
       const ids: string[] = [];
       const positions: Position[] = [];
 
+      const promises: Promise<Position | null>[] = [];
+
       for (let index = 0; index < balance.toNumber(); index++) {
-        const position = await getPositionByIndex(index);
+        const promise = getPositionByIndex(index).then((position) => {
+          if (position) {
+            return position;
+          } else {
+            return null;
+          }
+        });
+
+        promises.push(promise);
+      }
+
+      const allPositions = await Promise.all(promises);
+
+      allPositions.forEach((position) => {
         if (position) {
           positions.push(position);
           ids.push(position.id);
         }
-      }
+      });
 
       setOwnPositionIds(ids);
       setOwnPositions(positions);
@@ -617,6 +632,24 @@ const usePool = () => {
     }
   };
 
+  const burnPosition = async (positionId: string) => {
+    try {
+      setPending("Burning your position...");
+
+      const txResponse = await nftPositionManagerContract.burn(positionId, {
+        from: account,
+        gasLimit: 5000000,
+      });
+      setPending("Waiting for confirmations...");
+      const receipt = await txResponse.wait();
+      setSuccess(receipt.transactionHash);
+      return receipt.transactionHash;
+    } catch (error) {
+      setError(getErrorMessage(error));
+      console.error(`Failed to burn your position: ${error}`);
+    }
+  };
+
   return {
     loadingPositions,
     loadedPositions,
@@ -629,6 +662,7 @@ const usePool = () => {
     increaseLiquidity,
     withdrawLiquidity,
     claimFees,
+    burnPosition,
     error,
     pending,
     success,

@@ -163,8 +163,13 @@ function PoolNewPage() {
     setRangeMin(e.minValue);
     setRangeMax(e.maxValue);
     if (firstCurrencyAmount) {
+      const tempRangeMaxPerc = e.maxValue * 10;
+      const tempRangeMaxAmount =
+        (parseFloat(ethers.utils.formatEther(baseQuoteAmount)) *
+          (100 + tempRangeMaxPerc)) /
+        100;
       setSecondCurrencyAmount(
-        (parseFloat(firstCurrencyAmount) / e.maxValue).toString()
+        (parseFloat(firstCurrencyAmount) / tempRangeMaxAmount).toString()
       );
     }
   };

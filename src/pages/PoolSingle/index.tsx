@@ -46,6 +46,7 @@ function PoolSinglePage() {
     ownPositionIds,
     withdrawLiquidity,
     claimFees,
+    burnPosition,
     pending: poolPending,
     error: poolError,
     success: poolSuccess,
@@ -129,6 +130,12 @@ function PoolSinglePage() {
   }, [poolSuccess]);
 
   const trackingExplorer = `${GLQ_EXPLORER}/tx/${success}`;
+
+  const handleBurn = async () => {
+    if (positionId) {
+      await burnPosition(positionId);
+    }
+  };
 
   return (
     <>
@@ -390,6 +397,7 @@ function PoolSinglePage() {
                             </p>
                           </Alert>
                         )}
+                        <button onClick={handleBurn}>Burn</button>
                       </>
                     ) : (
                       <div className="pool-empty">
