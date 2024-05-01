@@ -533,7 +533,9 @@ const usePool = () => {
       setPending("Waiting for confirmations...");
       const receipt = await txResponse.wait(1);
       console.log(`Transaction successful: ${receipt.transactionHash}`);
-      return await claimFees(position, false);
+      await claimFees(position, false);
+
+      return await burnPosition(position.id);
     } catch (error) {
       setError(getErrorMessage(error));
       console.error(`Failed to withdraw liquidity: ${error}`);
@@ -634,13 +636,13 @@ const usePool = () => {
 
   const burnPosition = async (positionId: string) => {
     try {
-      setPending("Burning your position...");
+      // setPending("Burning your position...");
 
       const txResponse = await nftPositionManagerContract.burn(positionId, {
         from: account,
         gasLimit: 5000000,
       });
-      setPending("Waiting for confirmations...");
+      // setPending("Waiting for confirmations...");
       const receipt = await txResponse.wait();
       setSuccess(receipt.transactionHash);
       return receipt.transactionHash;
