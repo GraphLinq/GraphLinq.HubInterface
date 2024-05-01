@@ -316,7 +316,8 @@ function PoolSingleAddPage() {
                                     setFirstCurrencyAmount(val);
                                     setSecondCurrencyAmount(
                                       formatNumberToFixed(
-                                        parseFloat(val) / position.max,
+                                        parseFloat(val) /
+                                          position.poolCurrentPrice,
                                         6
                                       )
                                     );
@@ -337,7 +338,7 @@ function PoolSingleAddPage() {
                                         formatNumberToFixed(
                                           parseFloat(firstCurrencyBalance) /
                                             4 /
-                                            position.max,
+                                            position.poolCurrentPrice,
                                           6
                                         )
                                       );
@@ -360,7 +361,7 @@ function PoolSingleAddPage() {
                                         formatNumberToFixed(
                                           parseFloat(firstCurrencyBalance) /
                                             2 /
-                                            position.max,
+                                            position.poolCurrentPrice,
                                           6
                                         )
                                       );
@@ -382,7 +383,7 @@ function PoolSingleAddPage() {
                                       setSecondCurrencyAmount(
                                         formatNumberToFixed(
                                           parseFloat(firstCurrencyBalance) /
-                                            position.max,
+                                            position.poolCurrentPrice,
                                           6
                                         )
                                       );
@@ -409,7 +410,8 @@ function PoolSingleAddPage() {
                                     setSecondCurrencyAmount(val);
                                     setFirstCurrencyAmount(
                                       formatNumberToFixed(
-                                        parseFloat(val) * position.max,
+                                        parseFloat(val) *
+                                          position.poolCurrentPrice,
                                         6
                                       )
                                     );
@@ -431,7 +433,7 @@ function PoolSingleAddPage() {
                                         formatNumberToFixed(
                                           parseFloat(secondCurrencyBalance) /
                                             4 /
-                                            position.max,
+                                            position.poolCurrentPrice,
                                           6
                                         )
                                       );
@@ -453,7 +455,7 @@ function PoolSingleAddPage() {
                                         formatNumberToFixed(
                                           parseFloat(secondCurrencyBalance) /
                                             2 /
-                                            position.max,
+                                            position.poolCurrentPrice,
                                           6
                                         )
                                       );
@@ -474,7 +476,7 @@ function PoolSingleAddPage() {
                                       setFirstCurrencyAmount(
                                         formatNumberToFixed(
                                           parseFloat(secondCurrencyBalance) /
-                                            position.max,
+                                            position.poolCurrentPrice,
                                           6
                                         )
                                       );

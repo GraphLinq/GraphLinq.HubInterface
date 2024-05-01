@@ -277,6 +277,7 @@ const usePool = () => {
   ) => {
     let allowance = "0";
     const tokenContract = new Contract(tokenAddress, ERC20, provider);
+    setPending("Checking token allowance...");
     if (tokenContract) {
       const requiredAmount = parseFloat(amount);
       allowance = await tokenContract.allowance(
@@ -289,11 +290,13 @@ const usePool = () => {
       );
 
       if (allowanceDecimal < requiredAmount) {
+        setPending("Asking for token allowance...");
         const approveTx = await tokenContract.approve(
           targetContract.address,
           ethers.utils.parseEther(requiredAmount.toString())
         );
         await approveTx.wait();
+        setPending("Allowance granted successfully.");
       }
     }
   };
@@ -376,7 +379,7 @@ const usePool = () => {
         }
       }
     } catch (error) {
-      setError(getErrorMessage(error));
+      // setError(getErrorMessage(error));
       console.error("Failed to deploy/get pool:", error);
     }
 
@@ -505,8 +508,11 @@ const usePool = () => {
         nftPositionManagerContract
       );
 
+      setPending("Creating position...");
       const txResponse = await provider.sendTransaction(transaction);
+      setPending("Waiting for confirmations...");
       const receipt = await txResponse.wait(1);
+      setSuccess(receipt.transactionHash);
       console.log(`Transaction successful: ${receipt.transactionHash}`);
       return receipt.transactionHash;
     } catch (error) {
