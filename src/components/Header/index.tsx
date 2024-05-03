@@ -16,7 +16,7 @@ import WalletConnect from "@assets/icons/walletconnect.svg?react";
 import Wrapper from "@assets/icons/wrapper.svg?react";
 import Button from "@components/Button";
 import Pill from "@components/Pill";
-import { WGLQ_TOKEN } from "@constants/index";
+import { WGLQ_TOKEN } from "@constants/apptoken";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { formatEthereumAddress } from "@utils/string";
 import { ethers } from "ethers";

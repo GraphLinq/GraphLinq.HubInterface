@@ -1,25 +1,21 @@
+import Spinner from "@assets/icons/spinner.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import "./style.scss";
-import {
-  GLQ_EXPLORER,
-  GLQ_TOKEN,
-  SITE_NAME,
-  WGLQ_TOKEN,
-} from "@constants/index";
+import { WGLQ_TOKEN, GLQ_TOKEN } from "@constants/apptoken";
+import { GLQ_EXPLORER_URL, SITE_NAME } from "@constants/index";
+import { getErrorMessage } from "@utils/errors";
 import { formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAccount, useBalance } from "wagmi";
-import Spinner from "@assets/icons/spinner.svg?react";
 
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
-import useWrapper from "../../composables/useWrapper";
 import useSound from "../../composables/useSound";
-import { getErrorMessage } from "@utils/errors";
+import useWrapper from "../../composables/useWrapper";
 
 const seoTitle = `${SITE_NAME} — Wrapper`;
 
@@ -177,7 +173,7 @@ function WrapperPage() {
     }
   };
 
-  const trackingExplorer = `${GLQ_EXPLORER}/tx/${
+  const trackingExplorer = `${GLQ_EXPLORER_URL}/tx/${
     successWrapTx || successUnwrapTx
   }`;
 

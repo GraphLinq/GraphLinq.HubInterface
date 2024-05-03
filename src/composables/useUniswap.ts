@@ -1,7 +1,7 @@
 import {
-  GLQCHAIN_SWAP_QUOTER_ADDRESS,
   GLQCHAIN_SWAP_ROUTER_ADDRESS,
-} from "@constants/index";
+  GLQCHAIN_SWAP_QUOTER_ADDRESS,
+} from "@constants/address";
 import { abi as SWAP_ROUTER_ABI } from "@intrinsic-network/swap-router-contracts/artifacts/contracts/SwapRouter02.sol/SwapRouter02.json";
 import { abi as QuoterV2ABI } from "@uniswap/v3-periphery/artifacts/contracts/lens/QuoterV2.sol/QuoterV2.json";
 import { Contract } from "ethers";

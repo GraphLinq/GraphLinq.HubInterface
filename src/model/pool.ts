@@ -1,4 +1,4 @@
-import { AppToken } from "@constants/index";
+import { AppToken } from "@constants/apptoken";
 import { ethers } from "ethers";
 
 export interface Pool {

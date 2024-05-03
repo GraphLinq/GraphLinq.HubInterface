@@ -1,6 +1,6 @@
 import ArrowBack from "@assets/icons/arrow-back.svg?react";
-import ETHToken from "@assets/icons/eth-icon.svg?react";
-import GLQToken from "@assets/icons/glq-icon.svg?react";
+import ETHIcon from "@assets/icons/eth-icon.svg?react";
+import GLQIcon from "@assets/icons/glq-icon.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
 import Alert from "@components/Alert";
@@ -8,10 +8,11 @@ import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import InputRadioGroup from "@components/InputRadioGroup";
 import Select from "@components/Select";
-import { GLQCHAIN_CURRENCIES, SITE_NAME } from "@constants/index";
-import { Token } from "@uniswap/sdk-core";
+import { GLQCHAIN_CURRENCIES } from "@constants/apptoken";
+import { feesOptions } from "@constants/fees";
+import { SITE_NAME } from "@constants/index";
+import { getPoolTokenByAddress, orderedPoolTokens } from "@constants/pooltoken";
 import { tickToPrice } from "@uniswap/v3-sdk";
-import { GLQ_CHAIN_ID } from "@utils/chains";
 import { formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import MultiRangeSlider, { ChangeResult } from "multi-range-slider-react";
@@ -26,34 +27,11 @@ import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
 
 const tokenIcons = {
-  GLQ: <GLQToken />,
-  WGLQ: <GLQToken />,
-  ETH: <ETHToken />,
-  WETH: <ETHToken />,
+  GLQ: <GLQIcon />,
+  WGLQ: <GLQIcon />,
+  ETH: <ETHIcon />,
+  WETH: <ETHIcon />,
 };
-
-const feesOptions = [
-  {
-    label: "0.01%",
-    sublabel: "Very stable",
-    value: "0.01",
-  },
-  {
-    label: "0.05%",
-    sublabel: "Stable",
-    value: "0.05",
-  },
-  {
-    label: "0.30%",
-    sublabel: "For most",
-    value: "0.3",
-  },
-  {
-    label: "1%",
-    sublabel: "Exotic pairs",
-    value: "1",
-  },
-];
 
 const seoTitle = `${SITE_NAME} — Create pool`;
 
@@ -107,7 +85,7 @@ function PoolNewPage() {
     active: number,
     currency: "first" | "second"
   ) => {
-    // resetFeedback();
+    resetFeedback();
 
     if (currency === "first") {
       setFirstCurrencyOption(active);
@@ -140,34 +118,33 @@ function PoolNewPage() {
   const [currentPoolPrice, setCurrentPoolPrice] = useState(0);
 
   const handleFees = async (val: string) => {
+    if (!firstPoolToken || !secondPoolToken) {
+      return;
+    }
+
     setLoading(true);
     setFees(val);
 
-    const firstToken = new Token(
-      GLQ_CHAIN_ID,
-      firstCurrency.address.glq!,
-      firstCurrency.decimals
-    );
-
-    const secondToken = new Token(
-      GLQ_CHAIN_ID,
-      secondCurrency.address.glq!,
-      secondCurrency.decimals
-    );
     const poolAddress = await deployOrGetPool(
-      firstToken,
-      secondToken,
+      firstPoolToken,
+      secondPoolToken,
       "0",
       "0",
-      val
+      val,
+      false
     );
 
     if (poolAddress) {
-      const data = await getPoolState(poolAddress);
+      const poolState = await getPoolState(poolAddress);
 
-      if (data) {
+      if (poolState) {
+        const [token0, token1] = orderedPoolTokens(
+          firstPoolToken,
+          secondPoolToken
+        );
+
         const currentPrice = parseFloat(
-          tickToPrice(secondToken, firstToken, data.tick).toSignificant()
+          tickToPrice(token0, token1, poolState.tick).toSignificant()
         );
 
         setCurrentPoolPrice(currentPrice);
@@ -190,6 +167,15 @@ function PoolNewPage() {
   const rangeMinAmount = (currentPoolPrice * (100 + rangeMinPerc)) / 100;
   const rangeMaxAmount = (currentPoolPrice * (100 + rangeMaxPerc)) / 100;
 
+  const firstPoolToken = getPoolTokenByAddress(
+    firstCurrency.address.glq!,
+    "glq"
+  );
+  const secondPoolToken = getPoolTokenByAddress(
+    secondCurrency.address.glq!,
+    "glq"
+  );
+
   const handleInput = (e: ChangeResult) => {
     if (rangeMin === e.minValue && rangeMax === e.maxValue) {
       return;
@@ -207,19 +193,16 @@ function PoolNewPage() {
   };
 
   const handleSubmit = async () => {
+    if (!firstPoolToken || !secondPoolToken) {
+      return;
+    }
+
     setLoading(true);
     setPending("Setting up position...");
+
     const poolAddress = await deployOrGetPool(
-      new Token(
-        GLQ_CHAIN_ID,
-        firstCurrency.address.glq!,
-        firstCurrency.decimals
-      ),
-      new Token(
-        GLQ_CHAIN_ID,
-        secondCurrency.address.glq!,
-        secondCurrency.decimals
-      ),
+      firstPoolToken,
+      secondPoolToken,
       firstCurrencyAmount,
       secondCurrencyAmount,
       fees
@@ -228,16 +211,8 @@ function PoolNewPage() {
     if (poolAddress) {
       await mintLiquidity(
         poolAddress,
-        new Token(
-          GLQ_CHAIN_ID,
-          firstCurrency.address.glq!,
-          firstCurrency.decimals
-        ),
-        new Token(
-          GLQ_CHAIN_ID,
-          secondCurrency.address.glq!,
-          secondCurrency.decimals
-        ),
+        firstPoolToken,
+        secondPoolToken,
         firstCurrencyAmount,
         secondCurrencyAmount,
         rangeMinPerc,

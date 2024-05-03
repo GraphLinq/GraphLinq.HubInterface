@@ -1,7 +1,7 @@
 import "./style.scss";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Alert from "@components/Alert";
-import { GLQ_EXPLORER, MAINNET_EXPLORER } from "@constants/index";
+import { GLQ_EXPLORER_URL, MAINNET_EXPLORER_URL } from "@constants/index";
 import { useAppContext } from "@context/AppContext";
 import { useQuery } from "@tanstack/react-query";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID } from "@utils/chains";
@@ -96,9 +96,9 @@ const TxProgress = () => {
     }
   };
 
-  const trackingExplorer = `${isMainnet ? GLQ_EXPLORER : MAINNET_EXPLORER}/tx/${
-    trackingInfo && trackingInfo.bridge_tx
-  }`;
+  const trackingExplorer = `${
+    isMainnet ? GLQ_EXPLORER_URL : MAINNET_EXPLORER_URL
+  }/tx/${trackingInfo && trackingInfo.bridge_tx}`;
 
   return (
     <div className="txProgress">

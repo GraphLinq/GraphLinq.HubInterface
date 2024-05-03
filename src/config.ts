@@ -4,8 +4,7 @@ import { http, createConfig } from "wagmi";
 import { mainnet, sepolia } from "wagmi/chains";
 import { walletConnect } from "wagmi/connectors";
 
-import { GLQ_EXPLORER } from "./constants";
-import { GLQ_RPC_URL } from "./libs/constants";
+import { GLQ_EXPLORER_URL, GLQ_RPC_URL } from "./constants";
 
 declare module "wagmi" {
   interface Register {
@@ -21,7 +20,7 @@ export const glqchain = defineChain({
     default: { http: [GLQ_RPC_URL] },
   },
   blockExplorers: {
-    default: { name: "GLQ Explorer", url: GLQ_EXPLORER },
+    default: { name: "GLQ Explorer", url: GLQ_EXPLORER_URL },
   },
 });
 

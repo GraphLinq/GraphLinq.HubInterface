@@ -8,12 +8,11 @@ import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import Pill from "@components/Pill";
 import Select from "@components/Select";
+import { MAINNET_CURRENCIES, GLQCHAIN_CURRENCIES } from "@constants/apptoken";
 import {
-  MAINNET_CURRENCIES,
-  GLQCHAIN_CURRENCIES,
   SITE_NAME,
-  GLQ_EXPLORER,
-  MAINNET_EXPLORER,
+  GLQ_EXPLORER_URL,
+  MAINNET_EXPLORER_URL,
 } from "@constants/index";
 import { useAppContext } from "@context/AppContext";
 import { useQuery } from "@tanstack/react-query";
@@ -70,9 +69,9 @@ function BridgePage() {
     null
   );
 
-  const trackingExplorer = `${isMainnet ? GLQ_EXPLORER : MAINNET_EXPLORER}/tx/${
-    tracking && typeof tracking !== "string" && tracking.bridge_tx
-  }`;
+  const trackingExplorer = `${
+    isMainnet ? GLQ_EXPLORER_URL : MAINNET_EXPLORER_URL
+  }/tx/${tracking && typeof tracking !== "string" && tracking.bridge_tx}`;
 
   const resetFeedback = () => {
     setError("");

@@ -1,7 +1,8 @@
-import { useState } from "react";
-import useChains from "./useChains";
-import { WETH_TOKEN, WGLQ_TOKEN } from "@constants/index";
+import { WGLQ_TOKEN, WETH_TOKEN } from "@constants/apptoken";
 import { getErrorMessage } from "@utils/errors";
+import { useState } from "react";
+
+import useChains from "./useChains";
 
 function useAddTokens() {
   const { isGLQChain } = useChains();

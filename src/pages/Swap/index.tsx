@@ -9,12 +9,10 @@ import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import InputRadioGroup from "@components/InputRadioGroup";
 import Select from "@components/Select";
-import {
-  GLQCHAIN_CURRENCIES,
-  SITE_NAME,
-  GLQCHAIN_SWAP_ROUTER_ADDRESS,
-  GLQ_EXPLORER,
-} from "@constants/index";
+import { GLQCHAIN_SWAP_ROUTER_ADDRESS } from "@constants/address";
+import { GLQCHAIN_CURRENCIES } from "@constants/apptoken";
+import { SITE_NAME, GLQ_EXPLORER_URL } from "@constants/index";
+import { getErrorMessage } from "@utils/errors";
 import { formatBigNumberToFixed, formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
@@ -25,10 +23,9 @@ import useChains from "../../composables/useChains";
 import { useTokenContract } from "../../composables/useContract";
 import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
+import useSound from "../../composables/useSound";
 import useTokenBalance from "../../composables/useTokenBalance";
 import useUniswap from "../../composables/useUniswap";
-import { getErrorMessage } from "@utils/errors";
-import useSound from "../../composables/useSound";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -203,9 +200,14 @@ function SwapPage() {
 
     resetFeedback();
 
-    if (isNaN(parseFloat(ownCurrencyAmount)) || parseFloat(ownCurrencyAmount) <= 0) {
+    if (
+      isNaN(parseFloat(ownCurrencyAmount)) ||
+      parseFloat(ownCurrencyAmount) <= 0
+    ) {
       setError(
-        `Invalid amount to swap : ${ownCurrencyAmount !== '' ? ownCurrencyAmount : '0'} ${ownCurrency.name}`
+        `Invalid amount to swap : ${
+          ownCurrencyAmount !== "" ? ownCurrencyAmount : "0"
+        } ${ownCurrency.name}`
       );
       return;
     }
@@ -283,8 +285,8 @@ function SwapPage() {
       });
 
       setOwnCurrencyAmount("");
-      
-      playSound('sound_1');
+
+      playSound("sound_1");
     } catch (error: any) {
       resetFeedback();
       setError(getErrorMessage(error));
@@ -311,7 +313,7 @@ function SwapPage() {
     return () => clearTimeout(timer);
   }, [account, ownCurrency, ownCurrencyAmount]);
 
-  const trackingExplorer = `${GLQ_EXPLORER}/tx/${success}`;
+  const trackingExplorer = `${GLQ_EXPLORER_URL}/tx/${success}`;
 
   return (
     <>

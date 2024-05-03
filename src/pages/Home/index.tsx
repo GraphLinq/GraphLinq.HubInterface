@@ -4,7 +4,7 @@ import Info from "@assets/icons/info.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap-coin.svg?react";
 import HomeGraph from "@components/HomeGraph";
-import { GLQ_EXPLORER, SITE_NAME } from "@constants/index";
+import { GLQ_EXPLORER_URL, SITE_NAME } from "@constants/index";
 import { useQuery } from "@tanstack/react-query";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { formatDistanceToNow } from "date-fns";
@@ -33,7 +33,7 @@ function HomePage() {
   const glqPriceEvolutionColor = glqPriceEvolution >= 0 ? "green" : "red";
 
   const handleOpenTx = (hash: string) => {
-    const explorerUrl = `${GLQ_EXPLORER}/tx/${hash}`;
+    const explorerUrl = `${GLQ_EXPLORER_URL}/tx/${hash}`;
     window.open(explorerUrl, "_blank");
   };
 

@@ -1,4 +1,4 @@
-import { GLQCHAIN_WRAPPER } from "@constants/index";
+import { GLQCHAIN_WRAPPER } from "@constants/address";
 import { Contract } from "ethers";
 import { ethers } from "ethers";
 import { useAccount } from "wagmi";
@@ -14,11 +14,7 @@ const useWrapper = () => {
   const injectedProvider = useEthersSigner();
   const provider = injectedProvider ?? rpcProvider;
 
-  const wrapper = new Contract(
-    GLQCHAIN_WRAPPER,
-    WRAPPER_ABI,
-    provider
-  );
+  const wrapper = new Contract(GLQCHAIN_WRAPPER, WRAPPER_ABI, provider);
 
   const executeWrap = async (amountIn: number) => {
     if (!wrapper) return;

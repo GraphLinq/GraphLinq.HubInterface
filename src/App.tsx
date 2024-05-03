@@ -22,7 +22,7 @@ import {
 import { WagmiProvider } from "wagmi";
 
 import { config } from "./config";
-import { HUB_URL } from "./libs/constants";
+import { HUB_URL } from "./constants";
 
 function App() {
   const queryClient = new QueryClient();

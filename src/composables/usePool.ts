@@ -1,9 +1,9 @@
 import {
+  UNISWAP_POOL_FACTORY_ADDRESS,
   GLQCHAIN_POOL_NFT_ADDRESS,
   NULL_ADDRESS,
-  UNISWAP_POOL_FACTORY_ADDRESS,
-  getTokenByAddress,
-} from "@constants/index";
+} from "@constants/address";
+import { getAppTokenByAddress } from "@constants/apptoken";
 import univ3prices from "@thanpolas/univ3prices";
 import {
   CurrencyAmount,
@@ -34,7 +34,7 @@ import { PoolState, Position, PositionStatus } from "../model/pool";
 
 import { useEthersSigner } from "./useEthersProvider";
 import useRpcProvider from "./useRpcProvider";
-import { formatBigNumberToFixed } from "@utils/number";
+import { orderedPoolTokens } from "@constants/pooltoken";
 
 // const nftContractABI = [
 //   "function balanceOf(address owner) external view returns (uint256 balance)",
@@ -122,8 +122,8 @@ const usePool = () => {
     );
     const tempPosition = await nftPositionManagerContract.positions(tokenId);
 
-    const firstAppToken = getTokenByAddress(tempPosition.token0, "glq");
-    const secondAppToken = getTokenByAddress(tempPosition.token1, "glq");
+    const firstAppToken = getAppTokenByAddress(tempPosition.token0, "glq");
+    const secondAppToken = getAppTokenByAddress(tempPosition.token1, "glq");
 
     const poolAddress = await uniswapFactoryContract.getPool(
       tempPosition.token0,
@@ -189,6 +189,7 @@ const usePool = () => {
         poolCurrentPrice: currentPrice,
         tickUpper: tempPosition.tickUpper,
         tickLower: tempPosition.tickLower,
+        poolAddress: poolAddress,
       };
     }
   };
@@ -297,6 +298,7 @@ const usePool = () => {
           targetContract.address,
           ethers.utils.parseEther(requiredAmount.toString())
         );
+        setPending("Waiting for confirmations...");
         await approveTx.wait();
         if (alert) {
           setPending("Allowance granted successfully.");
@@ -310,16 +312,13 @@ const usePool = () => {
     tokenB: Token,
     amountA: string,
     amountB: string,
-    feeInPercent: string
+    feeInPercent: string,
+    alertAllowance = true
   ): Promise<string | null> => {
     let existingPoolAddress = null;
 
     try {
-      const tokens =
-        tokenA.address > tokenB.address
-          ? [tokenA.address, tokenB.address]
-          : [tokenB.address, tokenA.address];
-
+      const [token0, token1] = orderedPoolTokens(tokenA, tokenB);
       const fee = parseFloat(feeInPercent) * 10000;
 
       const amountAFormatted = ethers.utils.parseUnits(
@@ -332,41 +331,49 @@ const usePool = () => {
       );
 
       existingPoolAddress = await uniswapFactoryContract.getPool(
-        tokens[0],
-        tokens[1],
+        token0.address,
+        token1.address,
         fee,
         { gasLimit: 5000000 }
       );
       if (existingPoolAddress !== NULL_ADDRESS) {
         console.log(`Pool already exists at address: ${existingPoolAddress}`);
-        const poolContract = new Contract(
-          existingPoolAddress,
-          IUniswapV3PoolABI,
-          provider
-        );
+        try {
+          const poolContract = new Contract(
+            existingPoolAddress,
+            IUniswapV3PoolABI,
+            provider
+          );
 
-        await askForAllowance(tokenA.address, amountA, poolContract, false);
-        await askForAllowance(tokenB.address, amountB, poolContract, false);
+          await askForAllowance(
+            tokenA.address,
+            amountA,
+            poolContract,
+            alertAllowance
+          );
+          await askForAllowance(
+            tokenB.address,
+            amountB,
+            poolContract,
+            alertAllowance
+          );
 
-        const sqrtPrice = univ3prices.utils.encodeSqrtRatioX96(
-          amountAFormatted,
-          amountBFormatted
-        );
-        const tx = await poolContract.initialize(sqrtPrice.toString());
-        await tx.wait();
+          const sqrtPrice = univ3prices.utils.encodeSqrtRatioX96(
+            amountAFormatted,
+            amountBFormatted
+          );
+          const tx = await poolContract.initialize(sqrtPrice.toString());
+          await tx.wait();
 
-        console.log(
-          `Pool successfully initialized with base price ${amountAFormatted} VS ${amountBFormatted} !`
-        );
+          console.log(
+            `Pool successfully initialized with base price ${amountAFormatted} VS ${amountBFormatted} !`
+          );
+        } catch (error) {}
 
         return existingPoolAddress;
       } else {
         console.log("Deploying pool...");
-        const tx = await uniswapFactoryContract.createPool(
-          tokens[0],
-          tokens[1],
-          fee
-        );
+        const tx = await uniswapFactoryContract.createPool(token0, token1, fee);
         console.log("Wait..", tx);
         const receipt = await tx.wait();
 
@@ -401,37 +408,28 @@ const usePool = () => {
   ) => {
     try {
       const state = await getPoolState(addressPool);
-      let tokenA, tokenB, amountA, amountB;
-      if (tempTokenA.address > tempTokenB.address) {
-        tokenA = tempTokenA;
-        amountA = tempAmountA;
-        tokenB = tempTokenB;
-        amountB = tempAmountB;
-      } else {
-        tokenA = tempTokenB;
-        amountA = tempAmountB;
-        tokenB = tempTokenA;
-        amountB = tempAmountA;
-      }
+      const [token0, token1] = orderedPoolTokens(tempTokenA, tempTokenB);
+      const amount0 = tempTokenA === token0 ? tempAmountA : tempAmountB;
+      const amount1 = tempTokenB === token1 ? tempAmountB : tempAmountA;
 
       if (!state || !account) return;
 
-      const amountAFormatted = ethers.utils.parseUnits(
-        amountA,
-        tokenA.decimals
+      const amount0Formatted = ethers.utils.parseUnits(
+        amount0,
+        token0.decimals
       );
-      const amountBFormatted = ethers.utils.parseUnits(
-        amountB,
-        tokenB.decimals
+      const amount1Formatted = ethers.utils.parseUnits(
+        amount1,
+        token1.decimals
       );
 
       const amountToken0 = CurrencyAmount.fromRawAmount(
-        tokenA,
-        amountAFormatted.toString()
+        token0,
+        amount0Formatted.toString()
       );
       const amountToken1 = CurrencyAmount.fromRawAmount(
-        tokenB,
-        amountBFormatted.toString()
+        token1,
+        amount1Formatted.toString()
       );
 
       const pool = new Pool(
@@ -502,17 +500,17 @@ const usePool = () => {
       };
 
       await askForAllowance(
-        tokenA.address,
-        amountA,
+        token0.address,
+        amount0,
         nftPositionManagerContract
       );
       await askForAllowance(
-        tokenB.address,
-        amountB,
+        token1.address,
+        amount1,
         nftPositionManagerContract
       );
 
-      setPending("Creating position...");
+      setPending("Minting position...");
       const txResponse = await provider.sendTransaction(transaction);
       setPending("Waiting for confirmations...");
       const receipt = await txResponse.wait(1);

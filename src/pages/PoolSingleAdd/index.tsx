@@ -8,7 +8,7 @@ import Alert from "@components/Alert";
 import Button from "@components/Button";
 import "./style.scss";
 import InputNumber from "@components/InputNumber";
-import { GLQ_EXPLORER, SITE_NAME } from "@constants/index";
+import { GLQ_EXPLORER_URL, SITE_NAME } from "@constants/index";
 import {
   formatBigNumberToFixed,
   formatNumberToDollars,
@@ -56,7 +56,6 @@ function PoolSingleAddPage() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [formDisabled, setFormDisabled] = useState(false);
 
   if (loadedPositions && positionId && !ownPositionIds.includes(positionId)) {
     navigate("/pool");
@@ -126,15 +125,17 @@ function PoolSingleAddPage() {
 
   const handleSubmit = async () => {
     if (position) {
+      setLoading(true);
       await increaseLiquidity(
         position,
         firstCurrencyAmount,
         secondCurrencyAmount
       );
+      setLoading(false);
     }
   };
 
-  const trackingExplorer = `${GLQ_EXPLORER}/tx/${success}`;
+  const trackingExplorer = `${GLQ_EXPLORER_URL}/tx/${success}`;
 
   return (
     <>

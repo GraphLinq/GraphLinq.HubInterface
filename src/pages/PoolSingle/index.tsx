@@ -7,7 +7,7 @@ import Spinner from "@assets/icons/spinner.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
 import "./style.scss";
-import { GLQ_EXPLORER, SITE_NAME } from "@constants/index";
+import { GLQ_EXPLORER_URL, SITE_NAME } from "@constants/index";
 import {
   formatBigNumberToFixed,
   formatNumberToDollars,
@@ -128,7 +128,7 @@ function PoolSinglePage() {
     setSuccess(poolSuccess);
   }, [poolSuccess]);
 
-  const trackingExplorer = `${GLQ_EXPLORER}/tx/${success}`;
+  const trackingExplorer = `${GLQ_EXPLORER_URL}/tx/${success}`;
 
   return (
     <>
