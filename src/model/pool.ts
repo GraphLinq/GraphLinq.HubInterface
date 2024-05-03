@@ -57,4 +57,5 @@ export interface Position {
   poolCurrentPrice: number;
   tickLower: number;
   tickUpper: number;
+  poolAddress: string;
 }

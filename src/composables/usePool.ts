@@ -34,6 +34,7 @@ import { PoolState, Position, PositionStatus } from "../model/pool";
 
 import { useEthersSigner } from "./useEthersProvider";
 import useRpcProvider from "./useRpcProvider";
+import { formatBigNumberToFixed } from "@utils/number";
 
 // const nftContractABI = [
 //   "function balanceOf(address owner) external view returns (uint256 balance)",
@@ -124,11 +125,12 @@ const usePool = () => {
     const firstAppToken = getTokenByAddress(tempPosition.token0, "glq");
     const secondAppToken = getTokenByAddress(tempPosition.token1, "glq");
 
-    const poolAddress = uniswapFactoryContract.getPool(
+    const poolAddress = await uniswapFactoryContract.getPool(
       tempPosition.token0,
       tempPosition.token1,
       tempPosition.fee
     );
+
     const poolState = await getPoolState(poolAddress);
     if (firstAppToken && secondAppToken && poolState) {
       const token0 = new Token(
@@ -192,7 +194,7 @@ const usePool = () => {
   };
 
   const findAllPositions = async () => {
-    if (!account || !provider || loadedPositions) {
+    if (!account || !provider || loadingPositions || loadedPositions) {
       return;
     }
     try {
@@ -204,14 +206,9 @@ const usePool = () => {
       const promises: Promise<Position | null>[] = [];
 
       for (let index = 0; index < balance.toNumber(); index++) {
-        const promise = getPositionByIndex(index).then((position) => {
-          if (position) {
-            return position;
-          } else {
-            return null;
-          }
-        });
-
+        const promise = getPositionByIndex(index).then(
+          (position) => position ?? null
+        );
         promises.push(promise);
       }
 
@@ -273,11 +270,14 @@ const usePool = () => {
   const askForAllowance = async (
     tokenAddress: string,
     amount: string,
-    targetContract: ethers.Contract
+    targetContract: ethers.Contract,
+    alert = true
   ) => {
     let allowance = "0";
     const tokenContract = new Contract(tokenAddress, ERC20, provider);
-    setPending("Checking token allowance...");
+    if (alert) {
+      setPending("Checking token allowance...");
+    }
     if (tokenContract) {
       const requiredAmount = parseFloat(amount);
       allowance = await tokenContract.allowance(
@@ -290,13 +290,17 @@ const usePool = () => {
       );
 
       if (allowanceDecimal < requiredAmount) {
-        setPending("Asking for token allowance...");
+        if (alert) {
+          setPending("Asking for token allowance...");
+        }
         const approveTx = await tokenContract.approve(
           targetContract.address,
           ethers.utils.parseEther(requiredAmount.toString())
         );
         await approveTx.wait();
-        setPending("Allowance granted successfully.");
+        if (alert) {
+          setPending("Allowance granted successfully.");
+        }
       }
     }
   };
@@ -341,8 +345,8 @@ const usePool = () => {
           provider
         );
 
-        await askForAllowance(tokenA.address, amountA, poolContract);
-        await askForAllowance(tokenB.address, amountB, poolContract);
+        await askForAllowance(tokenA.address, amountA, poolContract, false);
+        await askForAllowance(tokenB.address, amountB, poolContract, false);
 
         const sqrtPrice = univ3prices.utils.encodeSqrtRatioX96(
           amountAFormatted,

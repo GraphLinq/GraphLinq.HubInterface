@@ -13,7 +13,7 @@
   }
 
   &-content {
-    &[data-disabled="true"] {
+    [data-disabled="true"] {
       position: relative;
       opacity: 0.5;
 

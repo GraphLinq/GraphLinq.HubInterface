@@ -46,7 +46,6 @@ function PoolSinglePage() {
     ownPositionIds,
     withdrawLiquidity,
     claimFees,
-    burnPosition,
     pending: poolPending,
     error: poolError,
     success: poolSuccess,

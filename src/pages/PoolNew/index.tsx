@@ -3,31 +3,27 @@ import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
+import Alert from "@components/Alert";
 import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import InputRadioGroup from "@components/InputRadioGroup";
 import Select from "@components/Select";
-import { GLQCHAIN_CURRENCIES, GLQ_EXPLORER, SITE_NAME } from "@constants/index";
+import { GLQCHAIN_CURRENCIES, SITE_NAME } from "@constants/index";
+import { Token } from "@uniswap/sdk-core";
+import { tickToPrice } from "@uniswap/v3-sdk";
+import { GLQ_CHAIN_ID } from "@utils/chains";
+import { formatNumberToFixed } from "@utils/number";
+import { ethers } from "ethers";
 import MultiRangeSlider, { ChangeResult } from "multi-range-slider-react";
 import "./style.scss";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import { useAccount, useBalance } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
-
-import { ethers } from "ethers";
-
-// import { useTokenContract } from "../../composables/useContract";
-import useUniswap from "../../composables/useUniswap";
-
-import { formatBigNumberToFixed, formatNumberToFixed } from "@utils/number";
-import { Token } from "@uniswap/sdk-core";
-import { GLQ_CHAIN_ID } from "@utils/chains";
-import Alert from "@components/Alert";
-import { Link } from "react-router-dom";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -66,13 +62,13 @@ function PoolNewPage() {
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
   const {
+    getPoolState,
     deployOrGetPool,
     mintLiquidity,
     pending: poolPending,
     error: poolError,
     success: poolSuccess,
   } = usePool();
-  const { quoteSwap } = useUniswap();
 
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -88,13 +84,6 @@ function PoolNewPage() {
 
   const firstCurrency = firstCurrencyOptions[firstCurrencyOption];
   const secondCurrency = secondCurrencyOptions[secondCurrencyOption];
-
-  // const firstCurrencyTokenContract = useTokenContract(
-  //   firstCurrency.address.glq
-  // );
-  // const secondCurrencyTokenContract = useTokenContract(
-  //   secondCurrency.address.glq
-  // );
 
   const [firstCurrencyAmount, setFirstCurrencyAmount] = useState("");
   const [secondCurrencyAmount, setSecondCurrencyAmount] = useState("");
@@ -148,10 +137,49 @@ function PoolNewPage() {
   };
 
   const [fees, setFees] = useState(feesOptions[2].value);
+  const [currentPoolPrice, setCurrentPoolPrice] = useState(0);
 
-  const [baseQuoteAmount, setBaseQuoteAmount] = useState(
-    ethers.BigNumber.from(0)
-  );
+  const handleFees = async (val: string) => {
+    setLoading(true);
+    setFees(val);
+
+    const firstToken = new Token(
+      GLQ_CHAIN_ID,
+      firstCurrency.address.glq!,
+      firstCurrency.decimals
+    );
+
+    const secondToken = new Token(
+      GLQ_CHAIN_ID,
+      secondCurrency.address.glq!,
+      secondCurrency.decimals
+    );
+    const poolAddress = await deployOrGetPool(
+      firstToken,
+      secondToken,
+      "0",
+      "0",
+      val
+    );
+
+    if (poolAddress) {
+      const data = await getPoolState(poolAddress);
+
+      if (data) {
+        const currentPrice = parseFloat(
+          tickToPrice(secondToken, firstToken, data.tick).toSignificant()
+        );
+
+        setCurrentPoolPrice(currentPrice);
+      }
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    handleFees(fees);
+  }, []);
 
   const [rangeMin, setRangeMin] = useState(-1);
   const [rangeMax, setRangeMax] = useState(1);
@@ -159,14 +187,8 @@ function PoolNewPage() {
   const rangeMinPerc = rangeMin * 10;
   const rangeMaxPerc = rangeMax * 10;
 
-  const rangeMinAmount =
-    (parseFloat(ethers.utils.formatEther(baseQuoteAmount)) *
-      (100 + rangeMinPerc)) /
-    100;
-  const rangeMaxAmount =
-    (parseFloat(ethers.utils.formatEther(baseQuoteAmount)) *
-      (100 + rangeMaxPerc)) /
-    100;
+  const rangeMinAmount = (currentPoolPrice * (100 + rangeMinPerc)) / 100;
+  const rangeMaxAmount = (currentPoolPrice * (100 + rangeMaxPerc)) / 100;
 
   const handleInput = (e: ChangeResult) => {
     if (rangeMin === e.minValue && rangeMax === e.maxValue) {
@@ -177,9 +199,7 @@ function PoolNewPage() {
     if (firstCurrencyAmount) {
       const tempRangeMaxPerc = e.maxValue * 10;
       const tempRangeMaxAmount =
-        (parseFloat(ethers.utils.formatEther(baseQuoteAmount)) *
-          (100 + tempRangeMaxPerc)) /
-        100;
+        (currentPoolPrice * (100 + tempRangeMaxPerc)) / 100;
       setSecondCurrencyAmount(
         (parseFloat(firstCurrencyAmount) / tempRangeMaxAmount).toString()
       );
@@ -227,58 +247,6 @@ function PoolNewPage() {
     setLoading(false);
   };
 
-  const [loadingQuote, setLoadingQuote] = useState(false);
-
-  let quoteQueue: Promise<void | unknown> = Promise.resolve();
-
-  const getQuote = async () => {
-    setLoadingQuote(true);
-
-    // eslint-disable-next-line no-async-promise-executor
-    const quotePromise = new Promise(async (resolve, reject) => {
-      try {
-        if (!firstCurrency) return;
-
-        const base = await quoteSwap(
-          secondCurrency.address.glq!,
-          firstCurrency.address.glq!,
-          1
-        );
-
-        if (base) {
-          setBaseQuoteAmount(base);
-        }
-
-        resolve(base);
-      } catch (error) {
-        reject(error);
-      } finally {
-        setLoadingQuote(false);
-      }
-    });
-
-    quoteQueue = quoteQueue.then(() => quotePromise);
-
-    return quotePromise;
-  };
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    const debouncedGetQuote = () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        if (account) {
-          getQuote();
-        }
-      }, 500);
-    };
-
-    debouncedGetQuote();
-
-    return () => clearTimeout(timer);
-  }, [account, firstCurrency, firstCurrencyAmount]);
-
   const resetFeedback = () => {
     setError("");
     setPending("");
@@ -300,7 +268,7 @@ function PoolNewPage() {
     setSuccess(poolSuccess);
   }, [poolSuccess]);
 
-  const globalLoading = loading || loadingQuote;
+  const globalLoading = loading;
   const emptyAmount = [firstCurrencyAmount, secondCurrencyAmount].some(
     (value) => value === "" || value === "0"
   );
@@ -376,7 +344,7 @@ function PoolNewPage() {
                         <div className="poolNew-block-content pool-fees">
                           <InputRadioGroup
                             options={feesOptions}
-                            onChange={(val) => setFees(val)}
+                            onChange={(val) => handleFees(val)}
                             defaultOption={fees}
                             type="large"
                           />
@@ -386,7 +354,7 @@ function PoolNewPage() {
                         <div className="poolNew-block-title">
                           Price Range{" "}
                           <span>
-                            {formatBigNumberToFixed(baseQuoteAmount, 6)}{" "}
+                            {formatNumberToFixed(currentPoolPrice, 6)}{" "}
                             {firstCurrency.name} per {secondCurrency.name}
                           </span>
                         </div>
@@ -448,12 +416,7 @@ function PoolNewPage() {
                                   setFirstCurrencyAmount(val);
                                   setSecondCurrencyAmount(
                                     formatNumberToFixed(
-                                      parseFloat(val) /
-                                        parseFloat(
-                                          ethers.utils.formatEther(
-                                            baseQuoteAmount
-                                          )
-                                        ),
+                                      parseFloat(val) / currentPoolPrice,
                                       6
                                     )
                                   );
@@ -474,11 +437,7 @@ function PoolNewPage() {
                                       formatNumberToFixed(
                                         parseFloat(firstCurrencyBalance) /
                                           4 /
-                                          parseFloat(
-                                            ethers.utils.formatEther(
-                                              baseQuoteAmount
-                                            )
-                                          ),
+                                          currentPoolPrice,
                                         6
                                       )
                                     );
@@ -500,11 +459,7 @@ function PoolNewPage() {
                                       formatNumberToFixed(
                                         parseFloat(firstCurrencyBalance) /
                                           2 /
-                                          parseFloat(
-                                            ethers.utils.formatEther(
-                                              baseQuoteAmount
-                                            )
-                                          ),
+                                          currentPoolPrice,
                                         6
                                       )
                                     );
@@ -525,11 +480,7 @@ function PoolNewPage() {
                                     setSecondCurrencyAmount(
                                       formatNumberToFixed(
                                         parseFloat(firstCurrencyBalance) /
-                                          parseFloat(
-                                            ethers.utils.formatEther(
-                                              baseQuoteAmount
-                                            )
-                                          ),
+                                          currentPoolPrice,
                                         6
                                       )
                                     );
@@ -556,12 +507,7 @@ function PoolNewPage() {
                                   setSecondCurrencyAmount(val);
                                   setFirstCurrencyAmount(
                                     formatNumberToFixed(
-                                      parseFloat(val) *
-                                        parseFloat(
-                                          ethers.utils.formatEther(
-                                            baseQuoteAmount
-                                          )
-                                        ),
+                                      parseFloat(val) * currentPoolPrice,
                                       6
                                     )
                                   );
@@ -582,11 +528,7 @@ function PoolNewPage() {
                                       formatNumberToFixed(
                                         parseFloat(secondCurrencyBalance) /
                                           4 /
-                                          parseFloat(
-                                            ethers.utils.formatEther(
-                                              baseQuoteAmount
-                                            )
-                                          ),
+                                          currentPoolPrice,
                                         6
                                       )
                                     );
@@ -608,11 +550,7 @@ function PoolNewPage() {
                                       formatNumberToFixed(
                                         parseFloat(secondCurrencyBalance) /
                                           2 /
-                                          parseFloat(
-                                            ethers.utils.formatEther(
-                                              baseQuoteAmount
-                                            )
-                                          ),
+                                          currentPoolPrice,
                                         6
                                       )
                                     );
@@ -633,11 +571,7 @@ function PoolNewPage() {
                                     setFirstCurrencyAmount(
                                       formatNumberToFixed(
                                         parseFloat(secondCurrencyBalance) /
-                                          parseFloat(
-                                            ethers.utils.formatEther(
-                                              baseQuoteAmount
-                                            )
-                                          ),
+                                          currentPoolPrice,
                                         6
                                       )
                                     );
