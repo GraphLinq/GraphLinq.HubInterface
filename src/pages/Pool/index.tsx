@@ -2,23 +2,23 @@ import Canceled from "@assets/icons/canceled.svg?react";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import SearchEmpty from "@assets/icons/search-empty.svg?react";
+import Spinner from "@assets/icons/spinner.svg?react";
 import VisiblityOff from "@assets/icons/visibility-off.svg?react";
 import Visiblity from "@assets/icons/visibility.svg?react";
 import Button from "@components/Button";
-import "./_pool.scss";
+import "./style.scss";
 import Pill from "@components/Pill";
-import {
-  ETH_TOKEN,
-  GLQ_TOKEN,
-  SITE_NAME,
-} from "@constants/index";
+import { SITE_NAME } from "@constants/index";
 import { formatNumberToFixed } from "@utils/number";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { NavLink } from "react-router-dom";
 import { useAccount } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
+import usePool from "../../composables/usePool";
+import { PositionStatus } from "../../model/pool";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -33,38 +33,13 @@ function PoolPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
-
-  enum PositionStatus {
-    IN_RANGE,
-    CLOSED,
-  }
-
-  const positions = [
-    {
-      pair: {
-        first: GLQ_TOKEN,
-        second: ETH_TOKEN,
-      },
-      fees: 1,
-      min: 0,
-      max: Infinity,
-      status: PositionStatus.IN_RANGE,
-    },
-    {
-      pair: {
-        first: GLQ_TOKEN,
-        second: ETH_TOKEN,
-      },
-      fees: 0.3,
-      min: 54990.2,
-      max: 1000000,
-      status: PositionStatus.CLOSED,
-    },
-  ];
+  const { ownPositions, loadingPositions } = usePool();
 
   const [displayClosedPositions, setDisplayClosedPositions] = useState(true);
 
-  const filteredPositions = !displayClosedPositions ? positions.filter((pos) => pos.status !== PositionStatus.CLOSED) : positions;
+  const filteredPositions = !displayClosedPositions
+    ? ownPositions.filter((pos) => pos.status !== PositionStatus.CLOSED)
+    : ownPositions;
 
   return (
     <>
@@ -92,22 +67,35 @@ function PoolPage() {
                 {isGLQChain ? (
                   <>
                     <div className="pool-amount">
-                      {positions.length === 0 ? (
+                      {ownPositions.length === 0 ? (
                         <>
-                          <div className="pool-empty">
-                            <div className="pool-empty-info">
-                              <SearchEmpty />
-                              <div className="pool-empty-label">
-                                No active positions
+                          {loadingPositions ? (
+                            <div className="pool-empty">
+                              <div className="pool-empty-info">
+                                <Spinner />
+                                <div className="pool-empty-label">
+                                  Loading positions...
+                                </div>
                               </div>
                             </div>
-                          </div>
+                          ) : (
+                            <>
+                              <div className="pool-empty">
+                                <div className="pool-empty-info">
+                                  <SearchEmpty />
+                                  <div className="pool-empty-label">
+                                    No active positions
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          )}
                         </>
                       ) : (
                         <>
                           <div className="pool-list-header">
                             <div className="pool-list-header-left">
-                              Your Positions <span>{positions.length}</span>
+                              Your Positions <span>{ownPositions.length}</span>
                             </div>
                             <div className="pool-list-header-right">
                               <Pill
@@ -132,62 +120,62 @@ function PoolPage() {
                           </div>
                           <div className="pool-list">
                             {filteredPositions.map((pos, key) => (
-                              <>
-                                <div
-                                  className="pool-list-item"
-                                  data-status={pos.status}
-                                  key={key}
-                                >
-                                  <div className="pool-list-item-left">
-                                    <div className="pool-list-item-infos">
-                                      <div className="pool-list-item-icons">
-                                        {tokenIcons[pos.pair.first.name]}
-                                        {tokenIcons[pos.pair.second.name]}
-                                      </div>
-                                      <div className="pool-list-item-pair">
-                                        <span>{pos.pair.first.name}</span> /{" "}
-                                        <span>{pos.pair.second.name}</span>
-                                      </div>
-                                      <div className="pool-list-item-fees">
-                                        {pos.fees.toFixed(2)}% Fee Tier
-                                      </div>
+                              <NavLink
+                                to={`/pool/${pos.id}`}
+                                className="pool-list-item"
+                                data-status={pos.status}
+                                key={key}
+                              >
+                                <div className="pool-list-item-left">
+                                  <div className="pool-list-item-infos">
+                                    <div className="pool-list-item-icons">
+                                      {tokenIcons[pos.pair.first.name]}
+                                      {tokenIcons[pos.pair.second.name]}
                                     </div>
-                                    <div className="pool-list-item-range">
-                                      <div className="pool-list-item-range-min">
-                                        Min:{" "}
-                                        <span>
-                                          {formatNumberToFixed(pos.min)}
-                                        </span>
-                                      </div>
-                                      <div className="pool-list-item-range-max">
-                                        Max:{" "}
-                                        <span>
-                                          {pos.max === Infinity ? "∞" : formatNumberToFixed(pos.max)}
-                                        </span>{" "}
-                                        {pos.pair.first.name} per{" "}
-                                        {pos.pair.second.name}
-                                      </div>
+                                    <div className="pool-list-item-pair">
+                                      <span>{pos.pair.first.name}</span> /{" "}
+                                      <span>{pos.pair.second.name}</span>
+                                    </div>
+                                    <div className="pool-list-item-fees">
+                                      {pos.fees.toFixed(2)}% Fee Tier
                                     </div>
                                   </div>
-                                  <div className="pool-list-item-right">
-                                    <div className="pool-list-item-status">
-                                      {pos.status ===
-                                        PositionStatus.IN_RANGE && (
-                                        <>
-                                          <div className="pool-list-item-status-dot"></div>
-                                          In range
-                                        </>
-                                      )}
-                                      {pos.status === PositionStatus.CLOSED && (
-                                        <>
-                                          <Canceled />
-                                          Closed
-                                        </>
-                                      )}
+                                  <div className="pool-list-item-range">
+                                    <div className="pool-list-item-range-min">
+                                      Min:{" "}
+                                      <span>
+                                        {formatNumberToFixed(pos.min, 6)}
+                                      </span>
+                                    </div>
+                                    <div className="pool-list-item-range-max">
+                                      Max:{" "}
+                                      <span>
+                                        {pos.max === Infinity
+                                          ? "∞"
+                                          : formatNumberToFixed(pos.max, 6)}
+                                      </span>{" "}
+                                      {pos.pair.first.name} per{" "}
+                                      {pos.pair.second.name}
                                     </div>
                                   </div>
                                 </div>
-                              </>
+                                <div className="pool-list-item-right">
+                                  <div className="pool-list-item-status">
+                                    {pos.status === PositionStatus.IN_RANGE && (
+                                      <>
+                                        <div className="pool-list-item-status-dot"></div>
+                                        In range
+                                      </>
+                                    )}
+                                    {pos.status === PositionStatus.CLOSED && (
+                                      <>
+                                        <Canceled />
+                                        Closed
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </NavLink>
                             ))}
                           </div>
                         </>

@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@utils/errors";
 import { formatNumberToDollars } from "@utils/number";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
@@ -25,18 +26,14 @@ const useExchangeRates = () => {
   const rpcProvider = useRpcProvider();
   const injectedProvider = useEthersSigner();
   const provider = injectedProvider ?? rpcProvider;
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchExchangeRates = async () => {
       try {
-        const ethResponse = await fetch(
-          "https://api.coinbase.com/v2/exchange-rates?currency=ETH"
-        );
-        const ethData = await ethResponse.json();
-        const ethRate = parseFloat(ethData.data.rates.USD);
-
-        const glqData = await getDashboardInformation();
-        const glqRate = parseFloat(glqData.analytics.closePrice);
+        const data = await getDashboardInformation();
+        const glqRate = parseFloat(data.analytics.closePrice);
+        const ethRate = data.prices.ETH;
 
         setExchangeRates({
           loading: false,
@@ -45,6 +42,7 @@ const useExchangeRates = () => {
           glq: glqRate,
         });
       } catch (error) {
+        setError(getErrorMessage(error));
         setExchangeRates({
           loading: false,
           error: "Failed to fetch exchange rates",
@@ -63,14 +61,19 @@ const useExchangeRates = () => {
     };
   }, [account, provider]);
 
-  const calculatePrice = (amount: number, currency: "eth" | "glq") => {
+  const calculatePrice = (
+    amount: number,
+    currency: "eth" | "glq",
+    type = "price"
+  ) => {
     if (!exchangeRates[currency]) {
       return;
     }
-    return formatNumberToDollars(amount * exchangeRates[currency]!, 4);
+    const priceNb = amount * exchangeRates[currency]!;
+    return type === "price" ? formatNumberToDollars(priceNb, 4) : priceNb;
   };
 
-  return { ...exchangeRates, calculatePrice };
+  return { ...exchangeRates, calculatePrice, error };
 };
 
 export default useExchangeRates;

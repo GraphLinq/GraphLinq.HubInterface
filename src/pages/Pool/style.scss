@@ -21,6 +21,15 @@
     &-label {
       color: var(--c-lavender);
     }
+
+    svg {
+      min-width: 40px;
+      height: auto;
+    }
+
+    circle {
+      fill: var(--c-lavender);
+    }
   }
 
   &-list {

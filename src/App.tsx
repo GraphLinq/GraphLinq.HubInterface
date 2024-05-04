@@ -6,6 +6,8 @@ import BridgePage from "@pages/Bridge";
 import HomePage from "@pages/Home";
 import PoolPage from "@pages/Pool";
 import PoolNewPage from "@pages/PoolNew";
+import PoolSinglePage from "@pages/PoolSingle";
+import PoolSingleAddPage from "@pages/PoolSingleAdd";
 import SwapPage from "@pages/Swap";
 import WrapperPage from "@pages/Wrapper";
 import RewardsPage from "@pages/Rewards";
@@ -20,7 +22,7 @@ import {
 import { WagmiProvider } from "wagmi";
 
 import { config } from "./config";
-import { HUB_URL } from "./libs/constants";
+import { HUB_URL } from "./constants";
 
 function App() {
   const queryClient = new QueryClient();
@@ -89,6 +91,14 @@ function App() {
         {
           path: "/pool/new",
           element: <PoolNewPage />,
+        },
+        {
+          path: "/pool/:id",
+          element: <PoolSinglePage />,
+        },
+        {
+          path: "/pool/:id/add",
+          element: <PoolSingleAddPage />,
         },
         {
           path: "/bridge",

@@ -1,4 +1,4 @@
-import "./_header.scss";
+import "./style.scss";
 import Bridge from "@assets/icons/bridge.svg?react";
 import Connect from "@assets/icons/connect-wallet.svg?react";
 import Dashboard from "@assets/icons/dashboard.svg?react";
@@ -8,7 +8,7 @@ import LogoName from "@assets/icons/logo-name.svg?react";
 import Logo from "@assets/icons/logo.svg?react";
 import Medal from "@assets/icons/medal.svg?react";
 import Metamask from "@assets/icons/metamask.svg?react";
-// import Pool from "@assets/icons/pool.svg?react";
+import Pool from "@assets/icons/pool.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap-coin.svg?react";
 import Wallet from "@assets/icons/wallet.svg?react";
@@ -16,7 +16,7 @@ import WalletConnect from "@assets/icons/walletconnect.svg?react";
 import Wrapper from "@assets/icons/wrapper.svg?react";
 import Button from "@components/Button";
 import Pill from "@components/Pill";
-import { WGLQ_TOKEN } from "@constants/index";
+import { WGLQ_TOKEN } from "@constants/apptoken";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { formatEthereumAddress } from "@utils/string";
 import { ethers } from "ethers";
@@ -44,10 +44,12 @@ function Header() {
     {
       icon: <GLQToken />,
       value: glq,
+      name: "glq",
     },
     {
       icon: <ETHToken />,
       value: eth,
+      name: "eth",
     },
   ];
 
@@ -57,21 +59,11 @@ function Header() {
       label: "Dashboard",
       url: "/",
     },
-    // {
-    //   icon: <Pool />,
-    //   label: "Pool",
-    //   url: "/pool",
-    // },
-    // {
-    //   icon: <CoinInfo />,
-    //   label: "Coin Info",
-    //   url: "/coin-info",
-    // },
-    // {
-    //   icon: <ChainStatus />,
-    //   label: "Chain Status",
-    //   url: "/chain-status",
-    // },
+    {
+      icon: <Pool />,
+      label: "Pool",
+      url: "/pool",
+    },
     {
       icon: <Bridge />,
       label: "Bridge",
@@ -124,7 +116,12 @@ function Header() {
             <div className="header-currencies-item" key={i}>
               {currency.icon}
               {currency.value && (
-                <span>{formatNumberToDollars(currency.value, 4)}</span>
+                <span>
+                  {currency.name === "glq"
+                    ? formatNumberToDollars(currency.value, 4)
+                    : formatNumberToDollars(Math.round(currency.value), 0)}
+                  {}
+                </span>
               )}
             </div>
           ))}

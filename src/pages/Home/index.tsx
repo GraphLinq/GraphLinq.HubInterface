@@ -1,14 +1,14 @@
-import "./_home.scss";
+import "./style.scss";
 import Arrow from "@assets/icons/arrow.svg?react";
-import Swap from "@assets/icons/swap-coin.svg?react";
 import Info from "@assets/icons/info.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
+import Swap from "@assets/icons/swap-coin.svg?react";
 import HomeGraph from "@components/HomeGraph";
-import { GLQ_EXPLORER, SITE_NAME } from "@constants/index";
+import { GLQ_EXPLORER_URL, SITE_NAME } from "@constants/index";
 import { useQuery } from "@tanstack/react-query";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
-import { Helmet } from "react-helmet-async";
 import { formatDistanceToNow } from "date-fns";
+import { Helmet } from "react-helmet-async";
 
 import { getDashboardInformation } from "../../queries/api";
 
@@ -33,7 +33,7 @@ function HomePage() {
   const glqPriceEvolutionColor = glqPriceEvolution >= 0 ? "green" : "red";
 
   const handleOpenTx = (hash: string) => {
-    const explorerUrl = `${GLQ_EXPLORER}/tx/${hash}`;
+    const explorerUrl = `${GLQ_EXPLORER_URL}/tx/${hash}`;
     window.open(explorerUrl, "_blank");
   };
 

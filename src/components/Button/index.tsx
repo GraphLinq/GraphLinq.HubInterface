@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import "./_button.scss";
+import React from "react";
+import { Link } from "react-router-dom";
+import "./style.scss";
 
 interface ButtonProps {
   link?: string;
@@ -9,13 +9,27 @@ interface ButtonProps {
   icon?: React.ReactNode;
   disabled?: boolean;
   target?: string;
-  type?: 'secondary' | 'tertiary';
+  type?: "secondary" | "tertiary";
 }
 
-const Button: React.FC<ButtonProps> = ({ link, onClick, children, icon, disabled, target, type }) => {
+const Button: React.FC<ButtonProps> = ({
+  link,
+  onClick,
+  children,
+  icon,
+  disabled,
+  target,
+  type,
+}) => {
   if (link) {
     return (
-      <Link to={link} target={target} className="button" data-disabled={disabled} data-type={type}>
+      <Link
+        to={link}
+        target={target}
+        className="button"
+        data-disabled={disabled}
+        data-type={type}
+      >
         {icon && <span className="button-icon">{icon}</span>}
         <span className="button-label">{children}</span>
       </Link>
@@ -23,7 +37,12 @@ const Button: React.FC<ButtonProps> = ({ link, onClick, children, icon, disabled
   }
 
   return (
-    <button onClick={onClick} className="button" data-disabled={disabled} data-type={type}>
+    <button
+      onClick={!disabled ? onClick : undefined}
+      className="button"
+      data-disabled={disabled}
+      data-type={type}
+    >
       {icon && <span className="button-icon">{icon}</span>}
       <span className="button-label">{children}</span>
     </button>

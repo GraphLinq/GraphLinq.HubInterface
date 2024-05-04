@@ -1,4 +1,4 @@
-import "./_bridge.scss";
+import "./style.scss";
 import ETHToken from "@assets/icons/eth-icon.svg?react";
 import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
@@ -8,16 +8,16 @@ import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import Pill from "@components/Pill";
 import Select from "@components/Select";
+import { MAINNET_CURRENCIES, GLQCHAIN_CURRENCIES } from "@constants/apptoken";
 import {
-  MAINNET_CURRENCIES,
-  GLQCHAIN_CURRENCIES,
   SITE_NAME,
-  GLQ_EXPLORER,
-  MAINNET_EXPLORER,
+  GLQ_EXPLORER_URL,
+  MAINNET_EXPLORER_URL,
 } from "@constants/index";
 import { useAppContext } from "@context/AppContext";
 import { useQuery } from "@tanstack/react-query";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
+import { getErrorMessage } from "@utils/errors";
 import { formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
@@ -31,10 +31,9 @@ import {
 } from "../../composables/useContract";
 import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
+import useSound from "../../composables/useSound";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
-import { getErrorMessage } from "@utils/errors";
-import useSound from "../../composables/useSound";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -70,9 +69,9 @@ function BridgePage() {
     null
   );
 
-  const trackingExplorer = `${isMainnet ? GLQ_EXPLORER : MAINNET_EXPLORER}/tx/${
-    tracking && typeof tracking !== "string" && tracking.bridge_tx
-  }`;
+  const trackingExplorer = `${
+    isMainnet ? GLQ_EXPLORER_URL : MAINNET_EXPLORER_URL
+  }/tx/${tracking && typeof tracking !== "string" && tracking.bridge_tx}`;
 
   const resetFeedback = () => {
     setError("");
@@ -397,7 +396,10 @@ function BridgePage() {
                         onClick={() => {
                           if (tokenBalance) {
                             setAmount(
-                              (parseFloat(tokenBalance) / 4).toString()
+                              formatNumberToFixed(
+                                parseFloat(tokenBalance) / 4,
+                                6
+                              )
                             );
                           }
                         }}
@@ -408,7 +410,10 @@ function BridgePage() {
                         onClick={() => {
                           if (tokenBalance) {
                             setAmount(
-                              (parseFloat(tokenBalance) / 2).toString()
+                              formatNumberToFixed(
+                                parseFloat(tokenBalance) / 2,
+                                6
+                              )
                             );
                           }
                         }}
@@ -418,7 +423,9 @@ function BridgePage() {
                       <Button
                         onClick={() => {
                           if (tokenBalance) {
-                            setAmount(parseFloat(tokenBalance).toString());
+                            setAmount(
+                              formatNumberToFixed(parseFloat(tokenBalance), 6)
+                            );
                           }
                         }}
                       >

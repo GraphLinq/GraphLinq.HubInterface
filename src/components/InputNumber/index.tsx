@@ -1,5 +1,5 @@
 import React from "react";
-import "./_inputNumber.scss"; // Assurez-vous d'importer le fichier de style CSS ou SCSS approprié
+import "./style.scss";
 
 interface InputNumberProps {
   icon?: React.ReactNode;

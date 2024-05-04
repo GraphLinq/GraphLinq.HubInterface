@@ -1,7 +1,8 @@
-import { useState } from "react";
-import useChains from "./useChains";
-import { WETH_TOKEN, WGLQ_TOKEN } from "@constants/index";
+import { WGLQ_TOKEN, WETH_TOKEN } from "@constants/apptoken";
 import { getErrorMessage } from "@utils/errors";
+import { useState } from "react";
+
+import useChains from "./useChains";
 
 function useAddTokens() {
   const { isGLQChain } = useChains();
@@ -18,7 +19,7 @@ function useAddTokens() {
 
     try {
       const winEth = window.ethereum as any;
-      
+
       if (!winEth) {
         throw new Error("Ethereum provider not found.");
       }
@@ -42,7 +43,7 @@ function useAddTokens() {
       } else {
         throw new Error("Failed to add token.");
       }
-    } catch (error: any) {
+    } catch (error) {
       setError(getErrorMessage(error));
       setLoading(false);
     }

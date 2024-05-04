@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import "./_select.scss";
+import "./style.scss";
 import Arrow from "@assets/icons/arrow.svg?react";
 import Check from "@assets/icons/check.svg?react";
+import React, { useState } from "react";
 
 interface SelectProps {
   options: React.ReactNode[];

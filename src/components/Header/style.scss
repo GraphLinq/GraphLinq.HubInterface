@@ -35,7 +35,7 @@
         }
       }
       &:last-of-type {
-        @include max($desktop) {
+        @include max($desktop-l) {
           display: none;
         }
         @include max($desktop-s) {
@@ -110,19 +110,11 @@
   }
 
   &-nav {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     align-items: center;
     gap: 4px;
     height: 80px;
-
-    @include max($desktop-l) {
-      position: initial;
-      transform: none;
-      margin-right: auto;
-    }
+    margin: 0 auto;
 
     @include max($desktop-s) {
       position: fixed;
@@ -156,6 +148,11 @@
         flex-direction: column;
         padding: 0;
         gap: 4px;
+      }
+
+      svg {
+        width: 24px;
+        height: 24px;
       }
 
       path {

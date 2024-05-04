@@ -1,50 +1,37 @@
 import ArrowBack from "@assets/icons/arrow-back.svg?react";
-import ETHToken from "@assets/icons/eth-icon.svg?react";
-import GLQToken from "@assets/icons/glq-icon.svg?react";
-import Swap from "@assets/icons/swap.svg?react";
-import MultiRangeSlider, { ChangeResult } from "multi-range-slider-react";
-import Button from "@components/Button";
-import "./_poolNew.scss";
-import { GLQCHAIN_CURRENCIES, SITE_NAME } from "@constants/index";
-import { useState } from "react";
-import { Helmet } from "react-helmet-async";
-import { useAccount } from "wagmi";
+import ETHIcon from "@assets/icons/eth-icon.svg?react";
+import GLQIcon from "@assets/icons/glq-icon.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
+import Swap from "@assets/icons/swap.svg?react";
+import Alert from "@components/Alert";
+import Button from "@components/Button";
+import InputNumber from "@components/InputNumber";
+import InputRadioGroup from "@components/InputRadioGroup";
+import Select from "@components/Select";
+import { GLQCHAIN_CURRENCIES } from "@constants/apptoken";
+import { feesOptions } from "@constants/fees";
+import { SITE_NAME } from "@constants/index";
+import { getPoolTokenByAddress, orderedPoolTokens } from "@constants/pooltoken";
+import { tickToPrice } from "@uniswap/v3-sdk";
+import { formatNumberToFixed } from "@utils/number";
+import { ethers } from "ethers";
+import MultiRangeSlider, { ChangeResult } from "multi-range-slider-react";
+import "./style.scss";
+import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
+import { useAccount, useBalance } from "wagmi";
+
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
-import Select from "@components/Select";
-import InputRadioGroup from "@components/InputRadioGroup";
-import InputNumber from "@components/InputNumber";
+import usePool from "../../composables/usePool";
 
 const tokenIcons = {
-  GLQ: <GLQToken />,
-  WGLQ: <GLQToken />,
-  ETH: <ETHToken />,
-  WETH: <ETHToken />,
+  GLQ: <GLQIcon />,
+  WGLQ: <GLQIcon />,
+  ETH: <ETHIcon />,
+  WETH: <ETHIcon />,
 };
-
-const feesOptions = [
-  {
-    label: "0.01%",
-    sublabel: "Very stable",
-    value: "0.1",
-  },
-  {
-    label: "0.05%",
-    sublabel: "Stable",
-    value: "0.5",
-  },
-  {
-    label: "0.30%",
-    sublabel: "For most",
-    value: "3",
-  },
-  {
-    label: "1%",
-    sublabel: "Exotic pairs",
-    value: "10",
-  },
-];
 
 const seoTitle = `${SITE_NAME} — Create pool`;
 
@@ -52,7 +39,19 @@ function PoolNewPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
+  const {
+    getPoolState,
+    deployOrGetPool,
+    mintLiquidity,
+    pending: poolPending,
+    error: poolError,
+    success: poolSuccess,
+  } = usePool();
 
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [firstCurrencyOption, setFirstCurrencyOption] = useState(0);
   const [secondCurrencyOption, setSecondCurrencyOption] = useState(1);
   const firstCurrencyOptions = GLQCHAIN_CURRENCIES.map((currency) => {
@@ -67,14 +66,26 @@ function PoolNewPage() {
   const [firstCurrencyAmount, setFirstCurrencyAmount] = useState("");
   const [secondCurrencyAmount, setSecondCurrencyAmount] = useState("");
 
-  const [firstCurrencyBalance] = useState("0");
-  const [secondCurrencyBalance] = useState("0");
+  const { data: firstCurrencyBalanceRaw } = useBalance({
+    address: account,
+    token: firstCurrency.address.glq,
+  });
+  const firstCurrencyBalance = firstCurrencyBalanceRaw?.value
+    ? ethers.utils.formatEther(firstCurrencyBalanceRaw?.value)
+    : "0";
+  const { data: secondCurrencyBalanceRaw } = useBalance({
+    address: account,
+    token: secondCurrency.address.glq,
+  });
+  const secondCurrencyBalance = secondCurrencyBalanceRaw?.value
+    ? ethers.utils.formatEther(secondCurrencyBalanceRaw?.value)
+    : "0";
 
   const handleCurrencySelectChange = (
     active: number,
     currency: "first" | "second"
   ) => {
-    // resetFeedback();
+    resetFeedback();
 
     if (currency === "first") {
       setFirstCurrencyOption(active);
@@ -104,18 +115,138 @@ function PoolNewPage() {
   };
 
   const [fees, setFees] = useState(feesOptions[2].value);
+  const [currentPoolPrice, setCurrentPoolPrice] = useState(0);
 
-  const [rangeMin, setRangeMin] = useState("35000");
-  const [rangeMax, setRangeMax] = useState("45000");
+  const handleFees = async (val: string) => {
+    if (!firstPoolToken || !secondPoolToken) {
+      return;
+    }
 
-  const [loading] = useState(false);
+    setLoading(true);
+    setFees(val);
 
-  const handleSubmit = () => {};
+    const poolAddress = await deployOrGetPool(
+      firstPoolToken,
+      secondPoolToken,
+      "0",
+      "0",
+      val,
+      false
+    );
+
+    if (poolAddress) {
+      const poolState = await getPoolState(poolAddress);
+
+      if (poolState) {
+        const [token0, token1] = orderedPoolTokens(
+          firstPoolToken,
+          secondPoolToken
+        );
+
+        const currentPrice = parseFloat(
+          tickToPrice(token0, token1, poolState.tick).toSignificant()
+        );
+
+        setCurrentPoolPrice(currentPrice);
+      }
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    handleFees(fees);
+  }, []);
+
+  const [rangeMin, setRangeMin] = useState(-1);
+  const [rangeMax, setRangeMax] = useState(1);
+
+  const rangeMinPerc = rangeMin * 10;
+  const rangeMaxPerc = rangeMax * 10;
+
+  const rangeMinAmount = (currentPoolPrice * (100 + rangeMinPerc)) / 100;
+  const rangeMaxAmount = (currentPoolPrice * (100 + rangeMaxPerc)) / 100;
+
+  const firstPoolToken = getPoolTokenByAddress(
+    firstCurrency.address.glq!,
+    "glq"
+  );
+  const secondPoolToken = getPoolTokenByAddress(
+    secondCurrency.address.glq!,
+    "glq"
+  );
 
   const handleInput = (e: ChangeResult) => {
-    setRangeMin(e.minValue.toString());
-    setRangeMax(e.maxValue.toString());
+    if (rangeMin === e.minValue && rangeMax === e.maxValue) {
+      return;
+    }
+    setRangeMin(e.minValue);
+    setRangeMax(e.maxValue);
+    if (firstCurrencyAmount) {
+      const tempRangeMaxPerc = e.maxValue * 10;
+      const tempRangeMaxAmount =
+        (currentPoolPrice * (100 + tempRangeMaxPerc)) / 100;
+      setSecondCurrencyAmount(
+        (parseFloat(firstCurrencyAmount) / tempRangeMaxAmount).toString()
+      );
+    }
   };
+
+  const handleSubmit = async () => {
+    if (!firstPoolToken || !secondPoolToken) {
+      return;
+    }
+
+    setLoading(true);
+    setPending("Setting up position...");
+
+    const poolAddress = await deployOrGetPool(
+      firstPoolToken,
+      secondPoolToken,
+      firstCurrencyAmount,
+      secondCurrencyAmount,
+      fees
+    );
+
+    if (poolAddress) {
+      await mintLiquidity(
+        poolAddress,
+        firstPoolToken,
+        secondPoolToken,
+        firstCurrencyAmount,
+        secondCurrencyAmount,
+        rangeMinPerc,
+        rangeMaxPerc
+      );
+    }
+    setLoading(false);
+  };
+
+  const resetFeedback = () => {
+    setError("");
+    setPending("");
+    setSuccess("");
+  };
+
+  useEffect(() => {
+    resetFeedback();
+    setPending(poolPending);
+  }, [poolPending]);
+
+  useEffect(() => {
+    resetFeedback();
+    setError(poolError);
+  }, [poolError]);
+
+  useEffect(() => {
+    resetFeedback();
+    setSuccess(poolSuccess);
+  }, [poolSuccess]);
+
+  const globalLoading = loading;
+  const emptyAmount = [firstCurrencyAmount, secondCurrencyAmount].some(
+    (value) => value === "" || value === "0"
+  );
 
   return (
     <>
@@ -127,13 +258,18 @@ function PoolNewPage() {
       <div className="main-page poolNew">
         <div className="main-card">
           <div className="poolNew-header">
-            <Button link="/pool" type="tertiary" icon={<ArrowBack />}>
+            <Button
+              link="/pool"
+              type="tertiary"
+              icon={<ArrowBack />}
+              disabled={globalLoading}
+            >
               Back
             </Button>
             <div className="main-card-title">Add liquidity</div>
           </div>
 
-          <div className="main-card-content">
+          <div className="main-card-content poolNew-content">
             {!account ? (
               <>
                 <div className="main-card-notlogged">
@@ -144,211 +280,315 @@ function PoolNewPage() {
               <>
                 {isGLQChain ? (
                   <>
-                    <div className="poolNew-block">
-                      <div className="poolNew-block-title">Pair</div>
-                      <div className="poolNew-block-content poolNew-pair">
-                        <Select
-                          active={firstCurrencyOption}
-                          options={firstCurrencyOptions.map((opt) => (
-                            <>
-                              {opt.icon} <span>{opt.name}</span>
-                            </>
-                          ))}
-                          onChange={(active) =>
-                            handleCurrencySelectChange(active, "first")
-                          }
-                        />
-                        <div
-                          className="bridge-swap-switch"
-                          onClick={handleSwapCurrencies}
-                        >
-                          <Swap />
-                        </div>
-                        <Select
-                          active={secondCurrencyOption}
-                          options={secondCurrencyOptions.map((opt) => (
-                            <>
-                              {opt.icon} <span>{opt.name}</span>
-                            </>
-                          ))}
-                          onChange={(active) =>
-                            handleCurrencySelectChange(active, "second")
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div className="poolNew-block">
-                      <div className="poolNew-block-title">Fee Tier</div>
-                      <div className="poolNew-block-content pool-fees">
-                        <InputRadioGroup
-                          options={feesOptions}
-                          onChange={(val) => setFees(val)}
-                          defaultOption={fees}
-                          type="large"
-                        />
-                      </div>
-                    </div>
-                    <div className="poolNew-block">
-                      <div className="poolNew-block-title">
-                        Price Range{" "}
-                        <span>
-                          {firstCurrency.name} per {secondCurrency.name}
-                        </span>
-                      </div>
-                      <div className="poolNew-block-content poolNew-range">
-                        <div className="poolNew-range-price">
-                          <div className="poolNew-range-value">
-                            {parseFloat(rangeMin).toLocaleString("en-US")}
+                    <div data-disabled={globalLoading}>
+                      <div className="poolNew-block">
+                        <div className="poolNew-block-title">Pair</div>
+                        <div className="poolNew-block-content poolNew-pair">
+                          <Select
+                            active={firstCurrencyOption}
+                            options={firstCurrencyOptions.map((opt) => (
+                              <>
+                                {opt.icon} <span>{opt.name}</span>
+                              </>
+                            ))}
+                            onChange={(active) =>
+                              handleCurrencySelectChange(active, "first")
+                            }
+                          />
+                          <div
+                            className="bridge-swap-switch"
+                            onClick={handleSwapCurrencies}
+                          >
+                            <Swap />
                           </div>
-                          <div className="poolNew-range-label">Low price</div>
-                        </div>
-                        <div className="poolNew-range-price">
-                          <div className="poolNew-range-value">
-                            {parseFloat(rangeMax).toLocaleString("en-US")}
-                          </div>
-                          <div className="poolNew-range-label">High price</div>
-                        </div>
-                        <div className="poolNew-range-input">
-                          <MultiRangeSlider
-                            min={25000}
-                            max={50000}
-                            step={1000}
-                            minValue={parseFloat(rangeMin)}
-                            maxValue={parseFloat(rangeMax)}
-                            stepOnly={true}
-                            ruler={false}
-                            label={false}
-                            onInput={(e: ChangeResult) => {
-                              handleInput(e);
-                            }}
+                          <Select
+                            active={secondCurrencyOption}
+                            options={secondCurrencyOptions.map((opt) => (
+                              <>
+                                {opt.icon} <span>{opt.name}</span>
+                              </>
+                            ))}
+                            onChange={(active) =>
+                              handleCurrencySelectChange(active, "second")
+                            }
                           />
                         </div>
                       </div>
-                    </div>
-                    <div className="poolNew-block">
-                      <div className="poolNew-block-title">
-                        Amount to deposit
-                      </div>
-                      <div className="poolNew-block-content poolNew-amounts">
-                        <div className="poolNew-amounts-swap">
-                          <div className="poolNew-amounts-swap-input">
-                            <InputNumber
-                              icon={firstCurrency.icon}
-                              currencyText={firstCurrency.name}
-                              value={firstCurrencyAmount}
-                              max={
-                                firstCurrencyBalance
-                                  ? parseFloat(firstCurrencyBalance)
-                                  : 0
-                              }
-                              onChange={(val) => setFirstCurrencyAmount(val)}
-                            />
-                          </div>
-                          <div className="poolNew-amounts-swap-actions">
-                            <Button
-                              onClick={() => {
-                                if (firstCurrencyBalance) {
-                                  setFirstCurrencyAmount(
-                                    (
-                                      parseFloat(firstCurrencyBalance) / 4
-                                    ).toString()
-                                  );
-                                }
-                              }}
-                            >
-                              25%
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                if (firstCurrencyBalance) {
-                                  setFirstCurrencyAmount(
-                                    (
-                                      parseFloat(firstCurrencyBalance) / 2
-                                    ).toString()
-                                  );
-                                }
-                              }}
-                            >
-                              50%
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                if (firstCurrencyBalance) {
-                                  setFirstCurrencyAmount(
-                                    parseFloat(firstCurrencyBalance).toString()
-                                  );
-                                }
-                              }}
-                            >
-                              MAX
-                            </Button>
-                          </div>
+                      <div className="poolNew-block">
+                        <div className="poolNew-block-title">Fee Tier</div>
+                        <div className="poolNew-block-content pool-fees">
+                          <InputRadioGroup
+                            options={feesOptions}
+                            onChange={(val) => handleFees(val)}
+                            defaultOption={fees}
+                            type="large"
+                          />
                         </div>
-                        <div className="poolNew-amounts-equal">=</div>
-                        <div className="poolNew-amounts-swap">
-                          <div className="poolNew-amounts-swap-input">
-                            <InputNumber
-                              icon={secondCurrency.icon}
-                              currencyText={secondCurrency.name}
-                              value={secondCurrencyAmount}
-                              max={
-                                secondCurrencyBalance
-                                  ? parseFloat(secondCurrencyBalance)
-                                  : 0
-                              }
-                              onChange={(val) => setSecondCurrencyAmount(val)}
-                            />
+                      </div>
+                      <div className="poolNew-block">
+                        <div className="poolNew-block-title">
+                          Price Range{" "}
+                          <span>
+                            {formatNumberToFixed(currentPoolPrice, 6)}{" "}
+                            {firstCurrency.name} per {secondCurrency.name}
+                          </span>
+                        </div>
+                        <div className="poolNew-block-content poolNew-range">
+                          <div className="poolNew-range-price">
+                            <div className="poolNew-range-value">
+                              {formatNumberToFixed(rangeMinAmount, 7)}
+                            </div>
+                            <div className="poolNew-range-label">Low price</div>
                           </div>
-                          <div className="poolNew-amounts-swap-actions">
-                            <Button
-                              onClick={() => {
-                                if (firstCurrencyBalance) {
-                                  setSecondCurrencyAmount(
-                                    (
-                                      parseFloat(secondCurrencyBalance) / 4
-                                    ).toString()
-                                  );
-                                }
+                          <div className="poolNew-range-price">
+                            <div className="poolNew-range-value">
+                              {formatNumberToFixed(rangeMaxAmount, 7)}
+                            </div>
+                            <div className="poolNew-range-label">
+                              High price
+                            </div>
+                          </div>
+                          <div className="poolNew-range-input">
+                            <MultiRangeSlider
+                              min={-1}
+                              max={1}
+                              step={0.1}
+                              minValue={rangeMin}
+                              maxValue={rangeMax}
+                              stepOnly={true}
+                              ruler={false}
+                              label={false}
+                              onInput={(e: ChangeResult) => {
+                                handleInput(e);
                               }}
-                            >
-                              25%
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                if (firstCurrencyBalance) {
-                                  setSecondCurrencyAmount(
-                                    (
-                                      parseFloat(secondCurrencyBalance) / 2
-                                    ).toString()
-                                  );
-                                }
-                              }}
-                            >
-                              50%
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                if (firstCurrencyBalance) {
-                                  setSecondCurrencyAmount(
-                                    parseFloat(secondCurrencyBalance).toString()
-                                  );
-                                }
-                              }}
-                            >
-                              MAX
-                            </Button>
+                              minCaption={`${rangeMinPerc.toFixed(2)}%`}
+                              maxCaption={`${
+                                rangeMax > 0
+                                  ? `+${rangeMaxPerc.toFixed(2)}`
+                                  : rangeMaxPerc.toFixed(2)
+                              }%`}
+                            />
                           </div>
                         </div>
                       </div>
+                      <div className="poolNew-block">
+                        <div className="poolNew-block-title">
+                          Amount to deposit
+                        </div>
+                        <div className="poolNew-block-content poolNew-amounts">
+                          <div className="poolNew-amounts-swap">
+                            <div className="poolNew-amounts-swap-input">
+                              <InputNumber
+                                icon={firstCurrency.icon}
+                                currencyText={firstCurrency.name}
+                                value={firstCurrencyAmount}
+                                max={
+                                  firstCurrencyBalance
+                                    ? parseFloat(firstCurrencyBalance)
+                                    : 0
+                                }
+                                onChange={(val) => {
+                                  setFirstCurrencyAmount(val);
+                                  setSecondCurrencyAmount(
+                                    formatNumberToFixed(
+                                      parseFloat(val) / currentPoolPrice,
+                                      6
+                                    )
+                                  );
+                                }}
+                              />
+                            </div>
+                            <div className="poolNew-amounts-swap-actions">
+                              <Button
+                                onClick={() => {
+                                  if (firstCurrencyBalance) {
+                                    setFirstCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(firstCurrencyBalance) / 4,
+                                        6
+                                      )
+                                    );
+                                    setSecondCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(firstCurrencyBalance) /
+                                          4 /
+                                          currentPoolPrice,
+                                        6
+                                      )
+                                    );
+                                  }
+                                }}
+                              >
+                                25%
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  if (firstCurrencyBalance) {
+                                    setFirstCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(firstCurrencyBalance) / 2,
+                                        6
+                                      )
+                                    );
+                                    setSecondCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(firstCurrencyBalance) /
+                                          2 /
+                                          currentPoolPrice,
+                                        6
+                                      )
+                                    );
+                                  }
+                                }}
+                              >
+                                50%
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  if (firstCurrencyBalance) {
+                                    setFirstCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(firstCurrencyBalance),
+                                        6
+                                      )
+                                    );
+                                    setSecondCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(firstCurrencyBalance) /
+                                          currentPoolPrice,
+                                        6
+                                      )
+                                    );
+                                  }
+                                }}
+                              >
+                                MAX
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="poolNew-amounts-equal">=</div>
+                          <div className="poolNew-amounts-swap">
+                            <div className="poolNew-amounts-swap-input">
+                              <InputNumber
+                                icon={secondCurrency.icon}
+                                currencyText={secondCurrency.name}
+                                value={secondCurrencyAmount}
+                                max={
+                                  secondCurrencyBalance
+                                    ? parseFloat(secondCurrencyBalance)
+                                    : 0
+                                }
+                                onChange={(val) => {
+                                  setSecondCurrencyAmount(val);
+                                  setFirstCurrencyAmount(
+                                    formatNumberToFixed(
+                                      parseFloat(val) * currentPoolPrice,
+                                      6
+                                    )
+                                  );
+                                }}
+                              />
+                            </div>
+                            <div className="poolNew-amounts-swap-actions">
+                              <Button
+                                onClick={() => {
+                                  if (firstCurrencyBalance) {
+                                    setSecondCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(secondCurrencyBalance) / 4,
+                                        6
+                                      )
+                                    );
+                                    setFirstCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(secondCurrencyBalance) /
+                                          4 /
+                                          currentPoolPrice,
+                                        6
+                                      )
+                                    );
+                                  }
+                                }}
+                              >
+                                25%
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  if (firstCurrencyBalance) {
+                                    setSecondCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(secondCurrencyBalance) / 2,
+                                        6
+                                      )
+                                    );
+                                    setFirstCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(secondCurrencyBalance) /
+                                          2 /
+                                          currentPoolPrice,
+                                        6
+                                      )
+                                    );
+                                  }
+                                }}
+                              >
+                                50%
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  if (firstCurrencyBalance) {
+                                    setSecondCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(secondCurrencyBalance),
+                                        6
+                                      )
+                                    );
+                                    setFirstCurrencyAmount(
+                                      formatNumberToFixed(
+                                        parseFloat(secondCurrencyBalance) /
+                                          currentPoolPrice,
+                                        6
+                                      )
+                                    );
+                                  }
+                                }}
+                              >
+                                MAX
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="poolNew-submit">
+                        <Button
+                          onClick={handleSubmit}
+                          icon={globalLoading && <Spinner />}
+                          disabled={globalLoading || emptyAmount}
+                        >
+                          Add liquidity
+                        </Button>
+                      </div>
                     </div>
-                    <div className="poolNew-submit">
-                      <Button
-                        onClick={handleSubmit}
-                        icon={loading && <Spinner />}
-                      >
-                        Add liquidity
-                      </Button>
-                    </div>
+                    {error && (
+                      <Alert type="error">
+                        <p>{error}</p>
+                      </Alert>
+                    )}
+                    {pending && (
+                      <Alert type="warning">
+                        <p>{pending}</p>
+                      </Alert>
+                    )}
+                    {success && (
+                      <Alert type="success">
+                        <p>Your position is now successfully created.</p>
+                        <p className="small" style={{ marginTop: 8 }}>
+                          <Link to={"/pool"}>
+                            <small>Go to your pools</small>
+                          </Link>
+                        </p>
+                      </Alert>
+                    )}
                   </>
                 ) : (
                   <>

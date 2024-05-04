@@ -1,25 +1,21 @@
+import Spinner from "@assets/icons/spinner.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
-import "./_wrapper.scss";
-import {
-  GLQ_EXPLORER,
-  GLQ_TOKEN,
-  SITE_NAME,
-  WGLQ_TOKEN,
-} from "@constants/index";
+import "./style.scss";
+import { WGLQ_TOKEN, GLQ_TOKEN } from "@constants/apptoken";
+import { GLQ_EXPLORER_URL, SITE_NAME } from "@constants/index";
+import { getErrorMessage } from "@utils/errors";
 import { formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAccount, useBalance } from "wagmi";
-import Spinner from "@assets/icons/spinner.svg?react";
 
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
-import useWrapper from "../../composables/useWrapper";
 import useSound from "../../composables/useSound";
-import { getErrorMessage } from "@utils/errors";
+import useWrapper from "../../composables/useWrapper";
 
 const seoTitle = `${SITE_NAME} — Wrapper`;
 
@@ -99,15 +95,15 @@ function WrapperPage() {
 
       setSuccessWrap(glqAmount);
       setSuccessWrapTx(receipt.transactionHash);
-      
+
       await fetchGLQBalance();
       await fetchWGLQBalance();
-      
+
       setLoadingWrap(false);
       setFormDisabled(false);
-      setGLQAmount('');
+      setGLQAmount("");
 
-      playSound('sound_3');
+      playSound("sound_3");
     } catch (error: any) {
       resetFeedback();
       setErrorWrap(error.toString());
@@ -166,9 +162,9 @@ function WrapperPage() {
       setLoadingUnwrap(false);
       setFormDisabled(false);
 
-      setWGLQAmount('');
+      setWGLQAmount("");
 
-      playSound('sound_3');
+      playSound("sound_3");
     } catch (error: any) {
       resetFeedback();
       setErrorUnwrap(getErrorMessage(error));
@@ -177,7 +173,7 @@ function WrapperPage() {
     }
   };
 
-  const trackingExplorer = `${GLQ_EXPLORER}/tx/${
+  const trackingExplorer = `${GLQ_EXPLORER_URL}/tx/${
     successWrapTx || successUnwrapTx
   }`;
 
@@ -238,7 +234,10 @@ function WrapperPage() {
                               onClick={() => {
                                 if (glqBalance) {
                                   setGLQAmount(
-                                    (parseFloat(glqBalance) / 4).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(glqBalance) / 4,
+                                      6
+                                    )
                                   );
                                 }
                               }}
@@ -249,7 +248,10 @@ function WrapperPage() {
                               onClick={() => {
                                 if (glqBalance) {
                                   setGLQAmount(
-                                    (parseFloat(glqBalance) / 2).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(glqBalance) / 2,
+                                      6
+                                    )
                                   );
                                 }
                               }}
@@ -260,7 +262,10 @@ function WrapperPage() {
                               onClick={() => {
                                 if (glqBalance) {
                                   setGLQAmount(
-                                    parseFloat(glqBalance).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(glqBalance),
+                                      6
+                                    )
                                   );
                                 }
                               }}
@@ -307,7 +312,6 @@ function WrapperPage() {
                         </Alert>
                       )}
 
-
                       {/* WGLQ Amount */}
                       <div
                         className="wrapper-amount-wrap"
@@ -338,7 +342,10 @@ function WrapperPage() {
                               onClick={() => {
                                 if (wglqBalance) {
                                   setWGLQAmount(
-                                    (parseFloat(wglqBalance) / 4).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(wglqBalance) / 4,
+                                      6
+                                    )
                                   );
                                 }
                               }}
@@ -349,7 +356,10 @@ function WrapperPage() {
                               onClick={() => {
                                 if (wglqBalance) {
                                   setWGLQAmount(
-                                    (parseFloat(wglqBalance) / 2).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(wglqBalance) / 2,
+                                      6
+                                    )
                                   );
                                 }
                               }}
@@ -360,7 +370,10 @@ function WrapperPage() {
                               onClick={() => {
                                 if (wglqBalance) {
                                   setWGLQAmount(
-                                    parseFloat(wglqBalance).toString()
+                                    formatNumberToFixed(
+                                      parseFloat(wglqBalance),
+                                      6
+                                    )
                                   );
                                 }
                               }}
@@ -393,7 +406,10 @@ function WrapperPage() {
                           <p>
                             You successfully unwrapped for{" "}
                             <b>
-                              {formatNumberToFixed(parseFloat(successUnwrap), 6)}{" "}
+                              {formatNumberToFixed(
+                                parseFloat(successUnwrap),
+                                6
+                              )}{" "}
                               GLQ
                             </b>
                             .
