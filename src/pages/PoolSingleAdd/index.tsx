@@ -13,6 +13,7 @@ import {
   formatBigNumberToFixed,
   formatNumberToDollars,
   formatNumberToFixed,
+  isInfinity,
 } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
@@ -272,7 +273,9 @@ function PoolSingleAddPage() {
                               <div className="poolSingleAdd-range-col">
                                 <div>
                                   <span>
-                                    {formatNumberToFixed(position.max, 6)}
+                                    {isInfinity(position.max)
+                                      ? "∞"
+                                      : formatNumberToFixed(position.max, 6)}
                                   </span>
                                 </div>
                                 <div>High price</div>

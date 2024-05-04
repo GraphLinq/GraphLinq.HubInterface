@@ -30,4 +30,13 @@ const formatBigNumberToFixed = (
   return formattedAmount;
 };
 
-export { formatNumberToDollars, formatNumberToFixed, formatBigNumberToFixed };
+const isInfinity = (value: number) => {
+  return value > 1e26;
+};
+
+export {
+  formatNumberToDollars,
+  formatNumberToFixed,
+  formatBigNumberToFixed,
+  isInfinity,
+};

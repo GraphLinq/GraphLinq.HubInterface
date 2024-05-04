@@ -9,7 +9,7 @@ import Button from "@components/Button";
 import "./style.scss";
 import Pill from "@components/Pill";
 import { SITE_NAME } from "@constants/index";
-import { formatNumberToFixed } from "@utils/number";
+import { formatNumberToFixed, isInfinity } from "@utils/number";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { NavLink } from "react-router-dom";
@@ -150,7 +150,7 @@ function PoolPage() {
                                     <div className="pool-list-item-range-max">
                                       Max:{" "}
                                       <span>
-                                        {pos.max === Infinity
+                                        {isInfinity(pos.max)
                                           ? "∞"
                                           : formatNumberToFixed(pos.max, 6)}
                                       </span>{" "}

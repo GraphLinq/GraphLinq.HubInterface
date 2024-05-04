@@ -42,8 +42,6 @@ const tokenIcons = {
   WETH: <ETHToken />,
 };
 
-let bridgeCost = ethers.BigNumber.from(0);
-
 const seoTitle = `${SITE_NAME} — Bridge`;
 
 function BridgePage() {
@@ -68,6 +66,8 @@ function BridgePage() {
   const [tracking, setTracking] = useState<TrackingInformation | string | null>(
     null
   );
+
+  const [bridgeCost, setBridgeCost] = useState(ethers.BigNumber.from(0));
 
   const trackingExplorer = `${
     isMainnet ? GLQ_EXPLORER_URL : MAINNET_EXPLORER_URL
@@ -107,19 +107,20 @@ function BridgePage() {
     activeCurrency.bridge &&
       activeCurrency.bridge[isMainnet ? "mainnet" : "glq"]
   );
-  useEffect(() => {
-    const fetchBridgeCost = async () => {
-      try {
-        if (bridgeContract) {
-          const value: ethers.BigNumber = await bridgeContract.getFeesInETH();
-          bridgeCost = value;
-        }
-      } catch (error) {
-        console.error("Error fetching bridge fee:", error);
-      }
-    };
 
-    fetchBridgeCost();
+  const updateBridgeCost = async () => {
+    try {
+      if (bridgeContract) {
+        const value: ethers.BigNumber = await bridgeContract.getFeesInETH();
+        setBridgeCost(value);
+      }
+    } catch (error) {
+      console.error("Error fetching bridge fee:", error);
+    }
+  };
+
+  useEffect(() => {
+    updateBridgeCost();
   }, [bridgeContract]);
 
   const handleSelectChange = (active: number) => {
@@ -173,7 +174,7 @@ function BridgePage() {
         return;
       }
 
-      bridgeCost = await bridgeContract.getFeesInETH();
+      await updateBridgeCost();
 
       let allowance = ethers.BigNumber.from(0);
       if (

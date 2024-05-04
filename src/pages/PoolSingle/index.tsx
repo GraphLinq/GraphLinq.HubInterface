@@ -12,6 +12,7 @@ import {
   formatBigNumberToFixed,
   formatNumberToDollars,
   formatNumberToFixed,
+  isInfinity,
 } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
@@ -130,6 +131,22 @@ function PoolSinglePage() {
 
   const trackingExplorer = `${GLQ_EXPLORER_URL}/tx/${success}`;
 
+  const feesFirst = position
+    ? (calculatePrice(
+        parseFloat(ethers.utils.formatEther(position.claimableFees.first)),
+        "glq",
+        "number"
+      ) as number)
+    : 0;
+  const feesSecond = position
+    ? (calculatePrice(
+        parseFloat(ethers.utils.formatEther(position.claimableFees.second)),
+        "eth",
+        "number"
+      ) as number)
+    : 0;
+  const totalFees = feesFirst + feesSecond;
+
   return (
     <>
       <Helmet>
@@ -224,17 +241,7 @@ function PoolSinglePage() {
                                 Unclaimed fees
                               </div>
                               <div className="poolSingle-value">
-                                <span>
-                                  {formatNumberToDollars(
-                                    parseFloat(
-                                      formatBigNumberToFixed(
-                                        position.claimableFees.total,
-                                        2
-                                      )
-                                    ),
-                                    2
-                                  )}
-                                </span>
+                                <span>{formatNumberToDollars(totalFees)}</span>
                               </div>
                             </div>
 
@@ -323,7 +330,9 @@ function PoolSinglePage() {
                               <div className="poolSingle-range-col">
                                 <div>
                                   <span>
-                                    {formatNumberToFixed(position.max, 6)}
+                                    {isInfinity(position.max)
+                                      ? "∞"
+                                      : formatNumberToFixed(position.max, 6)}
                                   </span>
                                 </div>
                                 <div>High price</div>

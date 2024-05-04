@@ -28,6 +28,7 @@ import { getErrorMessage } from "@utils/errors";
 import { Contract, ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
+import Decimal from "decimal.js";
 
 import ERC20 from "../contracts/ERC20.json";
 import { PoolState, Position, PositionStatus } from "../model/pool";
@@ -43,6 +44,7 @@ import { orderedPoolTokens } from "@constants/pooltoken";
 
 const usePool = () => {
   const { address: account } = useAccount();
+  // const account = "0xe87e9c55A720C89257302237B76CD5bA386d3819";
   const rpcProvider = useRpcProvider();
   const injectedProvider = useEthersSigner();
   const provider = injectedProvider ?? rpcProvider;
@@ -108,8 +110,8 @@ const usePool = () => {
     }
 
     return [
-      ethers.BigNumber.from(amount1.toString()),
-      ethers.BigNumber.from(amount0.toString()),
+      ethers.BigNumber.from(new Decimal(amount1).toFixed()),
+      ethers.BigNumber.from(new Decimal(amount0).toFixed()),
     ];
   }
 
@@ -173,11 +175,8 @@ const usePool = () => {
           second: firstAppToken,
         },
         claimableFees: {
-          total: tempPosition.feeGrowthInside0LastX128.add(
-            tempPosition.feeGrowthInside1LastX128
-          ),
-          first: tempPosition.feeGrowthInside0LastX128,
-          second: tempPosition.feeGrowthInside1LastX128,
+          first: tempPosition.tokensOwed1,
+          second: tempPosition.tokensOwed0,
         },
         fees: tempPosition.fee / 10000,
         min: minPrice,

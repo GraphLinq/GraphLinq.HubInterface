@@ -46,7 +46,6 @@ export interface Position {
     second: AppToken;
   };
   claimableFees: {
-    total: ethers.BigNumber;
     first: ethers.BigNumber;
     second: ethers.BigNumber;
   };
