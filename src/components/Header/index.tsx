@@ -44,10 +44,12 @@ function Header() {
     {
       icon: <GLQToken />,
       value: glq,
+      name: "glq",
     },
     {
       icon: <ETHToken />,
       value: eth,
+      name: "eth",
     },
   ];
 
@@ -62,16 +64,6 @@ function Header() {
       label: "Pool",
       url: "/pool",
     },
-    // {
-    //   icon: <CoinInfo />,
-    //   label: "Coin Info",
-    //   url: "/coin-info",
-    // },
-    // {
-    //   icon: <ChainStatus />,
-    //   label: "Chain Status",
-    //   url: "/chain-status",
-    // },
     {
       icon: <Bridge />,
       label: "Bridge",
@@ -124,7 +116,12 @@ function Header() {
             <div className="header-currencies-item" key={i}>
               {currency.icon}
               {currency.value && (
-                <span>{formatNumberToDollars(currency.value, 4)}</span>
+                <span>
+                  {currency.name === "glq"
+                    ? formatNumberToDollars(currency.value, 4)
+                    : formatNumberToDollars(Math.round(currency.value), 0)}
+                  {}
+                </span>
               )}
             </div>
           ))}
