@@ -12,6 +12,7 @@ import Select from "@components/Select";
 import { GLQCHAIN_SWAP_ROUTER_ADDRESS } from "@constants/address";
 import { GLQCHAIN_CURRENCIES } from "@constants/apptoken";
 import { SITE_NAME, GLQ_EXPLORER_URL } from "@constants/index";
+import { slippageOptions } from "@constants/slippage";
 import { getErrorMessage } from "@utils/errors";
 import { formatBigNumberToFixed, formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
@@ -33,25 +34,6 @@ const tokenIcons = {
   ETH: <ETHToken />,
   WETH: <ETHToken />,
 };
-
-const slippageOptions = [
-  {
-    label: "0.5%",
-    value: "5",
-  },
-  {
-    label: "1%",
-    value: "10",
-  },
-  {
-    label: "2%",
-    value: "20",
-  },
-  {
-    label: "3%",
-    value: "30",
-  },
-];
 
 const seoTitle = `${SITE_NAME} — Swap`;
 
@@ -212,6 +194,21 @@ function SwapPage() {
       return;
     }
 
+    if (
+      ownCurrencyBalance &&
+      parseFloat(ownCurrencyAmount) > parseFloat(ownCurrencyBalance)
+    ) {
+      setPending("");
+      setError(
+        `You only have ${formatNumberToFixed(
+          parseFloat(ownCurrencyBalance),
+          6
+        )} ${ownCurrency.name} in your wallet.`
+      );
+      setFormDisabled(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setFormDisabled(true);
@@ -240,22 +237,6 @@ function SwapPage() {
           "Allowance successfully increased, waiting for swap transaction..."
         );
       }
-
-      if (
-        ownCurrencyBalance &&
-        parseFloat(ownCurrencyAmount) > parseFloat(ownCurrencyBalance)
-      ) {
-        setPending("");
-        setError(
-          `You only have ${ownCurrencyBalance} ${ownCurrency.name} in your wallet.`
-        );
-        setFormDisabled(false);
-        return;
-      }
-
-      // setPending(
-      //   "Pending, check your wallet extension to execute the chain transaction..."
-      // );
 
       const tx = await executeSwap(
         ownCurrency.address.glq!,
@@ -360,11 +341,7 @@ function SwapPage() {
                           <div className="swap-choice-input-wrapper">
                             <InputNumber
                               value={ownCurrencyAmount}
-                              max={
-                                ownCurrencyBalance
-                                  ? parseFloat(ownCurrencyBalance)
-                                  : 0
-                              }
+                              max={Infinity}
                               onChange={(val) => setOwnCurrencyAmount(val)}
                             />
                           </div>
