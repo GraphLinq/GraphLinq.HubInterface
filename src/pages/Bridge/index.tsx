@@ -24,11 +24,9 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAccount, useBalance, useChainId } from "wagmi";
 
+import useBridge from "../../composables/useBridge";
 import useChains from "../../composables/useChains";
-import {
-  useBridgeContract,
-  useTokenContract,
-} from "../../composables/useContract";
+import { useTokenContract } from "../../composables/useContract";
 import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import useSound from "../../composables/useSound";
@@ -52,6 +50,7 @@ function BridgePage() {
   const { calculatePrice } = useExchangeRates();
   const { setWaitingTxData, isTxInProgress } = useAppContext();
   const { playSound } = useSound();
+  const { getBridgeContract, getBridgeCost, provider } = useBridge();
 
   const [loading, setLoading] = useState(false);
   const [formDisabled, setFormDisabled] = useState(false);
@@ -67,7 +66,7 @@ function BridgePage() {
     null
   );
 
-  const [bridgeCost, setBridgeCost] = useState(ethers.BigNumber.from(0));
+  const [bridgeCost, setBridgeCost] = useState<ethers.BigNumber | null>(null);
 
   const trackingExplorer = `${
     isMainnet ? GLQ_EXPLORER_URL : MAINNET_EXPLORER_URL
@@ -103,25 +102,20 @@ function BridgePage() {
   const activeTokenContract = useTokenContract(
     activeCurrency.address[isMainnet ? "mainnet" : "glq"]
   );
-  const bridgeContract = useBridgeContract(
-    activeCurrency.bridge &&
-      activeCurrency.bridge[isMainnet ? "mainnet" : "glq"]
-  );
 
   const updateBridgeCost = async () => {
-    try {
-      if (bridgeContract) {
-        const value: ethers.BigNumber = await bridgeContract.getFeesInETH();
-        setBridgeCost(value);
-      }
-    } catch (error) {
-      console.error("Error fetching bridge fee:", error);
+    if (activeCurrency.bridge) {
+      setBridgeCost(null);
+      const value = await getBridgeCost(
+        activeCurrency.bridge[isMainnet ? "mainnet" : "glq"]
+      );
+      setBridgeCost(value);
     }
   };
 
   useEffect(() => {
     updateBridgeCost();
-  }, [bridgeContract]);
+  }, [activeCurrency, provider]);
 
   const handleSelectChange = (active: number) => {
     resetFeedback();
@@ -141,9 +135,13 @@ function BridgePage() {
   const [amount, setAmount] = useState("");
 
   const handleSend = async () => {
-    if (formDisabled || !bridgeContract) {
-      return;
-    }
+    if (formDisabled || !activeCurrency.bridge) return;
+
+    const bridgeContract = getBridgeContract(
+      activeCurrency.bridge[isMainnet ? "mainnet" : "glq"]
+    );
+
+    if (!bridgeContract) return;
 
     resetFeedback();
 
@@ -211,10 +209,12 @@ function BridgePage() {
         !isMainnet ||
         (isMainnet && activeCurrency.address.mainnet !== undefined)
       ) {
-        value = bridgeCost.toString();
+        value = bridgeCost ? bridgeCost.toString() : "0";
       } else {
         const amountInWei = ethers.utils.parseEther(amount.toString());
-        const totalAmountInWei = amountInWei.add(bridgeCost);
+        const totalAmountInWei = amountInWei.add(
+          bridgeCost ?? ethers.BigNumber.from(0)
+        );
         value = totalAmountInWei.toString();
       }
 
@@ -436,12 +436,14 @@ function BridgePage() {
                   </div>
                   <div className="bridge-amount-cost">
                     Bridge fee :{" "}
-                    {bridgeCost
-                      ? calculatePrice(
-                          parseFloat(ethers.utils.formatEther(bridgeCost)),
-                          isMainnet ? "eth" : "glq"
-                        )
-                      : "$0.0000"}
+                    {bridgeCost ? (
+                      calculatePrice(
+                        parseFloat(ethers.utils.formatEther(bridgeCost)),
+                        isMainnet ? "eth" : "glq"
+                      )
+                    ) : (
+                      <Spinner />
+                    )}
                   </div>
                   <div className="bridge-amount-submit">
                     <Button onClick={handleSend} icon={loading && <Spinner />}>

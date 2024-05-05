@@ -121,8 +121,14 @@
     &-cost {
       display: flex;
       justify-content: center;
+      gap: 8px;
       margin-top: 32px;
       color: var(--c-lavender);
+
+      svg {
+        width: 20px;
+        height: auto;
+      }
     }
 
     &-submit {

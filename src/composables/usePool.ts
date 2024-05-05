@@ -241,6 +241,7 @@ const usePool = () => {
   };
 
   useEffect(() => {
+    console.log(provider);
     findAllPositions();
   }, [account, provider]);
 
