@@ -17,14 +17,14 @@ import {
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAccount } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
-import { PositionStatus } from "../../model/pool";
+import { Position, PositionStatus } from "../../model/pool";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -42,8 +42,8 @@ function PoolSinglePage() {
   const { id: positionId } = useParams();
   const { calculatePrice } = useExchangeRates();
   const {
-    loadedPositions,
-    ownPositions,
+    getPositionById,
+    loadedPositionIds,
     ownPositionIds,
     withdrawLiquidity,
     claimFees,
@@ -51,19 +51,28 @@ function PoolSinglePage() {
     error: poolError,
     success: poolSuccess,
   } = usePool();
-  const navigate = useNavigate();
 
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [formDisabled, setFormDisabled] = useState(false);
+  const [position, setPosition] = useState<Position | null>(null);
 
-  if (loadedPositions && positionId && !ownPositionIds.includes(positionId)) {
-    navigate("/pool");
-  }
+  const updatePosition = async () => {
+    if (!positionId) {
+      return;
+    }
 
-  const position = ownPositions.find((pos) => pos.id === positionId);
+    const tempPosition = await getPositionById(positionId);
+    if (tempPosition) {
+      setPosition(tempPosition);
+    }
+  };
+
+  useEffect(() => {
+    updatePosition();
+  }, [positionId]);
 
   const priceFirst = position
     ? (calculatePrice(
@@ -146,6 +155,9 @@ function PoolSinglePage() {
       ) as number)
     : 0;
   const totalFees = feesFirst + feesSecond;
+
+  const isPersonalPosition =
+    loadedPositionIds && positionId && ownPositionIds.includes(positionId);
 
   return (
     <>
@@ -246,13 +258,15 @@ function PoolSinglePage() {
                             </div>
 
                             <div className="poolSingle-block-right">
-                              <Button
-                                onClick={handleClaim}
-                                type="tertiary"
-                                disabled={formDisabled}
-                              >
-                                Collect fees
-                              </Button>
+                              {isPersonalPosition && (
+                                <Button
+                                  onClick={handleClaim}
+                                  type="tertiary"
+                                  disabled={formDisabled}
+                                >
+                                  Collect fees
+                                </Button>
+                              )}
                             </div>
                           </div>
 
@@ -356,27 +370,27 @@ function PoolSinglePage() {
                             {position.pair.second.name}
                           </div>
                         </div>
-
-                        <div
-                          className="poolSingle-actions"
-                          data-disabled={formDisabled}
-                        >
-                          <Button
-                            link={`/pool/${positionId}/add`}
-                            type="tertiary"
-                            disabled={formDisabled}
+                        {isPersonalPosition && (
+                          <div
+                            className="poolSingle-actions"
+                            data-disabled={formDisabled}
                           >
-                            Increase liquidity
-                          </Button>
-                          <Button
-                            onClick={handleWithdraw}
-                            disabled={formDisabled}
-                            icon={loading && <Spinner />}
-                          >
-                            Remove liquidity
-                          </Button>
-                        </div>
-
+                            <Button
+                              link={`/pool/${positionId}/add`}
+                              type="tertiary"
+                              disabled={formDisabled}
+                            >
+                              Increase liquidity
+                            </Button>
+                            <Button
+                              onClick={handleWithdraw}
+                              disabled={formDisabled}
+                              icon={loading && <Spinner />}
+                            >
+                              Remove liquidity
+                            </Button>
+                          </div>
+                        )}
                         {error && (
                           <Alert type="error">
                             <p>{error}</p>

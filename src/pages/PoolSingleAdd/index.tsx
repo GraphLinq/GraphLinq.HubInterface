@@ -44,7 +44,7 @@ function PoolSingleAddPage() {
   const { calculatePrice } = useExchangeRates();
   const {
     increaseLiquidity,
-    loadedPositions,
+    loadedPositionIds,
     ownPositions,
     ownPositionIds,
     pending: poolPending,
@@ -58,10 +58,15 @@ function PoolSingleAddPage() {
   const [pending, setPending] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  if (loadedPositions && positionId && !ownPositionIds.includes(positionId)) {
-    navigate("/pool");
-    return;
-  }
+  useEffect(() => {
+    if (
+      loadedPositionIds &&
+      positionId &&
+      !ownPositionIds.includes(positionId)
+    ) {
+      navigate("/pool");
+    }
+  }, [loadedPositionIds, ownPositionIds, positionId]);
 
   const position = ownPositions.find((pos) => pos.id === positionId);
 

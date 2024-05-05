@@ -4,6 +4,7 @@ import {
   NULL_ADDRESS,
 } from "@constants/address";
 import { getAppTokenByAddress } from "@constants/apptoken";
+import { getPoolTokenByAddress, orderedPoolTokens } from "@constants/pooltoken";
 import univ3prices from "@thanpolas/univ3prices";
 import {
   CurrencyAmount,
@@ -23,19 +24,17 @@ import {
   priceToClosestTick,
   tickToPrice,
 } from "@uniswap/v3-sdk";
-import { GLQ_CHAIN_ID } from "@utils/chains";
 import { getErrorMessage } from "@utils/errors";
+import Decimal from "decimal.js";
 import { Contract, ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
-import Decimal from "decimal.js";
 
 import ERC20 from "../contracts/ERC20.json";
 import { PoolState, Position, PositionStatus } from "../model/pool";
 
 import { useEthersSigner } from "./useEthersProvider";
 import useRpcProvider from "./useRpcProvider";
-import { orderedPoolTokens } from "@constants/pooltoken";
 
 // const nftContractABI = [
 //   "function balanceOf(address owner) external view returns (uint256 balance)",
@@ -53,6 +52,7 @@ const usePool = () => {
   const [ownPositions, setOwnPositions] = useState<Position[]>([]);
   const [loadingPositions, setLoadingPositions] = useState(false);
   const [loadedPositions, setLoadedPositions] = useState(false);
+  const [loadedPositionIds, setLoadedPositionIds] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
@@ -115,14 +115,8 @@ const usePool = () => {
     ];
   }
 
-  const getPositionByIndex = async (
-    index: number
-  ): Promise<Position | undefined> => {
-    const tokenId = await nftPositionManagerContract.tokenOfOwnerByIndex(
-      account,
-      index
-    );
-    const tempPosition = await nftPositionManagerContract.positions(tokenId);
+  const getPositionById = async (id: string): Promise<Position | undefined> => {
+    const tempPosition = await nftPositionManagerContract.positions(id);
 
     const firstAppToken = getAppTokenByAddress(tempPosition.token0, "glq");
     const secondAppToken = getAppTokenByAddress(tempPosition.token1, "glq");
@@ -135,15 +129,22 @@ const usePool = () => {
 
     const poolState = await getPoolState(poolAddress);
     if (firstAppToken && secondAppToken && poolState) {
-      const token0 = new Token(
-        GLQ_CHAIN_ID,
+      const firstPoolToken = getPoolTokenByAddress(
         firstAppToken.address.glq!,
-        firstAppToken.decimals
+        "glq"
       );
-      const token1 = new Token(
-        GLQ_CHAIN_ID,
+      const secondPoolToken = getPoolTokenByAddress(
         secondAppToken.address.glq!,
-        secondAppToken.decimals
+        "glq"
+      );
+
+      if (!firstPoolToken || !secondPoolToken) {
+        return;
+      }
+
+      const [token0, token1] = orderedPoolTokens(
+        firstPoolToken,
+        secondPoolToken
       );
 
       const minPrice = parseFloat(
@@ -164,7 +165,7 @@ const usePool = () => {
       );
 
       return {
-        id: tokenId.toString(),
+        id: id,
         liquidity: {
           total: tempPosition.liquidity,
           first: tokenAmounts[0],
@@ -193,35 +194,42 @@ const usePool = () => {
     }
   };
 
+  const getAllTokenIds = async () => {
+    const balance = await nftPositionManagerContract.balanceOf(account);
+
+    const tokenIds: string[] = [];
+
+    for (let index = 0; index < balance; index++) {
+      const tokenId = await nftPositionManagerContract.tokenOfOwnerByIndex(
+        account,
+        index
+      );
+      tokenIds.push(tokenId.toString());
+    }
+
+    return tokenIds;
+  };
+
   const findAllPositions = async () => {
     if (!account || !provider || loadingPositions || loadedPositions) {
       return;
     }
     try {
       setLoadingPositions(true);
-      const balance = await nftPositionManagerContract.balanceOf(account);
-      const ids: string[] = [];
-      const positions: Position[] = [];
 
-      const promises: Promise<Position | null>[] = [];
+      const ids = await getAllTokenIds();
+      setOwnPositionIds(ids);
+      setLoadedPositionIds(true);
 
-      for (let index = 0; index < balance.toNumber(); index++) {
-        const promise = getPositionByIndex(index).then(
-          (position) => position ?? null
-        );
-        promises.push(promise);
-      }
-
+      const promises: Promise<Position | null>[] = ids.map((id) =>
+        getPositionById(id).then((position) => position ?? null)
+      );
       const allPositions = await Promise.all(promises);
 
-      allPositions.forEach((position) => {
-        if (position) {
-          positions.push(position);
-          ids.push(position.id);
-        }
-      });
+      const positions = allPositions.filter(
+        (pos): pos is Position => pos !== null
+      );
 
-      setOwnPositionIds(ids);
       setOwnPositions(positions);
       setLoadingPositions(false);
       setLoadedPositions(true);
@@ -660,11 +668,12 @@ const usePool = () => {
   };
 
   return {
+    loadedPositionIds,
     loadingPositions,
     loadedPositions,
     ownPositionIds,
     ownPositions,
-    getPositionByIndex,
+    getPositionById,
     getPoolState,
     deployOrGetPool,
     mintLiquidity,
