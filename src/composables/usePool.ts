@@ -23,6 +23,7 @@ import {
   nearestUsableTick,
   priceToClosestTick,
   tickToPrice,
+  TickMath,
 } from "@uniswap/v3-sdk";
 import { getErrorMessage } from "@utils/errors";
 import Decimal from "decimal.js";
@@ -128,6 +129,7 @@ const usePool = () => {
     );
 
     const poolState = await getPoolState(poolAddress);
+
     if (firstAppToken && secondAppToken && poolState) {
       const firstPoolToken = getPoolTokenByAddress(
         firstAppToken.address.glq!,
@@ -241,7 +243,6 @@ const usePool = () => {
   };
 
   useEffect(() => {
-    console.log(provider);
     findAllPositions();
   }, [account, provider]);
 
@@ -472,11 +473,15 @@ const usePool = () => {
       );
 
       const tickMin = nearestUsableTick(
-        priceToClosestTick(minTargetPrice),
+        minPriceFromCurrent === -100
+          ? TickMath.MIN_TICK
+          : priceToClosestTick(minTargetPrice),
         state.tickSpacing
       );
       const tickMax = nearestUsableTick(
-        priceToClosestTick(maxTargetPrice),
+        maxPriceFromCurrent === Infinity
+          ? TickMath.MAX_TICK
+          : priceToClosestTick(maxTargetPrice),
         state.tickSpacing
       );
 

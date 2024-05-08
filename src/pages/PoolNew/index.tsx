@@ -116,6 +116,7 @@ function PoolNewPage() {
 
   const [fees, setFees] = useState(feesOptions[2].value);
   const [currentPoolPrice, setCurrentPoolPrice] = useState(0);
+  const [currentPoolPriceReversed, setCurrentPoolPriceReversed] = useState(0);
 
   const handleFees = async (val: string) => {
     if (!firstPoolToken || !secondPoolToken) {
@@ -124,6 +125,8 @@ function PoolNewPage() {
 
     setLoading(true);
     setFees(val);
+    setFirstCurrencyAmount("");
+    setSecondCurrencyAmount("");
 
     const poolAddress = await deployOrGetPool(
       firstPoolToken,
@@ -146,8 +149,16 @@ function PoolNewPage() {
         const currentPrice = parseFloat(
           tickToPrice(token0, token1, poolState.tick).toSignificant()
         );
-
-        setCurrentPoolPrice(currentPrice);
+        const currentPriceReversed = parseFloat(
+          tickToPrice(token1, token0, poolState.tick).toSignificant()
+        );
+        if (firstPoolToken.address === token0.address) {
+          setCurrentPoolPrice(currentPriceReversed);
+          setCurrentPoolPriceReversed(currentPrice);
+        } else {
+          setCurrentPoolPrice(currentPrice);
+          setCurrentPoolPriceReversed(currentPriceReversed);
+        }
       }
     }
 
@@ -156,16 +167,32 @@ function PoolNewPage() {
 
   useEffect(() => {
     handleFees(fees);
-  }, []);
+  }, [firstCurrency, secondCurrency]);
 
-  const [rangeMin, setRangeMin] = useState(-1);
+  const rangeConfig = {
+    minRange: {
+      min: -0.95,
+      max: 0,
+    },
+    maxRange: {
+      min: 0,
+      max: 1,
+    },
+    step: 0.05,
+  };
+
+  const [rangeMin, setRangeMin] = useState(-0.5);
   const [rangeMax, setRangeMax] = useState(1);
 
-  const rangeMinPerc = rangeMin * 10;
-  const rangeMaxPerc = rangeMax * 10;
+  const rangeMinPerc = rangeMin * 100;
+  const rangeMaxPerc = rangeMax * 100;
 
   const rangeMinAmount = (currentPoolPrice * (100 + rangeMinPerc)) / 100;
   const rangeMaxAmount = (currentPoolPrice * (100 + rangeMaxPerc)) / 100;
+  const rangeMinReversedAmount =
+    (currentPoolPriceReversed * (100 + rangeMinPerc)) / 100;
+  const rangeMaxReversedAmount =
+    (currentPoolPriceReversed * (100 + rangeMaxPerc)) / 100;
 
   const firstPoolToken = getPoolTokenByAddress(
     firstCurrency.address.glq!,
@@ -182,18 +209,40 @@ function PoolNewPage() {
     }
     setRangeMin(e.minValue);
     setRangeMax(e.maxValue);
-    if (firstCurrencyAmount) {
-      const tempRangeMaxPerc = e.maxValue * 10;
-      const tempRangeMaxAmount =
-        (currentPoolPrice * (100 + tempRangeMaxPerc)) / 100;
-      setSecondCurrencyAmount(
-        (parseFloat(firstCurrencyAmount) / tempRangeMaxAmount).toString()
-      );
-    }
   };
+
+  useEffect(() => {
+    if (firstCurrencyAmount) {
+      setSecondCurrencyAmount(calculateY(parseFloat(firstCurrencyAmount)));
+    }
+  }, [rangeMin, rangeMax]);
 
   const handleSubmit = async () => {
     if (!firstPoolToken || !secondPoolToken) {
+      return;
+    }
+
+    if (parseFloat(firstCurrencyBalance) < parseFloat(firstCurrencyAmount)) {
+      setPending("");
+      setError(
+        `You only have ${formatNumberToFixed(
+          parseFloat(firstCurrencyBalance),
+          6
+        )} ${firstCurrency.name} in your wallet.`
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (parseFloat(secondCurrencyBalance) < parseFloat(secondCurrencyAmount)) {
+      setPending("");
+      setError(
+        `You only have ${formatNumberToFixed(
+          parseFloat(secondCurrencyBalance),
+          6
+        )} ${secondCurrency.name} in your wallet.`
+      );
+      setLoading(false);
       return;
     }
 
@@ -221,6 +270,26 @@ function PoolNewPage() {
     }
     setLoading(false);
   };
+
+  function calculateY(x: number) {
+    const a = Math.sqrt(currentPoolPriceReversed);
+    const b = Math.sqrt(rangeMinReversedAmount);
+    const c = Math.sqrt(rangeMaxReversedAmount);
+
+    const L = (x * a * c) / (c - a);
+    const y = L * (a - b);
+    return formatNumberToFixed(y, 6);
+  }
+
+  function calculateX(y: number) {
+    const a = Math.sqrt(currentPoolPriceReversed);
+    const b = Math.sqrt(rangeMinReversedAmount);
+    const c = Math.sqrt(rangeMaxReversedAmount);
+
+    const L = y / (a - b);
+    const x = (L * (c - a)) / (a * c);
+    return formatNumberToFixed(x, 6);
+  }
 
   const resetFeedback = () => {
     setError("");
@@ -350,9 +419,9 @@ function PoolNewPage() {
                           </div>
                           <div className="poolNew-range-input">
                             <MultiRangeSlider
-                              min={-1}
-                              max={1}
-                              step={0.1}
+                              min={rangeConfig.minRange.min}
+                              max={rangeConfig.maxRange.max}
+                              step={rangeConfig.step}
                               minValue={rangeMin}
                               maxValue={rangeMax}
                               stepOnly={true}
@@ -382,18 +451,11 @@ function PoolNewPage() {
                                 icon={firstCurrency.icon}
                                 currencyText={firstCurrency.name}
                                 value={firstCurrencyAmount}
-                                max={
-                                  firstCurrencyBalance
-                                    ? parseFloat(firstCurrencyBalance)
-                                    : 0
-                                }
+                                max={Infinity}
                                 onChange={(val) => {
                                   setFirstCurrencyAmount(val);
                                   setSecondCurrencyAmount(
-                                    formatNumberToFixed(
-                                      parseFloat(val) / currentPoolPrice,
-                                      6
-                                    )
+                                    calculateY(parseFloat(val))
                                   );
                                 }}
                               />
@@ -473,18 +535,11 @@ function PoolNewPage() {
                                 icon={secondCurrency.icon}
                                 currencyText={secondCurrency.name}
                                 value={secondCurrencyAmount}
-                                max={
-                                  secondCurrencyBalance
-                                    ? parseFloat(secondCurrencyBalance)
-                                    : 0
-                                }
+                                max={Infinity}
                                 onChange={(val) => {
                                   setSecondCurrencyAmount(val);
                                   setFirstCurrencyAmount(
-                                    formatNumberToFixed(
-                                      parseFloat(val) * currentPoolPrice,
-                                      6
-                                    )
+                                    calculateX(parseFloat(val))
                                   );
                                 }}
                               />
