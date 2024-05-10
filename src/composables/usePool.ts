@@ -543,13 +543,20 @@ const usePool = () => {
     }
   };
 
-  const withdrawLiquidity = async (position: Position) => {
+  const withdrawLiquidity = async (
+    position: Position,
+    withdrawPerc: number
+  ) => {
+    const withdrawAmount = position.liquidity.total
+      .div(ethers.BigNumber.from(100))
+      .mul(ethers.BigNumber.from(withdrawPerc));
+
     try {
       setPending("Removing liquidity from your position...");
       const txResponse = await nftPositionManagerContract.decreaseLiquidity(
         {
           tokenId: position.id,
-          liquidity: position.liquidity.total,
+          liquidity: withdrawAmount,
           amount0Min: 0,
           amount1Min: 0,
           deadline: Math.floor(Date.now() / 1000) + 60 * 10, // deadline: 10 minutes from now
@@ -562,7 +569,11 @@ const usePool = () => {
       console.log(`Transaction successful: ${receipt.transactionHash}`);
       await claimFees(position, false);
 
-      return await burnPosition(position.id);
+      if (withdrawPerc === 100) {
+        await burnPosition(position.id);
+      }
+
+      return receipt.transactionHash;
     } catch (error) {
       setError(getErrorMessage(error));
       console.error(`Failed to withdraw liquidity: ${error}`);

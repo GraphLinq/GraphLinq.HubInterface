@@ -25,6 +25,9 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
 import { Position, PositionStatus } from "../../model/pool";
+import Popin from "@components/Popin";
+import InputRange from "react-input-range";
+import "react-input-range/lib/css/index.css";
 
 const tokenIcons = {
   GLQ: <GLQToken />,
@@ -58,6 +61,8 @@ function PoolSinglePage() {
   const [loading, setLoading] = useState(false);
   const [formDisabled, setFormDisabled] = useState(false);
   const [position, setPosition] = useState<Position | null>(null);
+  const [isWithdrawPopinOpen, setWithdrawPopinOpen] = useState(false);
+  const [withdrawPerc, setWithdrawPerc] = useState(100);
 
   const updatePosition = async () => {
     if (!positionId) {
@@ -71,8 +76,10 @@ function PoolSinglePage() {
   };
 
   useEffect(() => {
-    updatePosition();
-  }, [positionId]);
+    if (positionId && !isWithdrawPopinOpen) {
+      updatePosition();
+    }
+  }, [positionId, isWithdrawPopinOpen]);
 
   const priceFirst = position
     ? (calculatePrice(
@@ -117,7 +124,7 @@ function PoolSinglePage() {
     if (position) {
       setLoading(true);
       setFormDisabled(true);
-      await withdrawLiquidity(position);
+      await withdrawLiquidity(position, withdrawPerc);
       setLoading(false);
       setFormDisabled(false);
     }
@@ -383,7 +390,7 @@ function PoolSinglePage() {
                               Increase liquidity
                             </Button>
                             <Button
-                              onClick={handleWithdraw}
+                              onClick={() => setWithdrawPopinOpen(true)}
                               disabled={formDisabled}
                               icon={loading && <Spinner />}
                             >
@@ -412,6 +419,71 @@ function PoolSinglePage() {
                               </a>
                             </p>
                           </Alert>
+                        )}
+                        {isWithdrawPopinOpen && (
+                          <Popin
+                            title="Remove liquidity"
+                            onClose={() => setWithdrawPopinOpen(false)}
+                          >
+                            <div className="poolSingle-block">
+                              <div className="poolSingle-subtitle">Amount</div>
+                              <div className="poolSingle-value">
+                                <span>{withdrawPerc} %</span>
+                              </div>
+                              <InputRange
+                                step={1}
+                                value={withdrawPerc}
+                                minValue={1}
+                                maxValue={100}
+                                onChange={(value) =>
+                                  setWithdrawPerc(value as number)
+                                }
+                              />
+                              <div className="popin-actions">
+                                <Button
+                                  onClick={handleWithdraw}
+                                  disabled={formDisabled}
+                                  icon={loading && <Spinner />}
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+
+                              {(error || pending || success) && (
+                                <div className="popin-alert">
+                                  {error && (
+                                    <Alert type="error">
+                                      <p>{error}</p>
+                                    </Alert>
+                                  )}
+                                  {pending && (
+                                    <Alert type="warning">
+                                      <p>{pending}</p>
+                                    </Alert>
+                                  )}
+                                  {success && (
+                                    <Alert type="success">
+                                      <p>
+                                        Your withdrawal is now successfully
+                                        completed.
+                                      </p>
+                                      <p
+                                        className="small"
+                                        style={{ marginTop: 8 }}
+                                      >
+                                        <a
+                                          href={trackingExplorer}
+                                          target="_blank"
+                                        >
+                                          <small>Tx hash: {success}</small>
+                                        </a>
+                                      </p>
+                                    </Alert>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </Popin>
                         )}
                       </>
                     ) : (

@@ -7,6 +7,10 @@
     align-items: center;
     gap: 32px;
 
+    @include max($mobile) {
+      flex-direction: column;
+    }
+
     .button path {
       fill: none !important;
     }
@@ -18,6 +22,11 @@
       font-size: 40px;
       line-height: 1;
       font-weight: 600;
+
+      @include max($mobile) {
+        flex-direction: column;
+        gap: 12px;
+      }
 
       @include max($mobile-s) {
         font-size: 32px;
@@ -67,6 +76,10 @@
     font-weight: 600;
     font-size: 36px;
     line-height: 1;
+
+    @include max($mobile) {
+      font-size: 24px;
+    }
 
     span {
       color: var(--c-white);
@@ -153,6 +166,11 @@
   &-actions {
     display: flex;
     gap: 24px;
+
+    @include max($mobile) {
+      flex-direction: column;
+      gap: 16px;
+    }
 
     &[data-disabled="true"] {
       position: relative;

@@ -118,3 +118,24 @@ body {
     color: #ff69c3;
   }
 }
+
+.input-range {
+  * {
+    transition: none !important;
+  }
+  &__label {
+    display: none;
+  }
+  &__track {
+    &--active {
+      background-color: var(--c-lavender) !important;
+    }
+    &--background {
+      background-color: var(--c-martinique) !important;
+    }
+  }
+  &__slider {
+    background-color: var(--c-lavender) !important;
+    border-color: var(--c-lavender) !important;
+  }
+}
