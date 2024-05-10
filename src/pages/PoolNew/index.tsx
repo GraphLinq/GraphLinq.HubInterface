@@ -25,6 +25,7 @@ import { useAccount, useBalance } from "wagmi";
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
+import InputToggle from "@components/InputToggle";
 
 const tokenIcons = {
   GLQ: <GLQIcon />,
@@ -52,6 +53,7 @@ function PoolNewPage() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [fullRange, setFullRange] = useState(false);
   const [firstCurrencyOption, setFirstCurrencyOption] = useState(0);
   const [secondCurrencyOption, setSecondCurrencyOption] = useState(1);
   const firstCurrencyOptions = GLQCHAIN_CURRENCIES.map((currency) => {
@@ -264,14 +266,18 @@ function PoolNewPage() {
         secondPoolToken,
         firstCurrencyAmount,
         secondCurrencyAmount,
-        rangeMinPerc,
-        rangeMaxPerc
+        !fullRange ? rangeMinPerc : 0,
+        !fullRange ? rangeMaxPerc : Infinity
       );
     }
     setLoading(false);
   };
 
   function calculateY(x: number) {
+    if (fullRange) {
+      return formatNumberToFixed(x / currentPoolPrice, 6);
+    }
+
     const a = Math.sqrt(currentPoolPriceReversed);
     const b = Math.sqrt(rangeMinReversedAmount);
     const c = Math.sqrt(rangeMaxReversedAmount);
@@ -282,6 +288,10 @@ function PoolNewPage() {
   }
 
   function calculateX(y: number) {
+    if (fullRange) {
+      return formatNumberToFixed(y / currentPoolPriceReversed, 6);
+    }
+
     const a = Math.sqrt(currentPoolPriceReversed);
     const b = Math.sqrt(rangeMinReversedAmount);
     const c = Math.sqrt(rangeMaxReversedAmount);
@@ -316,6 +326,11 @@ function PoolNewPage() {
   const emptyAmount = [firstCurrencyAmount, secondCurrencyAmount].some(
     (value) => value === "" || value === "0"
   );
+
+  useEffect(() => {
+    setFirstCurrencyAmount("0");
+    setSecondCurrencyAmount("0");
+  }, [fullRange]);
 
   return (
     <>
@@ -395,49 +410,68 @@ function PoolNewPage() {
                         </div>
                       </div>
                       <div className="poolNew-block">
-                        <div className="poolNew-block-title">
-                          Price Range{" "}
-                          <span>
-                            {formatNumberToFixed(currentPoolPrice, 6)}{" "}
-                            {firstCurrency.name} per {secondCurrency.name}
-                          </span>
+                        <div className="poolSingle-block-header">
+                          <div className="poolSingle-block-left">
+                            <div className="poolNew-block-title">
+                              Price Range{" "}
+                              <span>
+                                {formatNumberToFixed(currentPoolPrice, 6)}{" "}
+                                {firstCurrency.name} per {secondCurrency.name}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="poolSingle-block-right">
+                            <InputToggle
+                              label="Full range"
+                              checked={fullRange}
+                              onChange={setFullRange}
+                            />
+                          </div>
                         </div>
+
                         <div className="poolNew-block-content poolNew-range">
                           <div className="poolNew-range-price">
                             <div className="poolNew-range-value">
-                              {formatNumberToFixed(rangeMinAmount, 7)}
+                              {!fullRange
+                                ? formatNumberToFixed(rangeMinAmount, 7)
+                                : "0"}
                             </div>
                             <div className="poolNew-range-label">Low price</div>
                           </div>
                           <div className="poolNew-range-price">
                             <div className="poolNew-range-value">
-                              {formatNumberToFixed(rangeMaxAmount, 7)}
+                              {!fullRange
+                                ? formatNumberToFixed(rangeMaxAmount, 7)
+                                : "∞"}
                             </div>
                             <div className="poolNew-range-label">
                               High price
                             </div>
                           </div>
-                          <div className="poolNew-range-input">
-                            <MultiRangeSlider
-                              min={rangeConfig.minRange.min}
-                              max={rangeConfig.maxRange.max}
-                              step={rangeConfig.step}
-                              minValue={rangeMin}
-                              maxValue={rangeMax}
-                              stepOnly={true}
-                              ruler={false}
-                              label={false}
-                              onInput={(e: ChangeResult) => {
-                                handleInput(e);
-                              }}
-                              minCaption={`${rangeMinPerc.toFixed(2)}%`}
-                              maxCaption={`${
-                                rangeMax > 0
-                                  ? `+${rangeMaxPerc.toFixed(2)}`
-                                  : rangeMaxPerc.toFixed(2)
-                              }%`}
-                            />
-                          </div>
+                          {!fullRange && (
+                            <div className="poolNew-range-input">
+                              <MultiRangeSlider
+                                min={rangeConfig.minRange.min}
+                                max={rangeConfig.maxRange.max}
+                                step={rangeConfig.step}
+                                minValue={rangeMin}
+                                maxValue={rangeMax}
+                                stepOnly={true}
+                                ruler={false}
+                                label={false}
+                                onInput={(e: ChangeResult) => {
+                                  handleInput(e);
+                                }}
+                                minCaption={`${rangeMinPerc.toFixed(2)}%`}
+                                maxCaption={`${
+                                  rangeMax > 0
+                                    ? `+${rangeMaxPerc.toFixed(2)}`
+                                    : rangeMaxPerc.toFixed(2)
+                                }%`}
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="poolNew-block">

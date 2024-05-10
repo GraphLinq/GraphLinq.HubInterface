@@ -452,38 +452,44 @@ const usePool = () => {
 
       const currentPrice = pool.token0Price;
 
-      const minTargetFraction = currentPrice.asFraction.multiply(
-        new Fraction(100 + minPriceFromCurrent, 100)
-      );
-      const maxTargetFraction = currentPrice.asFraction.multiply(
-        new Fraction(100 + maxPriceFromCurrent, 100)
-      );
+      let tickMin, tickMax;
+      if (minPriceFromCurrent === 0 && maxPriceFromCurrent === Infinity) {
+        tickMin = nearestUsableTick(TickMath.MIN_TICK, state.tickSpacing);
+        tickMax = nearestUsableTick(TickMath.MAX_TICK, state.tickSpacing);
+      } else {
+        const minTargetFraction = currentPrice.asFraction.multiply(
+          new Fraction(100 + minPriceFromCurrent, 100)
+        );
+        const maxTargetFraction = currentPrice.asFraction.multiply(
+          new Fraction(100 + maxPriceFromCurrent, 100)
+        );
 
-      const minTargetPrice = new Price(
-        currentPrice.baseCurrency,
-        currentPrice.quoteCurrency,
-        minTargetFraction.denominator,
-        minTargetFraction.numerator
-      );
-      const maxTargetPrice = new Price(
-        currentPrice.baseCurrency,
-        currentPrice.quoteCurrency,
-        maxTargetFraction.denominator,
-        maxTargetFraction.numerator
-      );
+        const minTargetPrice = new Price(
+          currentPrice.baseCurrency,
+          currentPrice.quoteCurrency,
+          minTargetFraction.denominator,
+          minTargetFraction.numerator
+        );
+        const maxTargetPrice = new Price(
+          currentPrice.baseCurrency,
+          currentPrice.quoteCurrency,
+          maxTargetFraction.denominator,
+          maxTargetFraction.numerator
+        );
 
-      const tickMin = nearestUsableTick(
-        minPriceFromCurrent === -100
-          ? TickMath.MIN_TICK
-          : priceToClosestTick(minTargetPrice),
-        state.tickSpacing
-      );
-      const tickMax = nearestUsableTick(
-        maxPriceFromCurrent === Infinity
-          ? TickMath.MAX_TICK
-          : priceToClosestTick(maxTargetPrice),
-        state.tickSpacing
-      );
+        tickMin = nearestUsableTick(
+          minPriceFromCurrent === -100
+            ? TickMath.MIN_TICK
+            : priceToClosestTick(minTargetPrice),
+          state.tickSpacing
+        );
+        tickMax = nearestUsableTick(
+          maxPriceFromCurrent === Infinity
+            ? TickMath.MAX_TICK
+            : priceToClosestTick(maxTargetPrice),
+          state.tickSpacing
+        );
+      }
 
       const position = UniPosition.fromAmounts({
         pool,
