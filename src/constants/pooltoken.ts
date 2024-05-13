@@ -22,5 +22,6 @@ export const getPoolTokenByAddress = (
 };
 
 export const orderedPoolTokens = (tokenA: Token, tokenB: Token) => {
-  return tokenA.address > tokenB.address ? [tokenA, tokenB] : [tokenB, tokenA];
+  return [tokenA, tokenB];
+  return tokenA.address < tokenB.address ? [tokenA, tokenB] : [tokenB, tokenA];
 };

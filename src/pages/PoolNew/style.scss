@@ -212,4 +212,10 @@
       margin-top: 24px;
     }
   }
+
+  &-initPrice {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 }

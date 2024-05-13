@@ -1,7 +1,5 @@
 import "./style.scss";
 import Arrow from "@assets/icons/arrow.svg?react";
-import ETHToken from "@assets/icons/eth-icon.svg?react";
-import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
 import Alert from "@components/Alert";
@@ -9,6 +7,7 @@ import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import InputRadioGroup from "@components/InputRadioGroup";
 import Select from "@components/Select";
+import TokenIcon from "@components/TokenIcon";
 import { GLQCHAIN_SWAP_ROUTER_ADDRESS } from "@constants/address";
 import { GLQCHAIN_CURRENCIES } from "@constants/apptoken";
 import { SITE_NAME, GLQ_EXPLORER_URL } from "@constants/index";
@@ -27,13 +26,6 @@ import useNetwork from "../../composables/useNetwork";
 import useSound from "../../composables/useSound";
 import useTokenBalance from "../../composables/useTokenBalance";
 import useUniswap from "../../composables/useUniswap";
-
-const tokenIcons = {
-  GLQ: <GLQToken />,
-  WGLQ: <GLQToken />,
-  ETH: <ETHToken />,
-  WETH: <ETHToken />,
-};
 
 const seoTitle = `${SITE_NAME} — Swap`;
 
@@ -125,7 +117,7 @@ function SwapPage() {
   const [ownCurrencyOption, setOwnCurrencyOption] = useState(0);
   const [tradeCurrencyOption, setTradeCurrencyOption] = useState(1);
   const ownCurrencyOptions = GLQCHAIN_CURRENCIES.map((currency) => {
-    currency.icon = tokenIcons[currency.name];
+    currency.icon = <TokenIcon tokenKey={currency.name} />;
     return currency;
   });
   const tradeCurrencyOptions = [...ownCurrencyOptions];

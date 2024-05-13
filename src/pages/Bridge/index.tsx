@@ -1,6 +1,4 @@
 import "./style.scss";
-import ETHToken from "@assets/icons/eth-icon.svg?react";
-import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
 import Alert from "@components/Alert";
@@ -8,6 +6,7 @@ import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import Pill from "@components/Pill";
 import Select from "@components/Select";
+import TokenIcon from "@components/TokenIcon";
 import { MAINNET_CURRENCIES, GLQCHAIN_CURRENCIES } from "@constants/apptoken";
 import {
   SITE_NAME,
@@ -32,13 +31,6 @@ import useNetwork from "../../composables/useNetwork";
 import useSound from "../../composables/useSound";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
-
-const tokenIcons = {
-  GLQ: <GLQToken />,
-  WGLQ: <GLQToken />,
-  ETH: <ETHToken />,
-  WETH: <ETHToken />,
-};
 
 const seoTitle = `${SITE_NAME} — Bridge`;
 
@@ -82,7 +74,7 @@ function BridgePage() {
   const currencyOptions = (
     isMainnet ? MAINNET_CURRENCIES : GLQCHAIN_CURRENCIES
   ).map((currency) => {
-    currency.icon = tokenIcons[currency.name];
+    currency.icon = <TokenIcon tokenKey={currency.name} />;
     return currency;
   });
   const activeCurrency = currencyOptions[activeOption];
@@ -216,6 +208,10 @@ function BridgePage() {
           bridgeCost ?? ethers.BigNumber.from(0)
         );
         value = totalAmountInWei.toString();
+      }
+
+      if (!activeCurrency.chainDestination) {
+        return;
       }
 
       const resultTx = await bridgeContract.initTransfer(

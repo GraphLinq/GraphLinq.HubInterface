@@ -10,17 +10,17 @@ import { isTestnet } from ".";
 /* Tokens */
 export type AppToken = {
   icon: JSX.Element | null;
-  name: "GLQ" | "WGLQ" | "ETH" | "WETH";
+  name: "GLQ" | "WGLQ" | "ETH" | "WETH" | "BTC" | "WBTC";
   address: {
     mainnet: `0x${string}` | undefined;
     glq: `0x${string}` | undefined;
   };
-  mirror: "GLQ" | "WGLQ" | "ETH" | "WETH";
+  mirror: "GLQ" | "WGLQ" | "ETH" | "WETH" | "BTC" | "WBTC";
   bridge?: {
     mainnet: `0x${string}`;
     glq: `0x${string}`;
   };
-  chainDestination: {
+  chainDestination?: {
     mainnet: string;
     glq: string;
   };
@@ -108,8 +108,20 @@ export const WETH_TOKEN: AppToken = {
   decimals: 18,
 };
 
+export const WBTC_TOKEN: AppToken = {
+  icon: null,
+  name: "WBTC",
+  address: {
+    mainnet: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+    glq: "0x6518E3160eFC496CD3451eC4aE52E99cfee20697",
+  },
+  mirror: "BTC",
+  exchangeRate: "glq",
+  decimals: 18,
+};
+
 export const MAINNET_CURRENCIES = [ETH_TOKEN, WGLQ_TOKEN];
-export const GLQCHAIN_CURRENCIES = [WGLQ_TOKEN, WETH_TOKEN];
+export const GLQCHAIN_CURRENCIES = [WGLQ_TOKEN, WETH_TOKEN, WBTC_TOKEN];
 
 export const getAppTokenByAddress = (
   address: `0x${string}`,

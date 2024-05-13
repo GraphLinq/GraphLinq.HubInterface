@@ -1,13 +1,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import ArrowBack from "@assets/icons/arrow-back.svg?react";
 import Canceled from "@assets/icons/canceled.svg?react";
-import ETHToken from "@assets/icons/eth-icon.svg?react";
-import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
 import "./style.scss";
 import InputNumber from "@components/InputNumber";
+import TokenIcon from "@components/TokenIcon";
 import { GLQ_EXPLORER_URL, SITE_NAME } from "@constants/index";
 import {
   formatBigNumberToFixed,
@@ -26,13 +25,6 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
 import { PositionStatus } from "../../model/pool";
-
-const tokenIcons = {
-  GLQ: <GLQToken />,
-  WGLQ: <GLQToken />,
-  ETH: <ETHToken />,
-  WETH: <ETHToken />,
-};
 
 const seoTitle = `${SITE_NAME} — Pool`;
 
@@ -164,8 +156,8 @@ function PoolSingleAddPage() {
               <>
                 <div className="poolSingleAdd-header-infos">
                   <div className="poolSingleAdd-header-icons">
-                    {tokenIcons[position.pair.first.name]}
-                    {tokenIcons[position.pair.second.name]}
+                    <TokenIcon tokenKey={position.pair.first.name} />
+                    <TokenIcon tokenKey={position.pair.second.name} />
                   </div>
                   <div className="poolSingleAdd-header-pair">
                     <span>{position.pair.first.name}</span>/
@@ -205,7 +197,9 @@ function PoolSingleAddPage() {
                           <div className="poolSingleAdd-table">
                             <div className="poolSingleAdd-table-row">
                               <div className="poolSingleAdd-table-col">
-                                {tokenIcons[position.pair.first.name]}
+                                <TokenIcon
+                                  tokenKey={position.pair.first.name}
+                                />
                                 <span>{position.pair.first.name}</span>
                               </div>
                               <div className="poolSingleAdd-table-col">
@@ -220,7 +214,9 @@ function PoolSingleAddPage() {
                             </div>
                             <div className="poolSingleAdd-table-row">
                               <div className="poolSingleAdd-table-col">
-                                {tokenIcons[position.pair.second.name]}
+                                <TokenIcon
+                                  tokenKey={position.pair.second.name}
+                                />
                                 <span>{position.pair.second.name}</span>
                               </div>
                               <div className="poolSingleAdd-table-col">
@@ -313,7 +309,11 @@ function PoolSingleAddPage() {
                             <div className="poolNew-amounts-swap">
                               <div className="poolNew-amounts-swap-input">
                                 <InputNumber
-                                  icon={tokenIcons[position.pair.first.name]}
+                                  icon={
+                                    <TokenIcon
+                                      tokenKey={position.pair.first.name}
+                                    />
+                                  }
                                   currencyText={position.pair.first.name}
                                   value={firstCurrencyAmount}
                                   max={
@@ -407,7 +407,11 @@ function PoolSingleAddPage() {
                             <div className="poolNew-amounts-swap">
                               <div className="poolNew-amounts-swap-input">
                                 <InputNumber
-                                  icon={tokenIcons[position.pair.second.name]}
+                                  icon={
+                                    <TokenIcon
+                                      tokenKey={position.pair.second.name}
+                                    />
+                                  }
                                   currencyText={position.pair.second.name}
                                   value={secondCurrencyAmount}
                                   max={

@@ -1,6 +1,4 @@
 import Canceled from "@assets/icons/canceled.svg?react";
-import ETHToken from "@assets/icons/eth-icon.svg?react";
-import GLQToken from "@assets/icons/glq-icon.svg?react";
 import SearchEmpty from "@assets/icons/search-empty.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import VisiblityOff from "@assets/icons/visibility-off.svg?react";
@@ -8,6 +6,7 @@ import Visiblity from "@assets/icons/visibility.svg?react";
 import Button from "@components/Button";
 import "./style.scss";
 import Pill from "@components/Pill";
+import TokenIcon from "@components/TokenIcon";
 import { SITE_NAME } from "@constants/index";
 import { formatNumberToFixed, isInfinity } from "@utils/number";
 import { useState } from "react";
@@ -19,13 +18,6 @@ import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
 import { PositionStatus } from "../../model/pool";
-
-const tokenIcons = {
-  GLQ: <GLQToken />,
-  WGLQ: <GLQToken />,
-  ETH: <ETHToken />,
-  WETH: <ETHToken />,
-};
 
 const seoTitle = `${SITE_NAME} — Pool`;
 
@@ -129,8 +121,12 @@ function PoolPage() {
                                 <div className="pool-list-item-left">
                                   <div className="pool-list-item-infos">
                                     <div className="pool-list-item-icons">
-                                      {tokenIcons[pos.pair.first.name]}
-                                      {tokenIcons[pos.pair.second.name]}
+                                      <TokenIcon
+                                        tokenKey={pos.pair.first.name}
+                                      />
+                                      <TokenIcon
+                                        tokenKey={pos.pair.second.name}
+                                      />
                                     </div>
                                     <div className="pool-list-item-pair">
                                       <span>{pos.pair.first.name}</span> /{" "}

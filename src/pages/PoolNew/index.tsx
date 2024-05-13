@@ -1,13 +1,13 @@
 import ArrowBack from "@assets/icons/arrow-back.svg?react";
-import ETHIcon from "@assets/icons/eth-icon.svg?react";
-import GLQIcon from "@assets/icons/glq-icon.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import InputRadioGroup from "@components/InputRadioGroup";
+import InputToggle from "@components/InputToggle";
 import Select from "@components/Select";
+import TokenIcon from "@components/TokenIcon";
 import { GLQCHAIN_CURRENCIES } from "@constants/apptoken";
 import { feesOptions } from "@constants/fees";
 import { SITE_NAME } from "@constants/index";
@@ -25,14 +25,6 @@ import { useAccount, useBalance } from "wagmi";
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
-import InputToggle from "@components/InputToggle";
-
-const tokenIcons = {
-  GLQ: <GLQIcon />,
-  WGLQ: <GLQIcon />,
-  ETH: <ETHIcon />,
-  WETH: <ETHIcon />,
-};
 
 const seoTitle = `${SITE_NAME} — Create pool`;
 
@@ -54,10 +46,11 @@ function PoolNewPage() {
   const [pending, setPending] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fullRange, setFullRange] = useState(false);
+  const [isNewPool, setNewPool] = useState(false);
   const [firstCurrencyOption, setFirstCurrencyOption] = useState(0);
   const [secondCurrencyOption, setSecondCurrencyOption] = useState(1);
   const firstCurrencyOptions = GLQCHAIN_CURRENCIES.map((currency) => {
-    currency.icon = tokenIcons[currency.name];
+    currency.icon = <TokenIcon tokenKey={currency.name} />;
     return currency;
   });
   const secondCurrencyOptions = [...firstCurrencyOptions];
@@ -129,6 +122,7 @@ function PoolNewPage() {
     setFees(val);
     setFirstCurrencyAmount("");
     setSecondCurrencyAmount("");
+    setNewPool(false);
 
     const poolAddress = await deployOrGetPool(
       firstPoolToken,
@@ -162,6 +156,10 @@ function PoolNewPage() {
           setCurrentPoolPriceReversed(currentPriceReversed);
         }
       }
+    } else {
+      setNewPool(true);
+      setCurrentPoolPrice(0);
+      setCurrentPoolPriceReversed(0);
     }
 
     setLoading(false);
@@ -256,7 +254,9 @@ function PoolNewPage() {
       secondPoolToken,
       firstCurrencyAmount,
       secondCurrencyAmount,
-      fees
+      fees,
+      true,
+      true
     );
 
     if (poolAddress) {
@@ -409,6 +409,41 @@ function PoolNewPage() {
                           />
                         </div>
                       </div>
+                      {isNewPool && (
+                        <div className="poolNew-block">
+                          <div className="poolSingle-block-header">
+                            <div className="poolNew-block-title">
+                              Starting Price{" "}
+                              <span>
+                                {firstCurrency.name} per {secondCurrency.name}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="poolNew-block-content poolNew-initPrice">
+                            <Alert type="info">
+                              <p>
+                                This pool must be initialized before liquidity
+                                can be added. To initialize, select a starting
+                                price for the pool. Then enter your liquidity
+                                price range and deposit amount. Gas charges will
+                                be higher than usual due to the initialization
+                                transaction.
+                              </p>
+                            </Alert>
+
+                            <InputNumber
+                              icon={firstCurrency.icon}
+                              currencyText={firstCurrency.name}
+                              value={currentPoolPrice.toString()}
+                              max={Infinity}
+                              onChange={(val) => {
+                                setCurrentPoolPrice(parseFloat(val));
+                                setCurrentPoolPriceReversed(parseFloat(val));
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
                       <div className="poolNew-block">
                         <div className="poolSingle-block-header">
                           <div className="poolSingle-block-left">
@@ -652,7 +687,11 @@ function PoolNewPage() {
                         <Button
                           onClick={handleSubmit}
                           icon={globalLoading && <Spinner />}
-                          disabled={globalLoading || emptyAmount}
+                          disabled={
+                            globalLoading ||
+                            emptyAmount ||
+                            (isNewPool && currentPoolPrice === 0)
+                          }
                         >
                           Add liquidity
                         </Button>

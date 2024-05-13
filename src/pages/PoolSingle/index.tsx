@@ -1,12 +1,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import ArrowBack from "@assets/icons/arrow-back.svg?react";
 import Canceled from "@assets/icons/canceled.svg?react";
-import ETHToken from "@assets/icons/eth-icon.svg?react";
-import GLQToken from "@assets/icons/glq-icon.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
 import "./style.scss";
+import Popin from "@components/Popin";
+import TokenIcon from "@components/TokenIcon";
 import { GLQ_EXPLORER_URL, SITE_NAME } from "@constants/index";
 import {
   formatBigNumberToFixed,
@@ -17,6 +17,7 @@ import {
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import InputRange from "react-input-range";
 import { useParams } from "react-router-dom";
 import { useAccount } from "wagmi";
 
@@ -25,16 +26,7 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
 import { Position, PositionStatus } from "../../model/pool";
-import Popin from "@components/Popin";
-import InputRange from "react-input-range";
 import "react-input-range/lib/css/index.css";
-
-const tokenIcons = {
-  GLQ: <GLQToken />,
-  WGLQ: <GLQToken />,
-  ETH: <ETHToken />,
-  WETH: <ETHToken />,
-};
 
 const seoTitle = `${SITE_NAME} — Pool`;
 
@@ -84,21 +76,36 @@ function PoolSinglePage() {
   const priceFirst = position
     ? (calculatePrice(
         parseFloat(ethers.utils.formatEther(position.liquidity.first)),
-        "glq",
+        "glq", // TODO Dynamiser
         "number"
       ) as number)
     : 0;
   const priceSecond = position
     ? (calculatePrice(
         parseFloat(ethers.utils.formatEther(position.liquidity.second)),
-        "eth",
+        "eth", // TODO Dynamiser
         "number"
       ) as number)
     : 0;
   const totalPrice = priceFirst + priceSecond;
-  const percPartFirst = totalPrice !== 0 ? (priceFirst / totalPrice) * 100 : 0;
-  const percPartSecond =
-    totalPrice !== 0 ? (priceSecond / totalPrice) * 100 : 0;
+  // const percPartFirst = totalPrice !== 0 ? (priceFirst / totalPrice) * 100 : 0;
+  // const percPartSecond =
+  //   totalPrice !== 0 ? (priceSecond / totalPrice) * 100 : 0;
+
+  //     50/23134.9 = 0.00216123692
+  // Quantité WETH * 100 / 0.00216123692
+  // (0.002160 * 100 / 0.00216123692) / 2 = 49.9xxxx
+
+  const amountFirst = position
+    ? parseFloat(ethers.utils.formatEther(position!.liquidity.first))
+    : 0;
+  const amountSecond = position
+    ? parseFloat(ethers.utils.formatEther(position!.liquidity.second))
+    : 0;
+  const percPartSecond = position
+    ? (amountSecond * 100) / (amountFirst / position.poolCurrentPrice) / 2
+    : 0;
+  const percPartFirst = 100 - percPartSecond;
 
   const resetFeedback = () => {
     setError("");
@@ -183,8 +190,8 @@ function PoolSinglePage() {
               <>
                 <div className="poolSingle-header-infos">
                   <div className="poolSingle-header-icons">
-                    {tokenIcons[position.pair.first.name]}
-                    {tokenIcons[position.pair.second.name]}
+                    <TokenIcon tokenKey={position.pair.first.name} />
+                    <TokenIcon tokenKey={position.pair.second.name} />
                   </div>
                   <div className="poolSingle-header-pair">
                     <span>{position.pair.first.name}</span>/
@@ -222,7 +229,9 @@ function PoolSinglePage() {
                           <div className="poolSingle-table">
                             <div className="poolSingle-table-row">
                               <div className="poolSingle-table-col">
-                                {tokenIcons[position.pair.first.name]}
+                                <TokenIcon
+                                  tokenKey={position.pair.first.name}
+                                />
                                 <span>{position.pair.first.name}</span>
                               </div>
                               <div className="poolSingle-table-col">
@@ -237,7 +246,9 @@ function PoolSinglePage() {
                             </div>
                             <div className="poolSingle-table-row">
                               <div className="poolSingle-table-col">
-                                {tokenIcons[position.pair.second.name]}
+                                <TokenIcon
+                                  tokenKey={position.pair.second.name}
+                                />
                                 <span>{position.pair.second.name}</span>
                               </div>
                               <div className="poolSingle-table-col">
@@ -280,7 +291,9 @@ function PoolSinglePage() {
                           <div className="poolSingle-table">
                             <div className="poolSingle-table-row">
                               <div className="poolSingle-table-col">
-                                {tokenIcons[position.pair.first.name]}
+                                <TokenIcon
+                                  tokenKey={position.pair.first.name}
+                                />
                                 <span>{position.pair.first.name}</span>
                               </div>
                               <div className="poolSingle-table-col">
@@ -294,7 +307,9 @@ function PoolSinglePage() {
                             </div>
                             <div className="poolSingle-table-row">
                               <div className="poolSingle-table-col">
-                                {tokenIcons[position.pair.second.name]}
+                                <TokenIcon
+                                  tokenKey={position.pair.second.name}
+                                />
                                 <span>{position.pair.second.name}</span>
                               </div>
                               <div className="poolSingle-table-col">

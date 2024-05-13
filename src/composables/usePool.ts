@@ -174,12 +174,12 @@ const usePool = () => {
           second: tokenAmounts[1],
         },
         pair: {
-          first: secondAppToken,
-          second: firstAppToken,
+          first: firstAppToken,
+          second: secondAppToken,
         },
         claimableFees: {
-          first: tempPosition.tokensOwed1,
-          second: tempPosition.tokensOwed0,
+          first: tempPosition.tokensOwed0,
+          second: tempPosition.tokensOwed1,
         },
         fees: tempPosition.fee / 10000,
         min: minPrice,
@@ -322,7 +322,8 @@ const usePool = () => {
     amountA: string,
     amountB: string,
     feeInPercent: string,
-    alertAllowance = true
+    alertAllowance = true,
+    deploy = false
   ): Promise<string | null> => {
     let existingPoolAddress = null;
 
@@ -345,44 +346,18 @@ const usePool = () => {
         fee,
         { gasLimit: 5000000 }
       );
+
       if (existingPoolAddress !== NULL_ADDRESS) {
         console.log(`Pool already exists at address: ${existingPoolAddress}`);
-        try {
-          const poolContract = new Contract(
-            existingPoolAddress,
-            IUniswapV3PoolABI,
-            provider
-          );
-
-          await askForAllowance(
-            tokenA.address,
-            amountA,
-            poolContract,
-            alertAllowance
-          );
-          await askForAllowance(
-            tokenB.address,
-            amountB,
-            poolContract,
-            alertAllowance
-          );
-
-          const sqrtPrice = univ3prices.utils.encodeSqrtRatioX96(
-            amountAFormatted,
-            amountBFormatted
-          );
-          const tx = await poolContract.initialize(sqrtPrice.toString());
-          await tx.wait();
-
-          console.log(
-            `Pool successfully initialized with base price ${amountAFormatted} VS ${amountBFormatted} !`
-          );
-        } catch (error) {}
 
         return existingPoolAddress;
-      } else {
+      } else if (deploy) {
         console.log("Deploying pool...");
-        const tx = await uniswapFactoryContract.createPool(token0, token1, fee);
+        const tx = await uniswapFactoryContract.createPool(
+          token0.address,
+          token1.address,
+          fee
+        );
         console.log("Wait..", tx);
         const receipt = await tx.wait();
 
@@ -393,6 +368,39 @@ const usePool = () => {
           console.log(
             `Pool deployed at address: ${poolAddressEvent.args.pool}`
           );
+
+          try {
+            const poolContract = new Contract(
+              poolAddressEvent.args.pool,
+              IUniswapV3PoolABI,
+              provider
+            );
+
+            await askForAllowance(
+              tokenA.address,
+              amountA,
+              poolContract,
+              alertAllowance
+            );
+            await askForAllowance(
+              tokenB.address,
+              amountB,
+              poolContract,
+              alertAllowance
+            );
+
+            const sqrtPrice = univ3prices.utils.encodeSqrtRatioX96(
+              amountAFormatted,
+              amountBFormatted
+            );
+            const tx = await poolContract.initialize(sqrtPrice.toString());
+            await tx.wait();
+
+            console.log(
+              `Pool successfully initialized with base price ${amountAFormatted} VS ${amountBFormatted} !`
+            );
+          } catch (error) {}
+
           return poolAddressEvent.args.pool;
         } else {
           console.log("PoolCreated event not found in transaction receipt.");
@@ -403,7 +411,7 @@ const usePool = () => {
       console.error("Failed to deploy/get pool:", error);
     }
 
-    return existingPoolAddress;
+    return existingPoolAddress !== NULL_ADDRESS ? existingPoolAddress : null;
   };
 
   const mintLiquidity = async (
