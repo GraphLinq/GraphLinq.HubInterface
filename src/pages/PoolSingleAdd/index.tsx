@@ -236,8 +236,8 @@ function PoolSingleAddPage() {
                             <div className="poolSingleAdd-block-left">
                               <div className="poolSingleAdd-subtitle">
                                 <span>Price range</span>
-                                {position.pair.first.name} per{" "}
-                                {position.pair.second.name}
+                                {position.pair.second.name} per{" "}
+                                {position.pair.first.name}
                               </div>
                             </div>
 
@@ -289,8 +289,8 @@ function PoolSingleAddPage() {
                                 6
                               )}
                             </span>
-                            {position.pair.first.name} per{" "}
-                            {position.pair.second.name}
+                            {position.pair.second.name} per{" "}
+                            {position.pair.first.name}
                           </div>
                         </div>
 

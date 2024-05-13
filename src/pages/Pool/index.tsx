@@ -147,8 +147,8 @@ function PoolPage() {
                                           ? "∞"
                                           : formatNumberToFixed(pos.max, 6)}
                                       </span>{" "}
-                                      {pos.pair.first.name} per{" "}
-                                      {pos.pair.second.name}
+                                      {pos.pair.second.name} per{" "}
+                                      {pos.pair.first.name}
                                     </div>
                                   </div>
                                 </div>

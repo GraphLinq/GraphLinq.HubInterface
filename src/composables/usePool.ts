@@ -111,8 +111,8 @@ const usePool = () => {
     }
 
     return [
-      ethers.BigNumber.from(new Decimal(amount1).toFixed()),
       ethers.BigNumber.from(new Decimal(amount0).toFixed()),
+      ethers.BigNumber.from(new Decimal(amount1).toFixed()),
     ];
   }
 
@@ -144,19 +144,26 @@ const usePool = () => {
         return;
       }
 
-      const [token0, token1] = orderedPoolTokens(
-        firstPoolToken,
-        secondPoolToken
-      );
-
       const minPrice = parseFloat(
-        tickToPrice(token0, token1, tempPosition.tickLower).toSignificant()
+        tickToPrice(
+          firstPoolToken,
+          secondPoolToken,
+          tempPosition.tickLower
+        ).toSignificant()
       );
       const maxPrice = parseFloat(
-        tickToPrice(token0, token1, tempPosition.tickUpper).toSignificant()
+        tickToPrice(
+          firstPoolToken,
+          secondPoolToken,
+          tempPosition.tickUpper
+        ).toSignificant()
       );
       const currentPrice = parseFloat(
-        tickToPrice(token0, token1, poolState.tick).toSignificant()
+        tickToPrice(
+          firstPoolToken,
+          secondPoolToken,
+          poolState.tick
+        ).toSignificant()
       );
 
       const tokenAmounts = await getTokenAmounts(

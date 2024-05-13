@@ -72,39 +72,51 @@ function PoolSinglePage() {
     }
   }, [positionId, isWithdrawPopinOpen]);
 
-  const priceFirst = position
-    ? (calculatePrice(
-        parseFloat(ethers.utils.formatEther(position.liquidity.first)),
-        "glq", // TODO Dynamiser
-        "number"
-      ) as number)
-    : 0;
-  const priceSecond = position
-    ? (calculatePrice(
-        parseFloat(ethers.utils.formatEther(position.liquidity.second)),
-        "eth", // TODO Dynamiser
-        "number"
-      ) as number)
-    : 0;
-  const totalPrice = priceFirst + priceSecond;
-  // const percPartFirst = totalPrice !== 0 ? (priceFirst / totalPrice) * 100 : 0;
-  // const percPartSecond =
-  //   totalPrice !== 0 ? (priceSecond / totalPrice) * 100 : 0;
-
-  //     50/23134.9 = 0.00216123692
-  // Quantité WETH * 100 / 0.00216123692
-  // (0.002160 * 100 / 0.00216123692) / 2 = 49.9xxxx
-
   const amountFirst = position
     ? parseFloat(ethers.utils.formatEther(position!.liquidity.first))
     : 0;
   const amountSecond = position
     ? parseFloat(ethers.utils.formatEther(position!.liquidity.second))
     : 0;
-  const percPartSecond = position
-    ? (amountSecond * 100) / (amountFirst / position.poolCurrentPrice) / 2
-    : 0;
-  const percPartFirst = 100 - percPartSecond;
+
+  const percPartFirst =
+    position && amountFirst !== 0
+      ? (amountFirst * 100) / (amountSecond / position.poolCurrentPrice) / 2
+      : 0;
+  const percPartSecond = amountSecond !== 0 ? 100 - percPartFirst : 0;
+
+  const hasWGLQInPosition = position
+    ? [position.pair.first.name, position.pair.second.name].includes("WGLQ")
+    : false;
+
+  const WGLQTokenPosition =
+    position && hasWGLQInPosition && position.pair.first.name === "WGLQ"
+      ? "first"
+      : "second";
+
+  const priceFirst =
+    position && hasWGLQInPosition
+      ? (calculatePrice(
+          WGLQTokenPosition === "first"
+            ? parseFloat(ethers.utils.formatEther(position.liquidity.first))
+            : parseFloat(ethers.utils.formatEther(position.liquidity.first)) *
+                position.poolCurrentPrice,
+          "glq",
+          "number"
+        ) as number)
+      : 0;
+  const priceSecond =
+    position && hasWGLQInPosition
+      ? (calculatePrice(
+          WGLQTokenPosition === "second"
+            ? parseFloat(ethers.utils.formatEther(position.liquidity.second))
+            : parseFloat(ethers.utils.formatEther(position.liquidity.second)) *
+                position.poolCurrentPrice,
+          "glq",
+          "number"
+        ) as number)
+      : 0;
+  const totalPrice = priceFirst + priceSecond;
 
   const resetFeedback = () => {
     setError("");
@@ -153,17 +165,26 @@ function PoolSinglePage() {
 
   const trackingExplorer = `${GLQ_EXPLORER_URL}/tx/${success}`;
 
-  const feesFirst = position
-    ? (calculatePrice(
-        parseFloat(ethers.utils.formatEther(position.claimableFees.first)),
-        "glq",
-        "number"
-      ) as number)
-    : 0;
+  const feesFirst =
+    position && hasWGLQInPosition
+      ? (calculatePrice(
+          WGLQTokenPosition === "first"
+            ? parseFloat(ethers.utils.formatEther(position.claimableFees.first))
+            : parseFloat(
+                ethers.utils.formatEther(position.claimableFees.first)
+              ) * position.poolCurrentPrice,
+          "glq",
+          "number"
+        ) as number)
+      : 0;
   const feesSecond = position
     ? (calculatePrice(
-        parseFloat(ethers.utils.formatEther(position.claimableFees.second)),
-        "eth",
+        WGLQTokenPosition === "second"
+          ? parseFloat(ethers.utils.formatEther(position.claimableFees.second))
+          : parseFloat(
+              ethers.utils.formatEther(position.claimableFees.second)
+            ) * position.poolCurrentPrice,
+        "glq",
         "number"
       ) as number)
     : 0;
@@ -328,8 +349,8 @@ function PoolSinglePage() {
                             <div className="poolSingle-block-left">
                               <div className="poolSingle-subtitle">
                                 <span>Price range</span>
-                                {position.pair.first.name} per{" "}
-                                {position.pair.second.name}
+                                {position.pair.second.name} per{" "}
+                                {position.pair.first.name}
                               </div>
                             </div>
 
@@ -381,8 +402,8 @@ function PoolSinglePage() {
                                 6
                               )}
                             </span>
-                            {position.pair.first.name} per{" "}
-                            {position.pair.second.name}
+                            {position.pair.second.name} per{" "}
+                            {position.pair.first.name}
                           </div>
                         </div>
                         {isPersonalPosition && (
