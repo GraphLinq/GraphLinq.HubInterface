@@ -121,7 +121,7 @@ export const WBTC_TOKEN: AppToken = {
 };
 
 export const MAINNET_CURRENCIES = [ETH_TOKEN, WGLQ_TOKEN];
-export const GLQCHAIN_CURRENCIES = [WGLQ_TOKEN, WETH_TOKEN, WBTC_TOKEN];
+export const GLQCHAIN_CURRENCIES = [WGLQ_TOKEN, WETH_TOKEN];
 
 export const getAppTokenByAddress = (
   address: `0x${string}`,

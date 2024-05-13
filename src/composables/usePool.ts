@@ -187,7 +187,7 @@ const usePool = () => {
         status:
           currentPrice >= minPrice && currentPrice <= maxPrice
             ? PositionStatus.IN_RANGE
-            : PositionStatus.CLOSED,
+            : PositionStatus.OUT_OF_RANGE,
         poolCurrentPrice: currentPrice,
         tickUpper: tempPosition.tickUpper,
         tickLower: tempPosition.tickLower,

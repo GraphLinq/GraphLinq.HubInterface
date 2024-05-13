@@ -123,6 +123,10 @@
           height: 8px;
           border-radius: 50%;
           background-color: var(--c-mint-green);
+
+          &[data-status="out_of_range"] {
+            background-color: var(--c-mint-orange);
+          }
         }
       }
     }

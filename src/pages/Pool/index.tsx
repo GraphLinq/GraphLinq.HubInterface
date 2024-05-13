@@ -1,4 +1,3 @@
-import Canceled from "@assets/icons/canceled.svg?react";
 import SearchEmpty from "@assets/icons/search-empty.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import VisiblityOff from "@assets/icons/visibility-off.svg?react";
@@ -27,10 +26,10 @@ function PoolPage() {
   const { switchToGraphLinqMainnet } = useNetwork();
   const { ownPositions, loadingPositions } = usePool();
 
-  const [displayClosedPositions, setDisplayClosedPositions] = useState(true);
+  const [displayOORPositions, setDisplayOORPositions] = useState(true);
 
-  const filteredPositions = !displayClosedPositions
-    ? ownPositions.filter((pos) => pos.status !== PositionStatus.CLOSED)
+  const filteredPositions = !displayOORPositions
+    ? ownPositions.filter((pos) => pos.status !== PositionStatus.OUT_OF_RANGE)
     : ownPositions;
 
   return (
@@ -92,21 +91,19 @@ function PoolPage() {
                             <div className="pool-list-header-right">
                               <Pill
                                 onClick={() =>
-                                  setDisplayClosedPositions(
-                                    !displayClosedPositions
-                                  )
+                                  setDisplayOORPositions(!displayOORPositions)
                                 }
                                 icon={
-                                  displayClosedPositions ? (
+                                  displayOORPositions ? (
                                     <VisiblityOff />
                                   ) : (
                                     <Visiblity />
                                   )
                                 }
                               >
-                                {displayClosedPositions
-                                  ? "Hide closed positions"
-                                  : "Display closed positions"}
+                                {displayOORPositions
+                                  ? "Hide out of range positions"
+                                  : "Display out of range positions"}
                               </Pill>
                             </div>
                           </div>
@@ -157,18 +154,13 @@ function PoolPage() {
                                 </div>
                                 <div className="pool-list-item-right">
                                   <div className="pool-list-item-status">
-                                    {pos.status === PositionStatus.IN_RANGE && (
-                                      <>
-                                        <div className="pool-list-item-status-dot"></div>
-                                        In range
-                                      </>
-                                    )}
-                                    {pos.status === PositionStatus.CLOSED && (
-                                      <>
-                                        <Canceled />
-                                        Closed
-                                      </>
-                                    )}
+                                    <div
+                                      className="pool-list-item-status-dot"
+                                      data-status={pos.status}
+                                    ></div>
+                                    {pos.status === PositionStatus.IN_RANGE
+                                      ? "In range"
+                                      : "Out of range"}
                                   </div>
                                 </div>
                               </NavLink>

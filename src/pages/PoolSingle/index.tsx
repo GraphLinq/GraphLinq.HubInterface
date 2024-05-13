@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import ArrowBack from "@assets/icons/arrow-back.svg?react";
-import Canceled from "@assets/icons/canceled.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Alert from "@components/Alert";
 import Button from "@components/Button";
@@ -336,19 +335,13 @@ function PoolSinglePage() {
 
                             <div className="poolSingle-block-right">
                               <div className="poolSingle-status">
-                                {position.status ===
-                                  PositionStatus.IN_RANGE && (
-                                  <>
-                                    <div className="poolSingle-status-dot"></div>
-                                    In range
-                                  </>
-                                )}
-                                {position.status === PositionStatus.CLOSED && (
-                                  <>
-                                    <Canceled />
-                                    Closed
-                                  </>
-                                )}
+                                <div
+                                  className="pool-list-item-status-dot"
+                                  data-status={position.status}
+                                ></div>
+                                {position.status === PositionStatus.IN_RANGE
+                                  ? "In range"
+                                  : "Out of range"}
                               </div>
                             </div>
                           </div>

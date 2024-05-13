@@ -1,20 +1,21 @@
 @import "../mixins/medias";
 
 :root {
-  --ff-base: 'Gilroy', sans-serif;
+  --ff-base: "Gilroy", sans-serif;
 
   --header-height: 80px;
   --header-nav-mobile: 80px;
 
   --c-white: #ffffff;
-  --c-lavender: #897FAC;
-  --c-martinique: #302B44;
-  --c-mulled-wine: #4E4962;
-  --c-cinder: #0E0C11;
-  --c-bastille: #1B1621;
+  --c-lavender: #897fac;
+  --c-martinique: #302b44;
+  --c-mulled-wine: #4e4962;
+  --c-cinder: #0e0c11;
+  --c-bastille: #1b1621;
   --c-denim: #1573e6;
-  --c-fog: #DED2FF;
+  --c-fog: #ded2ff;
   --c-mint-green: #69ffa5;
+  --c-mint-orange: #ff8c00;
   --c-mint-red: #ff4935;
 
   @include max($mobile-s) {

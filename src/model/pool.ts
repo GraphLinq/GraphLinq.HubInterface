@@ -31,7 +31,7 @@ export interface PoolState {
 
 export enum PositionStatus {
   IN_RANGE = "in_range",
-  CLOSED = "closed",
+  OUT_OF_RANGE = "out_of_range",
 }
 
 export interface Position {
