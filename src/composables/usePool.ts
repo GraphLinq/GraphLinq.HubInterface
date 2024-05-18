@@ -117,89 +117,93 @@ const usePool = () => {
   }
 
   const getPositionById = async (id: string): Promise<Position | undefined> => {
-    const tempPosition = await nftPositionManagerContract.positions(id);
+    try {
+      const tempPosition = await nftPositionManagerContract.positions(id);
 
-    const firstAppToken = getAppTokenByAddress(tempPosition.token0, "glq");
-    const secondAppToken = getAppTokenByAddress(tempPosition.token1, "glq");
+      const firstAppToken = getAppTokenByAddress(tempPosition.token0, "glq");
+      const secondAppToken = getAppTokenByAddress(tempPosition.token1, "glq");
 
-    const poolAddress = await uniswapFactoryContract.getPool(
-      tempPosition.token0,
-      tempPosition.token1,
-      tempPosition.fee
-    );
-
-    const poolState = await getPoolState(poolAddress);
-
-    if (firstAppToken && secondAppToken && poolState) {
-      const firstPoolToken = getPoolTokenByAddress(
-        firstAppToken.address.glq!,
-        "glq"
-      );
-      const secondPoolToken = getPoolTokenByAddress(
-        secondAppToken.address.glq!,
-        "glq"
+      const poolAddress = await uniswapFactoryContract.getPool(
+        tempPosition.token0,
+        tempPosition.token1,
+        tempPosition.fee
       );
 
-      if (!firstPoolToken || !secondPoolToken) {
-        return;
-      }
+      const poolState = await getPoolState(poolAddress);
 
-      const minPrice = parseFloat(
-        tickToPrice(
-          firstPoolToken,
-          secondPoolToken,
-          tempPosition.tickLower
-        ).toSignificant()
-      );
-      const maxPrice = parseFloat(
-        tickToPrice(
-          firstPoolToken,
-          secondPoolToken,
+      if (firstAppToken && secondAppToken && poolState) {
+        const firstPoolToken = getPoolTokenByAddress(
+          firstAppToken.address.glq!,
+          "glq"
+        );
+        const secondPoolToken = getPoolTokenByAddress(
+          secondAppToken.address.glq!,
+          "glq"
+        );
+
+        if (!firstPoolToken || !secondPoolToken) {
+          return;
+        }
+
+        const minPrice = parseFloat(
+          tickToPrice(
+            firstPoolToken,
+            secondPoolToken,
+            tempPosition.tickLower
+          ).toSignificant()
+        );
+        const maxPrice = parseFloat(
+          tickToPrice(
+            firstPoolToken,
+            secondPoolToken,
+            tempPosition.tickUpper
+          ).toSignificant()
+        );
+        const currentPrice = parseFloat(
+          tickToPrice(
+            firstPoolToken,
+            secondPoolToken,
+            poolState.tick
+          ).toSignificant()
+        );
+
+        const tokenAmounts = await getTokenAmounts(
+          tempPosition.liquidity,
+          poolState.sqrtPriceX96,
+          tempPosition.tickLower,
           tempPosition.tickUpper
-        ).toSignificant()
-      );
-      const currentPrice = parseFloat(
-        tickToPrice(
-          firstPoolToken,
-          secondPoolToken,
-          poolState.tick
-        ).toSignificant()
-      );
+        );
 
-      const tokenAmounts = await getTokenAmounts(
-        tempPosition.liquidity,
-        poolState.sqrtPriceX96,
-        tempPosition.tickLower,
-        tempPosition.tickUpper
-      );
-
-      return {
-        id: id,
-        liquidity: {
-          total: tempPosition.liquidity,
-          first: tokenAmounts[0],
-          second: tokenAmounts[1],
-        },
-        pair: {
-          first: firstAppToken,
-          second: secondAppToken,
-        },
-        claimableFees: {
-          first: tempPosition.tokensOwed0,
-          second: tempPosition.tokensOwed1,
-        },
-        fees: tempPosition.fee / 10000,
-        min: minPrice,
-        max: maxPrice,
-        status:
-          currentPrice >= minPrice && currentPrice <= maxPrice
-            ? PositionStatus.IN_RANGE
-            : PositionStatus.OUT_OF_RANGE,
-        poolCurrentPrice: currentPrice,
-        tickUpper: tempPosition.tickUpper,
-        tickLower: tempPosition.tickLower,
-        poolAddress: poolAddress,
-      };
+        return {
+          id: id,
+          liquidity: {
+            total: tempPosition.liquidity,
+            first: tokenAmounts[0],
+            second: tokenAmounts[1],
+          },
+          pair: {
+            first: firstAppToken,
+            second: secondAppToken,
+          },
+          claimableFees: {
+            first: tempPosition.tokensOwed0,
+            second: tempPosition.tokensOwed1,
+          },
+          fees: tempPosition.fee / 10000,
+          min: minPrice,
+          max: maxPrice,
+          status:
+            currentPrice >= minPrice && currentPrice <= maxPrice
+              ? PositionStatus.IN_RANGE
+              : PositionStatus.OUT_OF_RANGE,
+          poolCurrentPrice: currentPrice,
+          tickUpper: tempPosition.tickUpper,
+          tickLower: tempPosition.tickLower,
+          poolAddress: poolAddress,
+        };
+      }
+    } catch (error) {
+      console.error("Error getting position by id", error);
     }
   };
 

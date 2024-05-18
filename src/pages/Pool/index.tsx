@@ -24,7 +24,7 @@ function PoolPage() {
   const { address: account } = useAccount();
   const { isGLQChain } = useChains();
   const { switchToGraphLinqMainnet } = useNetwork();
-  const { ownPositions, loadingPositions } = usePool();
+  const { ownPositions, ownPositionIds, loadingPositions } = usePool();
 
   const [displayOORPositions, setDisplayOORPositions] = useState(true);
 
@@ -61,14 +61,35 @@ function PoolPage() {
                       {ownPositions.length === 0 ? (
                         <>
                           {loadingPositions ? (
-                            <div className="pool-empty">
-                              <div className="pool-empty-info">
-                                <Spinner />
-                                <div className="pool-empty-label">
-                                  Loading positions...
+                            <>
+                              {ownPositionIds.length ? (
+                                <>
+                                  <div className="pool-list-header">
+                                    <div className="pool-list-header-left">
+                                      Your Positions{" "}
+                                      <span>{ownPositionIds.length}</span>
+                                    </div>
+                                  </div>
+                                  <div className="pool-list">
+                                    {ownPositionIds.map((_, key) => (
+                                      <div className="pool-list-item" key={key}>
+                                        Loading position...
+                                        <Spinner />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="pool-empty">
+                                  <div className="pool-empty-info">
+                                    <Spinner />
+                                    <div className="pool-empty-label">
+                                      Loading positions...
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            </div>
+                              )}
+                            </>
                           ) : (
                             <>
                               <div className="pool-empty">
