@@ -701,10 +701,10 @@ const usePool = () => {
       });
       // setPending("Waiting for confirmations...");
       const receipt = await txResponse.wait();
-      setSuccess(receipt.transactionHash);
+      // setSuccess(receipt.transactionHash);
       return receipt.transactionHash;
     } catch (error) {
-      setError(getErrorMessage(error));
+      // setError(getErrorMessage(error));
       console.error(`Failed to burn your position: ${error}`);
     }
   };

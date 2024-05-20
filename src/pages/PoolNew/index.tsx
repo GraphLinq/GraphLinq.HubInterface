@@ -533,19 +533,13 @@ function PoolNewPage() {
                               <Button
                                 onClick={() => {
                                   if (firstCurrencyBalance) {
-                                    setFirstCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(firstCurrencyBalance) / 4,
-                                        6
-                                      )
+                                    const val = formatNumberToFixed(
+                                      parseFloat(firstCurrencyBalance) / 4,
+                                      6
                                     );
+                                    setFirstCurrencyAmount(val);
                                     setSecondCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(firstCurrencyBalance) /
-                                          4 /
-                                          currentPoolPrice,
-                                        6
-                                      )
+                                      calculateY(parseFloat(val))
                                     );
                                   }
                                 }}
@@ -555,19 +549,13 @@ function PoolNewPage() {
                               <Button
                                 onClick={() => {
                                   if (firstCurrencyBalance) {
-                                    setFirstCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(firstCurrencyBalance) / 2,
-                                        6
-                                      )
+                                    const val = formatNumberToFixed(
+                                      parseFloat(firstCurrencyBalance) / 2,
+                                      6
                                     );
+                                    setFirstCurrencyAmount(val);
                                     setSecondCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(firstCurrencyBalance) /
-                                          2 /
-                                          currentPoolPrice,
-                                        6
-                                      )
+                                      calculateY(parseFloat(val))
                                     );
                                   }
                                 }}
@@ -577,18 +565,13 @@ function PoolNewPage() {
                               <Button
                                 onClick={() => {
                                   if (firstCurrencyBalance) {
-                                    setFirstCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(firstCurrencyBalance),
-                                        6
-                                      )
+                                    const val = formatNumberToFixed(
+                                      parseFloat(firstCurrencyBalance),
+                                      6
                                     );
+                                    setFirstCurrencyAmount(val);
                                     setSecondCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(firstCurrencyBalance) /
-                                          currentPoolPrice,
-                                        6
-                                      )
+                                      calculateY(parseFloat(val))
                                     );
                                   }
                                 }}
@@ -616,20 +599,14 @@ function PoolNewPage() {
                             <div className="poolNew-amounts-swap-actions">
                               <Button
                                 onClick={() => {
-                                  if (firstCurrencyBalance) {
-                                    setSecondCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(secondCurrencyBalance) / 4,
-                                        6
-                                      )
+                                  if (secondCurrencyBalance) {
+                                    const val = formatNumberToFixed(
+                                      parseFloat(secondCurrencyBalance) / 4,
+                                      6
                                     );
+                                    setSecondCurrencyAmount(val);
                                     setFirstCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(secondCurrencyBalance) /
-                                          4 /
-                                          currentPoolPrice,
-                                        6
-                                      )
+                                      calculateX(parseFloat(val))
                                     );
                                   }
                                 }}
@@ -638,20 +615,14 @@ function PoolNewPage() {
                               </Button>
                               <Button
                                 onClick={() => {
-                                  if (firstCurrencyBalance) {
-                                    setSecondCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(secondCurrencyBalance) / 2,
-                                        6
-                                      )
+                                  if (secondCurrencyBalance) {
+                                    const val = formatNumberToFixed(
+                                      parseFloat(secondCurrencyBalance) / 2,
+                                      6
                                     );
+                                    setSecondCurrencyAmount(val);
                                     setFirstCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(secondCurrencyBalance) /
-                                          2 /
-                                          currentPoolPrice,
-                                        6
-                                      )
+                                      calculateX(parseFloat(val))
                                     );
                                   }
                                 }}
@@ -660,19 +631,14 @@ function PoolNewPage() {
                               </Button>
                               <Button
                                 onClick={() => {
-                                  if (firstCurrencyBalance) {
-                                    setSecondCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(secondCurrencyBalance),
-                                        6
-                                      )
+                                  if (secondCurrencyBalance) {
+                                    const val = formatNumberToFixed(
+                                      parseFloat(secondCurrencyBalance),
+                                      6
                                     );
+                                    setSecondCurrencyAmount(val);
                                     setFirstCurrencyAmount(
-                                      formatNumberToFixed(
-                                        parseFloat(secondCurrencyBalance) /
-                                          currentPoolPrice,
-                                        6
-                                      )
+                                      calculateX(parseFloat(val))
                                     );
                                   }
                                 }}

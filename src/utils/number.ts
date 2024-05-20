@@ -9,7 +9,7 @@ const formatNumberToDollars = (number: number, digits = 5) => {
 };
 
 const formatNumberToFixed = (num: number, precision: number = 2) => {
-  const fixedNum = num.toFixed(precision);
+  const fixedNum = toFixedFloor(num, precision);
   const trimmedNum = parseFloat(fixedNum).toString();
   return trimmedNum;
 };
@@ -32,6 +32,11 @@ const formatBigNumberToFixed = (
 
 const isInfinity = (value: number) => {
   return value > 1e26;
+};
+
+const toFixedFloor = (value: number, decimals: number) => {
+  const factor = Math.pow(10, decimals);
+  return (Math.floor(value * factor) / factor).toFixed(decimals);
 };
 
 export {

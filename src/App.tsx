@@ -15,6 +15,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import {
   createBrowserRouter,
+  Navigate,
   Outlet,
   RouterProvider,
   ScrollRestoration,
@@ -115,6 +116,10 @@ function App() {
         {
           path: "/rewards",
           element: <RewardsPage />,
+        },
+        {
+          path: "*", // Route "catch-all"
+          element: <Navigate to="/" replace />,
         },
       ],
     },
