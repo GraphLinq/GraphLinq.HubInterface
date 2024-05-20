@@ -12,3 +12,14 @@ export interface Challenge {
   status: ChallengeStatus;
   available: boolean;
 }
+
+export interface ChallengeInformation {
+  challenges: Challenge[];
+  points: number;
+}
+
+export interface ChallengeLadderUser {
+  address: string;
+  points: number;
+  position: number;
+}

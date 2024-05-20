@@ -3,14 +3,28 @@ import { SITE_NAME } from "@constants/index";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { useAccount } from "wagmi";
+import Spinner from "@assets/icons/spinner.svg?react";
 
 import { ChallengeStatus } from "../../model/rewards";
-import { getChallengesInformation } from "../../queries/api";
+import {
+  getChallengesInformation,
+  getChallengesLadder,
+} from "../../queries/api";
 
 const seoTitle = `${SITE_NAME} — Rewards`;
 
 function RewardsPage() {
   const { address: account } = useAccount();
+
+  const qChallengeLadder = useQuery({
+    queryKey: ["challengesLadder"],
+    queryFn: () => getChallengesLadder(),
+    refetchInterval: 600000,
+  });
+
+  const leaderboard = qChallengeLadder.data
+    ? qChallengeLadder.data.sort((a, b) => b.position - a.position)
+    : [];
 
   const qChallenges = useQuery({
     queryKey: ["challengesInformation"],
@@ -19,7 +33,8 @@ function RewardsPage() {
     enabled: !!account,
   });
 
-  const challenges = qChallenges.data || [];
+  const challenges = qChallenges.data?.challenges || [];
+  const points = qChallenges.data?.points || 0;
 
   const availableChallenges = challenges.reduce(
     (count, challenge) => (challenge.available ? count + 1 : count),
@@ -30,34 +45,7 @@ function RewardsPage() {
       challenge.status === ChallengeStatus.COMPLETED ? count + 1 : count,
     0
   );
-  const completedRewardsPerc = (completedRewards / challenges.length) * 100;
-
-  const leaderboard = [
-    {
-      address: "0x0000",
-      points: 150,
-    },
-    {
-      address: "0x0000",
-      points: 120,
-    },
-    {
-      address: "0x0000",
-      points: 100,
-    },
-    {
-      address: "0x0000",
-      points: 50,
-    },
-    {
-      address: "0x0000",
-      points: 30,
-    },
-    {
-      address: "0x0000",
-      points: 10,
-    },
-  ];
+  const completedRewardsPerc = (completedRewards / availableChallenges) * 100;
 
   return (
     <>
@@ -80,15 +68,19 @@ function RewardsPage() {
                   </>
                 ) : (
                   <div className="rewards-total">
+                    <div className="rewards-total-subtitle">You have</div>
+                    <div className="rewards-total-value">
+                      {points} {points > 1 ? "points" : "point"}
+                    </div>
                     <div className="rewards-total-subtitle">
-                      You have completed
+                      after collected
                     </div>
                     <div className="rewards-total-value">
-                      {completedRewards} rewards{" "}
+                      {completedRewards}{" "}
+                      {completedRewards > 1 ? "rewards" : "reward"}{" "}
                       {challenges.length > 0 && (
                         <>
-                          <span>on {availableChallenges} available for </span>X
-                          points
+                          <span>on {availableChallenges} available</span>
                         </>
                       )}
                     </div>
@@ -109,27 +101,36 @@ function RewardsPage() {
                 )}
               </div>
             </div>
-            <div className="main-card">
+            <div className="main-card leaderboard">
               <div className="main-card-title">Leaderboard</div>
-              <div className="main-card-content"></div>
-              <table className="rewards-table">
-                <thead>
-                  <tr>
-                    <th data-rank>Rank</th>
-                    <th data-address>Address</th>
-                    <th data-points>Points</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaderboard.reverse().map((user, key) => (
-                    <tr key={`leader-board-${key}`}>
-                      <td data-rank>{key + 1}</td>
-                      <td data-address>{user.address}</td>
-                      <td data-points>{user.points}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="main-card-content">
+                {qChallengeLadder.isLoading ? (
+                  <div className="rewards-table-loader">
+                    <Spinner />
+                  </div>
+                ) : (
+                  <div className="rewards-table-wrapper">
+                    <table className="rewards-table">
+                      <thead>
+                        <tr>
+                          <th data-rank>Rank</th>
+                          <th data-address>Address</th>
+                          <th data-points>Points</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {leaderboard.reverse().map((user, key) => (
+                          <tr key={`leader-board-${key}`}>
+                            <td data-rank>{user.position}</td>
+                            <td data-address>{user.address}</td>
+                            <td data-points>{user.points}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div className="rewards-right">

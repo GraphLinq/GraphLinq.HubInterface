@@ -30,11 +30,13 @@
       &:before {
         content: "";
         position: absolute;
+        z-index: -1;
         top: 0;
         left: 0;
         bottom: 0;
         right: 0;
         background: url(../../assets/img/reward_bg.png) no-repeat center/cover;
+        opacity: 0.5;
         @include max($tablet) {
           opacity: 0.1;
         }
@@ -71,13 +73,16 @@
     &-subtitle {
       color: var(--c-lavender);
       font-size: 16px;
+
+      * + & {
+        margin-top: 8px;
+      }
     }
     &-value {
       color: var(--c-white);
       font-size: 24px;
 
       span {
-        color: var(--c-lavender);
         font-size: 16px;
       }
     }
@@ -260,8 +265,23 @@
 
   &-table {
     width: 100%;
+    max-width: 100%;
     color: var(--c-lavender);
     font-weight: 600;
+
+    &-loader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background-color: rgba(48, 43, 68, 0.4);
+      border-radius: 8px;
+    }
+
+    &-wrapper {
+      width: 100%;
+      overflow: auto;
+    }
 
     tr + tr {
       border-top: 1px solid var(--c-martinique);

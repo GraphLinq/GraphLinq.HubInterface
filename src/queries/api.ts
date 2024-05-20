@@ -1,7 +1,7 @@
 import { BRIDGE_API_URL, DASHBOARD_API_URL } from "@constants/index";
 import { TrackingInformation } from "../model/tracking";
 import { DashboardInformation } from "../model/dashboard";
-import { Challenge } from "../model/rewards";
+import { ChallengeInformation, ChallengeLadderUser } from "../model/rewards";
 
 // Monitoring
 export const getTrackingInformation = async (address: string) =>
@@ -19,9 +19,15 @@ export const getDashboardInformation = async () =>
 
 // Challenges
 export const getChallengesInformation = async (address: string) =>
-  request<Challenge[]>(
+  request<ChallengeInformation>(
     `${DASHBOARD_API_URL}/challenges/${address}`,
     "getChallengesInformation"
+  );
+
+export const getChallengesLadder = async () =>
+  request<ChallengeLadderUser[]>(
+    `${DASHBOARD_API_URL}/ladder?page=1&size=10`,
+    "getChallengesLadder"
   );
 
 // Functions
