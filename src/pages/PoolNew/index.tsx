@@ -109,7 +109,7 @@ function PoolNewPage() {
     setSecondCurrencyAmount("");
   };
 
-  const [fees, setFees] = useState(feesOptions[2].value);
+  const [fees, setFees] = useState(feesOptions[3].value);
   const [currentPoolPrice, setCurrentPoolPrice] = useState(0);
   const [currentPoolPriceReversed, setCurrentPoolPriceReversed] = useState(0);
 
