@@ -174,6 +174,18 @@ const usePool = () => {
           tempPosition.tickUpper
         );
 
+        const collectParams = {
+          tokenId: id,
+          recipient: account,
+          amount0Max: ethers.utils.parseEther("100000000"),
+          amount1Max: ethers.utils.parseEther("100000000"),
+        };
+
+        const claimTxResponse =
+          await nftPositionManagerContract.callStatic.collect(collectParams, {
+            gasLimit: 5000000,
+          });
+
         return {
           id: id,
           liquidity: {
@@ -186,8 +198,8 @@ const usePool = () => {
             second: secondAppToken,
           },
           claimableFees: {
-            first: tempPosition.tokensOwed0,
-            second: tempPosition.tokensOwed1,
+            first: claimTxResponse.amount0,
+            second: claimTxResponse.amount1,
           },
           fees: tempPosition.fee / 10000,
           min: minPrice,
