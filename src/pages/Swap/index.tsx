@@ -443,7 +443,7 @@ function SwapPage() {
                         disabled={loadingQuote || loadingBalance}
                         icon={loading && <Spinner />}
                       >
-                        Send
+                        Swap
                       </Button>
                     </div>
                   </>
