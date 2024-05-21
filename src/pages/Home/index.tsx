@@ -91,11 +91,9 @@ function HomePage() {
             <div className="home-bubble-value">
               {qDashboardInformation.isLoading && <Spinner />}
 
-              {qDashboardInformation.data?.analytics.WGLQSwap24h &&
-                formatNumberToDollars(
-                  qDashboardInformation.data?.analytics.WGLQSwap24h,
-                  2
-                )}
+              {qDashboardInformation.data?.analytics.WGLQSwap24h.toLocaleString(
+                "en-US"
+              )}
             </div>
             <div className="home-bubble-label">24h WGLQ swap</div>
           </div>
