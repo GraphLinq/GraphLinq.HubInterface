@@ -17,7 +17,7 @@ import { formatBigNumberToFixed, formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useAccount } from "wagmi";
+import { useAccount  } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import { useTokenContract } from "../../composables/useContract";
@@ -25,7 +25,9 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import useSound from "../../composables/useSound";
 import useTokenBalance from "../../composables/useTokenBalance";
+import useTokenInfo from "../../composables/useTokenInfos";
 import useUniswap from "../../composables/useUniswap";
+
 
 const seoTitle = `${SITE_NAME} — Swap`;
 
@@ -37,6 +39,9 @@ function SwapPage() {
   const { isGLQChain } = useChains();
   const { quoteSwap, executeSwap, feeInPercent } = useUniswap();
   const { playSound } = useSound();
+
+  const tokenData = useTokenInfo('0x6518E3160eFC496CD3451eC4aE52E99cfed20697'); // @TODO
+  console.log(tokenData)
 
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
