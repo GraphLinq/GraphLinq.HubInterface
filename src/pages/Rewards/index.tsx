@@ -164,10 +164,15 @@ function RewardsPage() {
                               <>
                                 <div className="rewards-challenge-bar">
                                   <div className="rewards-challenge-bar-bg"></div>
-                                  <div className="rewards-challenge-bar-progress"></div>
+                                  <div
+                                    className="rewards-challenge-bar-progress"
+                                    style={{
+                                      width: challenge.progression * 100 + "%",
+                                    }}
+                                  ></div>
                                 </div>
                                 <div className="rewards-challenge-progress-text">
-                                  {challenge.progression * 100}%
+                                  {(challenge.progression * 100).toFixed(2)}%
                                 </div>
                               </>
                             )}
