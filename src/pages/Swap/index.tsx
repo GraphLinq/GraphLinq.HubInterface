@@ -6,7 +6,7 @@ import Alert from "@components/Alert";
 import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import InputRadioGroup from "@components/InputRadioGroup";
-import Select from "@components/Select";
+import SelectAppToken from "@components/SelectAppToken";
 import TokenIcon from "@components/TokenIcon";
 import { GLQCHAIN_SWAP_ROUTER_ADDRESS } from "@constants/address";
 import { GLQCHAIN_CURRENCIES } from "@constants/apptoken";
@@ -17,7 +17,7 @@ import { formatBigNumberToFixed, formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useAccount  } from "wagmi";
+import { useAccount } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import { useTokenContract } from "../../composables/useContract";
@@ -25,9 +25,7 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import useSound from "../../composables/useSound";
 import useTokenBalance from "../../composables/useTokenBalance";
-import useTokenInfo from "../../composables/useTokenInfos";
 import useUniswap from "../../composables/useUniswap";
-
 
 const seoTitle = `${SITE_NAME} — Swap`;
 
@@ -39,9 +37,6 @@ function SwapPage() {
   const { isGLQChain } = useChains();
   const { quoteSwap, executeSwap, feeInPercent } = useUniswap();
   const { playSound } = useSound();
-
-  const tokenData = useTokenInfo('0x6518E3160eFC496CD3451eC4aE52E99cfed20697'); // @TODO
-  console.log(tokenData)
 
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
@@ -121,11 +116,15 @@ function SwapPage() {
 
   const [ownCurrencyOption, setOwnCurrencyOption] = useState(0);
   const [tradeCurrencyOption, setTradeCurrencyOption] = useState(1);
-  const ownCurrencyOptions = GLQCHAIN_CURRENCIES.map((currency) => {
-    currency.icon = <TokenIcon tokenKey={currency.name} />;
-    return currency;
-  });
-  const tradeCurrencyOptions = [...ownCurrencyOptions];
+  const [ownCurrencyOptions, setOwnCurrencyOptions] = useState(
+    GLQCHAIN_CURRENCIES.map((currency) => {
+      currency.icon = <TokenIcon tokenKey={currency.name} />;
+      return currency;
+    })
+  );
+  const [tradeCurrencyOptions, setTradeCurrencyOptions] = useState([
+    ...ownCurrencyOptions,
+  ]);
 
   const ownCurrency = ownCurrencyOptions[ownCurrencyOption];
   const tradeCurrency = tradeCurrencyOptions[tradeCurrencyOption];
@@ -343,23 +342,27 @@ function SwapPage() {
                             />
                           </div>
                           <div className="swap-choice-input-price">
-                            {calculatePrice(
-                              !isNaN(parseFloat(ownCurrencyAmount))
-                                ? parseFloat(ownCurrencyAmount)
-                                : 0,
-                              ownCurrency.exchangeRate
-                            )}
+                            {ownCurrency.exchangeRate &&
+                              calculatePrice(
+                                !isNaN(parseFloat(ownCurrencyAmount))
+                                  ? parseFloat(ownCurrencyAmount)
+                                  : 0,
+                                ownCurrency.exchangeRate
+                              )}
                           </div>
-                          <Select
+                          <SelectAppToken
                             active={ownCurrencyOption}
-                            options={ownCurrencyOptions.map((opt) => (
-                              <>
-                                {opt.icon} <span>{opt.name}</span>
-                              </>
-                            ))}
-                            onChange={(active) =>
-                              handleCurrencySelectChange(active, "own")
-                            }
+                            options={ownCurrencyOptions}
+                            onChange={(active, custom) => {
+                              if (custom) {
+                                setOwnCurrencyOptions([
+                                  ...ownCurrencyOptions,
+                                  custom,
+                                ]);
+                              }
+
+                              handleCurrencySelectChange(active, "own");
+                            }}
                           />
                         </div>
                       </div>
@@ -380,21 +383,27 @@ function SwapPage() {
                             />
                           </div>
                           <div className="swap-choice-input-price">
-                            {calculatePrice(
-                              parseFloat(ethers.utils.formatEther(quoteAmount)),
-                              tradeCurrency.exchangeRate
-                            )}
+                            {tradeCurrency.exchangeRate &&
+                              calculatePrice(
+                                parseFloat(
+                                  ethers.utils.formatEther(quoteAmount)
+                                ),
+                                tradeCurrency.exchangeRate
+                              )}
                           </div>
-                          <Select
+                          <SelectAppToken
                             active={tradeCurrencyOption}
-                            options={tradeCurrencyOptions.map((opt) => (
-                              <>
-                                {opt.icon} <span>{opt.name}</span>
-                              </>
-                            ))}
-                            onChange={(active) =>
-                              handleCurrencySelectChange(active, "trade")
-                            }
+                            options={tradeCurrencyOptions}
+                            onChange={(active, custom) => {
+                              if (custom) {
+                                setTradeCurrencyOptions([
+                                  ...tradeCurrencyOptions,
+                                  custom,
+                                ]);
+                              }
+
+                              handleCurrencySelectChange(active, "trade");
+                            }}
                           />
                         </div>
                       </div>
@@ -406,21 +415,24 @@ function SwapPage() {
                       >
                         <div className="swap-summary-header-info">
                           <span>1 {ownCurrency.name}</span>
-                          <span className="color">
-                            {calculatePrice(1, ownCurrency.exchangeRate)}
-                          </span>
+                          {ownCurrency.exchangeRate && (
+                            <span className="color">
+                              {calculatePrice(1, ownCurrency.exchangeRate)}
+                            </span>
+                          )}
                           <span className="color">=</span>
                           <span>
                             {formatBigNumberToFixed(baseQuoteAmount, 6)}{" "}
                             {tradeCurrency.name}
                           </span>
                           <span className="color">
-                            {calculatePrice(
-                              parseFloat(
-                                ethers.utils.formatEther(baseQuoteAmount)
-                              ),
-                              tradeCurrency.exchangeRate
-                            )}
+                            {tradeCurrency.exchangeRate &&
+                              calculatePrice(
+                                parseFloat(
+                                  ethers.utils.formatEther(baseQuoteAmount)
+                                ),
+                                tradeCurrency.exchangeRate
+                              )}
                           </span>
                         </div>
                         <Arrow />

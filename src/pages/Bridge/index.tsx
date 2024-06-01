@@ -371,10 +371,11 @@ function BridgePage() {
                       : activeCurrency.name}
                     {tokenBalance && (
                       <span>
-                        {calculatePrice(
-                          parseFloat(tokenBalance),
-                          activeCurrency.exchangeRate
-                        )}
+                        {activeCurrency.exchangeRate &&
+                          calculatePrice(
+                            parseFloat(tokenBalance),
+                            activeCurrency.exchangeRate
+                          )}
                       </span>
                     )}
                   </div>

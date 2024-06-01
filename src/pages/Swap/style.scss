@@ -95,10 +95,12 @@
         height: auto;
       }
 
-      input {
-        width: 100px;
-        height: 32px;
-        background-color: transparent;
+      &-wrapper {
+        input {
+          width: 100px;
+          height: 32px;
+          background-color: transparent;
+        }
       }
 
       &-price {
@@ -106,7 +108,8 @@
         color: var(--c-lavender);
       }
 
-      .select {
+      .select,
+      .selectAppToken {
         margin-left: auto;
         border: 0;
 

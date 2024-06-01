@@ -10,12 +10,12 @@ import { isTestnet } from ".";
 /* Tokens */
 export type AppToken = {
   icon: JSX.Element | null;
-  name: "GLQ" | "WGLQ" | "ETH" | "WETH" | "BTC" | "WBTC";
+  name: string;
   address: {
     mainnet: `0x${string}` | undefined;
     glq: `0x${string}` | undefined;
   };
-  mirror: "GLQ" | "WGLQ" | "ETH" | "WETH" | "BTC" | "WBTC";
+  mirror?: string;
   bridge?: {
     mainnet: `0x${string}`;
     glq: `0x${string}`;
@@ -24,7 +24,7 @@ export type AppToken = {
     mainnet: string;
     glq: string;
   };
-  exchangeRate: "eth" | "glq";
+  exchangeRate?: "eth" | "glq";
   decimals: number;
 };
 
