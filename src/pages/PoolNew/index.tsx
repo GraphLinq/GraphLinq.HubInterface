@@ -11,7 +11,7 @@ import TokenIcon from "@components/TokenIcon";
 import { GLQCHAIN_CURRENCIES } from "@constants/apptoken";
 import { feesOptions } from "@constants/fees";
 import { SITE_NAME } from "@constants/index";
-import { getPoolTokenByAddress, orderedPoolTokens } from "@constants/pooltoken";
+import { getPoolTokenByAddress } from "@constants/pooltoken";
 import { tickToPrice } from "@uniswap/v3-sdk";
 import { formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
@@ -137,10 +137,7 @@ function PoolNewPage() {
       const poolState = await getPoolState(poolAddress);
 
       if (poolState) {
-        const [token0, token1] = orderedPoolTokens(
-          firstPoolToken,
-          secondPoolToken
-        );
+        const [token0, token1] = [firstPoolToken, secondPoolToken];
 
         const currentPrice = parseFloat(
           tickToPrice(token0, token1, poolState.tick).toSignificant()

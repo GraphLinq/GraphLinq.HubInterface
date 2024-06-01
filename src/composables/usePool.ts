@@ -4,7 +4,7 @@ import {
   NULL_ADDRESS,
 } from "@constants/address";
 import { getAppTokenByAddress } from "@constants/apptoken";
-import { getPoolTokenByAddress, orderedPoolTokens } from "@constants/pooltoken";
+import { getPoolTokenByAddress } from "@constants/pooltoken";
 import univ3prices from "@thanpolas/univ3prices";
 import {
   CurrencyAmount,
@@ -351,7 +351,7 @@ const usePool = () => {
     let existingPoolAddress = null;
 
     try {
-      const [token0, token1] = orderedPoolTokens(tokenA, tokenB);
+      const [token0, token1] = [tokenA, tokenB];
       const fee = parseFloat(feeInPercent) * 10000;
 
       const amountAFormatted = ethers.utils.parseUnits(
@@ -448,9 +448,8 @@ const usePool = () => {
   ) => {
     try {
       const state = await getPoolState(addressPool);
-      const [token0, token1] = orderedPoolTokens(tempTokenA, tempTokenB);
-      const amount0 = tempTokenA === token0 ? tempAmountA : tempAmountB;
-      const amount1 = tempTokenB === token1 ? tempAmountB : tempAmountA;
+      const [token0, token1] = [tempTokenA, tempTokenB];
+      const [amount0, amount1] = [tempAmountA, tempAmountB];
 
       if (!state || !account) return;
 
@@ -522,12 +521,14 @@ const usePool = () => {
         );
       }
 
+      const isReversed = pool.token0.address !== token0.address;
+
       const position = UniPosition.fromAmounts({
         pool,
         tickLower: tickMin,
         tickUpper: tickMax,
-        amount0: amountToken0.quotient,
-        amount1: amountToken1.quotient,
+        amount0: isReversed ? amountToken1.quotient : amountToken0.quotient,
+        amount1: isReversed ? amountToken0.quotient : amountToken1.quotient,
         useFullPrecision: true,
       });
 

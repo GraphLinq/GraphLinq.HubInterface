@@ -7,7 +7,7 @@ import "./style.scss";
 import InputNumber from "@components/InputNumber";
 import TokenIcon from "@components/TokenIcon";
 import { GLQ_EXPLORER_URL, SITE_NAME } from "@constants/index";
-import { getPoolTokenByAddress, orderedPoolTokens } from "@constants/pooltoken";
+import { getPoolTokenByAddress } from "@constants/pooltoken";
 import { tickToPrice } from "@uniswap/v3-sdk";
 import {
   formatBigNumberToFixed,
@@ -92,10 +92,7 @@ function PoolSingleAddPage() {
       const poolState = await getPoolState(position.poolAddress);
 
       if (poolState) {
-        const [token0, token1] = orderedPoolTokens(
-          firstPoolToken,
-          secondPoolToken
-        );
+        const [token0, token1] = [firstPoolToken, secondPoolToken];
 
         const currentPrice = parseFloat(
           tickToPrice(token0, token1, poolState.tick).toSignificant()

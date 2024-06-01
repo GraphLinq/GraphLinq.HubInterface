@@ -20,7 +20,3 @@ export const getPoolTokenByAddress = (
     chain === "eth" ? MAINNET_POOL_TOKENS : GLQCHAIN_POOL_TOKENS;
   return poolTokens.find((token) => token.address === address);
 };
-
-export const orderedPoolTokens = (tokenA: Token, tokenB: Token) => {
-  return tokenA.address < tokenB.address ? [tokenA, tokenB] : [tokenB, tokenA];
-};
