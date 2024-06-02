@@ -285,6 +285,10 @@ function PoolSingleAddPage() {
   const isPersonalPosition =
     loadedPositionIds && positionId && ownPositionIds.includes(positionId);
 
+  const poolExplorerUrl = position
+    ? GLQ_EXPLORER_URL + "/address/" + position.poolAddress
+    : undefined;
+
   return (
     <>
       <Helmet>
@@ -309,10 +313,14 @@ function PoolSingleAddPage() {
                     <TokenIcon tokenKey={position.pair.first.name} />
                     <TokenIcon tokenKey={position.pair.second.name} />
                   </div>
-                  <div className="poolSingleAdd-header-pair">
+                  <a
+                    href={poolExplorerUrl}
+                    target="_blank"
+                    className="poolSingleAdd-header-pair"
+                  >
                     <span>{position.pair.first.name}</span>/
                     <span>{position.pair.second.name}</span>
-                  </div>
+                  </a>
                   <div className="poolSingleAdd-header-fees">
                     {position.fees.toFixed(2)}%
                   </div>
