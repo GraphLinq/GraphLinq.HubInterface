@@ -307,7 +307,6 @@ function SwapPage() {
             className="main-card-content"
             data-disabled={loadingQuote || loadingBalance || formDisabled}
           >
-            {ownCurrency.name} - {tradeCurrency.name}
             {!account ? (
               <>
                 <div className="main-card-notlogged">
