@@ -9,7 +9,7 @@ import InputRadioGroup from "@components/InputRadioGroup";
 import SelectAppToken from "@components/SelectAppToken";
 import TokenIcon from "@components/TokenIcon";
 import { GLQCHAIN_SWAP_ROUTER_ADDRESS } from "@constants/address";
-import { GLQCHAIN_CURRENCIES } from "@constants/apptoken";
+import { AppToken, GLQCHAIN_CURRENCIES } from "@constants/apptoken";
 import { SITE_NAME, GLQ_EXPLORER_URL } from "@constants/index";
 import { slippageOptions } from "@constants/slippage";
 import { getErrorMessage } from "@utils/errors";
@@ -42,6 +42,7 @@ function SwapPage() {
   const [pending, setPending] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [swapAvailable, setSwapAvailable] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(true);
   const [formDisabled, setFormDisabled] = useState(false);
 
@@ -64,6 +65,8 @@ function SwapPage() {
     setLoadingQuote(true);
 
     const quotePromise = new Promise(async (resolve, reject) => {
+      setSwapAvailable(false);
+
       try {
         if (!ownCurrency) return;
 
@@ -75,6 +78,7 @@ function SwapPage() {
 
         if (base) {
           setBaseQuoteAmount(base);
+          setSwapAvailable(true);
         }
 
         let result = ethers.BigNumber.from(0);
@@ -114,8 +118,6 @@ function SwapPage() {
     setSuccess("");
   };
 
-  const [ownCurrencyOption, setOwnCurrencyOption] = useState(0);
-  const [tradeCurrencyOption, setTradeCurrencyOption] = useState(1);
   const [ownCurrencyOptions, setOwnCurrencyOptions] = useState(
     GLQCHAIN_CURRENCIES.map((currency) => {
       currency.icon = <TokenIcon tokenKey={currency.name} />;
@@ -125,9 +127,8 @@ function SwapPage() {
   const [tradeCurrencyOptions, setTradeCurrencyOptions] = useState([
     ...ownCurrencyOptions,
   ]);
-
-  const ownCurrency = ownCurrencyOptions[ownCurrencyOption];
-  const tradeCurrency = tradeCurrencyOptions[tradeCurrencyOption];
+  const [ownCurrency, setOwnCurrency] = useState(ownCurrencyOptions[0]);
+  const [tradeCurrency, setTradeCurrency] = useState(tradeCurrencyOptions[1]);
 
   const {
     balance: ownCurrencyBalance,
@@ -140,22 +141,22 @@ function SwapPage() {
   const activeTokenContract = useTokenContract(ownCurrency.address.glq);
 
   const handleCurrencySelectChange = (
-    active: number,
+    active: AppToken,
     currency: "own" | "trade"
   ) => {
     resetFeedback();
 
     if (currency === "own") {
-      setOwnCurrencyOption(active);
+      setOwnCurrency(active);
 
-      if (tradeCurrencyOption === active) {
-        setTradeCurrencyOption(ownCurrencyOption);
+      if (tradeCurrency.address === active.address) {
+        setTradeCurrency(ownCurrency);
       }
     } else {
-      setTradeCurrencyOption(active);
+      setTradeCurrency(active);
 
-      if (ownCurrencyOption === active) {
-        setOwnCurrencyOption(tradeCurrencyOption);
+      if (ownCurrency.address === active.address) {
+        setOwnCurrency(tradeCurrency);
       }
     }
 
@@ -164,9 +165,9 @@ function SwapPage() {
   };
 
   const handleSwapCurrencies = () => {
-    const newTradeCurrencyOption = ownCurrencyOption;
-    setOwnCurrencyOption(tradeCurrencyOption);
-    setTradeCurrencyOption(newTradeCurrencyOption);
+    const newTradeCurrency = ownCurrency;
+    setOwnCurrency(tradeCurrency);
+    setTradeCurrency(newTradeCurrency);
 
     setOwnCurrencyAmount("");
     setQuoteAmount(ethers.BigNumber.from(0));
@@ -288,7 +289,7 @@ function SwapPage() {
     debouncedGetQuote();
 
     return () => clearTimeout(timer);
-  }, [account, ownCurrency, ownCurrencyAmount]);
+  }, [account, ownCurrency, ownCurrencyAmount, tradeCurrency]);
 
   const trackingExplorer = `${GLQ_EXPLORER_URL}/tx/${success}`;
 
@@ -306,6 +307,7 @@ function SwapPage() {
             className="main-card-content"
             data-disabled={loadingQuote || loadingBalance || formDisabled}
           >
+            {ownCurrency.name} - {tradeCurrency.name}
             {!account ? (
               <>
                 <div className="main-card-notlogged">
@@ -351,17 +353,21 @@ function SwapPage() {
                               )}
                           </div>
                           <SelectAppToken
-                            active={ownCurrencyOption}
+                            active={ownCurrency}
                             options={ownCurrencyOptions}
-                            onChange={(active, custom) => {
-                              if (custom) {
+                            onChange={(apptoken) => {
+                              if (
+                                ownCurrencyOptions.every(
+                                  (opt) => opt.address !== apptoken.address
+                                )
+                              ) {
                                 setOwnCurrencyOptions([
                                   ...ownCurrencyOptions,
-                                  custom,
+                                  apptoken,
                                 ]);
                               }
 
-                              handleCurrencySelectChange(active, "own");
+                              handleCurrencySelectChange(apptoken, "own");
                             }}
                           />
                         </div>
@@ -392,17 +398,21 @@ function SwapPage() {
                               )}
                           </div>
                           <SelectAppToken
-                            active={tradeCurrencyOption}
+                            active={tradeCurrency}
                             options={tradeCurrencyOptions}
-                            onChange={(active, custom) => {
-                              if (custom) {
+                            onChange={(apptoken) => {
+                              if (
+                                tradeCurrencyOptions.every(
+                                  (opt) => opt.address !== apptoken.address
+                                )
+                              ) {
                                 setTradeCurrencyOptions([
                                   ...tradeCurrencyOptions,
-                                  custom,
+                                  apptoken,
                                 ]);
                               }
 
-                              handleCurrencySelectChange(active, "trade");
+                              handleCurrencySelectChange(apptoken, "trade");
                             }}
                           />
                         </div>
@@ -421,19 +431,27 @@ function SwapPage() {
                             </span>
                           )}
                           <span className="color">=</span>
-                          <span>
-                            {formatBigNumberToFixed(baseQuoteAmount, 6)}{" "}
-                            {tradeCurrency.name}
-                          </span>
-                          <span className="color">
-                            {tradeCurrency.exchangeRate &&
-                              calculatePrice(
-                                parseFloat(
-                                  ethers.utils.formatEther(baseQuoteAmount)
-                                ),
-                                tradeCurrency.exchangeRate
-                              )}
-                          </span>
+                          {swapAvailable ? (
+                            <>
+                              <span>
+                                {formatBigNumberToFixed(baseQuoteAmount, 6)}{" "}
+                                {tradeCurrency.name}
+                              </span>
+                              <span className="color">
+                                {tradeCurrency.exchangeRate &&
+                                  calculatePrice(
+                                    parseFloat(
+                                      ethers.utils.formatEther(baseQuoteAmount)
+                                    ),
+                                    tradeCurrency.exchangeRate
+                                  )}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span>0 {tradeCurrency.name}</span>
+                            </>
+                          )}
                         </div>
                         <Arrow />
                       </div>
@@ -457,7 +475,9 @@ function SwapPage() {
                     <div className="swap-submit">
                       <Button
                         onClick={handleSend}
-                        disabled={loadingQuote || loadingBalance}
+                        disabled={
+                          loadingQuote || loadingBalance || !swapAvailable
+                        }
                         icon={loading && <Spinner />}
                       >
                         Swap
@@ -497,6 +517,15 @@ function SwapPage() {
                 <a href={trackingExplorer} target="_blank">
                   <small>Tx hash: {success}</small>
                 </a>
+              </p>
+            </Alert>
+          )}
+
+          {!swapAvailable && !loadingQuote && (
+            <Alert type="warning">
+              <p>
+                Swap is not available for this token pair. Please select another
+                one.
               </p>
             </Alert>
           )}

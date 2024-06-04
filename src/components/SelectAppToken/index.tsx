@@ -9,8 +9,8 @@ import InputText from "@components/InputText";
 
 interface SelectAppTokenProps {
   options: AppToken[];
-  active: number;
-  onChange?: (index: number, custom?: AppToken) => void;
+  active: AppToken;
+  onChange?: (apptoken: AppToken) => void;
 }
 
 const SelectAppToken: React.FC<SelectAppTokenProps> = ({
@@ -22,7 +22,6 @@ const SelectAppToken: React.FC<SelectAppTokenProps> = ({
   const [inputValue, setInputValue] = useState("");
   const [customOptions, setCustomOptions] = useState<AppToken[]>(options);
   const [selectedOption, setSelectedOption] = useState(active);
-  const [customAppToken, setCustomAppToken] = useState<AppToken | null>(null);
 
   const tokenData = useTokenInfo(inputValue);
 
@@ -40,29 +39,28 @@ const SelectAppToken: React.FC<SelectAppTokenProps> = ({
 
       if (!customOptions.some((opt) => opt.name === newAppToken.name)) {
         setCustomOptions([...options, newAppToken]);
-        setCustomAppToken(newAppToken);
         setInputValue("");
       }
     }
   }, [tokenData]);
 
-  const handleOptionClick = (index: number) => {
+  useEffect(() => {
+    setSelectedOption(active);
+  }, [active]);
+
+  const handleOptionClick = (apptoken: AppToken) => {
     if (onChange) {
-      if (index >= options.length && customAppToken) {
-        onChange(index, customAppToken);
-      } else {
-        onChange(index);
-      }
+      onChange(apptoken);
     }
-    setSelectedOption(index);
+
+    setSelectedOption(apptoken);
     setOpen(false);
   };
 
   return (
     <div className="selectAppToken" data-open={isOpen}>
       <div className="selectAppToken-current" onClick={() => setOpen(!isOpen)}>
-        {customOptions[selectedOption].icon}{" "}
-        <span>{customOptions[selectedOption].name}</span>
+        {selectedOption.icon} <span>{selectedOption.name}</span>
         <div className="selectAppToken-arrow">
           <Arrow />
         </div>
@@ -72,10 +70,10 @@ const SelectAppToken: React.FC<SelectAppTokenProps> = ({
           <div
             className="selectAppToken-option"
             key={i}
-            onClick={() => handleOptionClick(i)}
+            onClick={() => handleOptionClick(opt)}
           >
             {opt.icon} <span>{opt.name}</span>
-            {selectedOption === i && <Check />}
+            {selectedOption.address === opt.address && <Check />}
           </div>
         ))}
 
