@@ -6,12 +6,10 @@ import Button from "@components/Button";
 import InputNumber from "@components/InputNumber";
 import InputRadioGroup from "@components/InputRadioGroup";
 import InputToggle from "@components/InputToggle";
-import Select from "@components/Select";
 import TokenIcon from "@components/TokenIcon";
-import { GLQCHAIN_CURRENCIES } from "@constants/apptoken";
+import { AppToken, GLQCHAIN_CURRENCIES } from "@constants/apptoken";
 import { feesOptions } from "@constants/fees";
 import { SITE_NAME } from "@constants/index";
-import { getPoolTokenByAddress } from "@constants/pooltoken";
 import { tickToPrice } from "@uniswap/v3-sdk";
 import { formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
@@ -25,6 +23,9 @@ import { useAccount, useBalance } from "wagmi";
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
+import SelectAppToken from "@components/SelectAppToken";
+import { Token } from "@uniswap/sdk-core";
+import { GLQ_CHAIN_ID } from "@utils/chains";
 
 const seoTitle = `${SITE_NAME} — Create pool`;
 
@@ -47,16 +48,20 @@ function PoolNewPage() {
   const [loading, setLoading] = useState(false);
   const [fullRange, setFullRange] = useState(false);
   const [isNewPool, setNewPool] = useState(false);
-  const [firstCurrencyOption, setFirstCurrencyOption] = useState(0);
-  const [secondCurrencyOption, setSecondCurrencyOption] = useState(1);
-  const firstCurrencyOptions = GLQCHAIN_CURRENCIES.map((currency) => {
-    currency.icon = <TokenIcon tokenKey={currency.name} />;
-    return currency;
-  });
-  const secondCurrencyOptions = [...firstCurrencyOptions];
+  const [firstCurrencyOptions, setFirstCurrencyOptions] = useState(
+    GLQCHAIN_CURRENCIES.map((currency) => {
+      currency.icon = <TokenIcon tokenKey={currency.name} />;
+      return currency;
+    })
+  );
+  const [secondCurrencyOptions, setSecondCurrencyOptions] = useState([
+    ...firstCurrencyOptions,
+  ]);
 
-  const firstCurrency = firstCurrencyOptions[firstCurrencyOption];
-  const secondCurrency = secondCurrencyOptions[secondCurrencyOption];
+  const [firstCurrency, setFirstCurrency] = useState(firstCurrencyOptions[0]);
+  const [secondCurrency, setSecondCurrency] = useState(
+    secondCurrencyOptions[1]
+  );
 
   const [firstCurrencyAmount, setFirstCurrencyAmount] = useState("");
   const [secondCurrencyAmount, setSecondCurrencyAmount] = useState("");
@@ -77,22 +82,22 @@ function PoolNewPage() {
     : "0";
 
   const handleCurrencySelectChange = (
-    active: number,
+    active: AppToken,
     currency: "first" | "second"
   ) => {
     resetFeedback();
 
     if (currency === "first") {
-      setFirstCurrencyOption(active);
+      setFirstCurrency(active);
 
-      if (secondCurrencyOption === active) {
-        setSecondCurrencyOption(firstCurrencyOption);
+      if (secondCurrency === active) {
+        setSecondCurrency(firstCurrency);
       }
     } else {
-      setSecondCurrencyOption(active);
+      setSecondCurrency(active);
 
-      if (firstCurrencyOption === active) {
-        setFirstCurrencyOption(secondCurrencyOption);
+      if (firstCurrency === active) {
+        setFirstCurrency(secondCurrency);
       }
     }
 
@@ -101,9 +106,9 @@ function PoolNewPage() {
   };
 
   const handleSwapCurrencies = () => {
-    const newSecondCurrencyOption = firstCurrencyOption;
-    setFirstCurrencyOption(secondCurrencyOption);
-    setSecondCurrencyOption(newSecondCurrencyOption);
+    const newSecondCurrency = firstCurrency;
+    setFirstCurrency(secondCurrency);
+    setSecondCurrency(newSecondCurrency);
 
     setFirstCurrencyAmount("");
     setSecondCurrencyAmount("");
@@ -191,13 +196,15 @@ function PoolNewPage() {
   const rangeMaxReversedAmount =
     (currentPoolPriceReversed * (100 + rangeMaxPerc)) / 100;
 
-  const firstPoolToken = getPoolTokenByAddress(
+  const firstPoolToken = new Token(
+    GLQ_CHAIN_ID,
     firstCurrency.address.glq!,
-    "glq"
+    firstCurrency.decimals
   );
-  const secondPoolToken = getPoolTokenByAddress(
+  const secondPoolToken = new Token(
+    GLQ_CHAIN_ID,
     secondCurrency.address.glq!,
-    "glq"
+    secondCurrency.decimals
   );
 
   const handleInput = (e: ChangeResult) => {
@@ -365,16 +372,23 @@ function PoolNewPage() {
                       <div className="poolNew-block">
                         <div className="poolNew-block-title">Pair</div>
                         <div className="poolNew-block-content poolNew-pair">
-                          <Select
-                            active={firstCurrencyOption}
-                            options={firstCurrencyOptions.map((opt) => (
-                              <>
-                                {opt.icon} <span>{opt.name}</span>
-                              </>
-                            ))}
-                            onChange={(active) =>
-                              handleCurrencySelectChange(active, "first")
-                            }
+                          <SelectAppToken
+                            active={firstCurrency}
+                            options={firstCurrencyOptions}
+                            onChange={(apptoken) => {
+                              if (
+                                firstCurrencyOptions.every(
+                                  (opt) => opt.address !== apptoken.address
+                                )
+                              ) {
+                                setFirstCurrencyOptions([
+                                  ...firstCurrencyOptions,
+                                  apptoken,
+                                ]);
+                              }
+
+                              handleCurrencySelectChange(apptoken, "first");
+                            }}
                           />
                           <div
                             className="bridge-swap-switch"
@@ -382,16 +396,23 @@ function PoolNewPage() {
                           >
                             <Swap />
                           </div>
-                          <Select
-                            active={secondCurrencyOption}
-                            options={secondCurrencyOptions.map((opt) => (
-                              <>
-                                {opt.icon} <span>{opt.name}</span>
-                              </>
-                            ))}
-                            onChange={(active) =>
-                              handleCurrencySelectChange(active, "second")
-                            }
+                          <SelectAppToken
+                            active={secondCurrency}
+                            options={secondCurrencyOptions}
+                            onChange={(apptoken) => {
+                              if (
+                                secondCurrencyOptions.every(
+                                  (opt) => opt.address !== apptoken.address
+                                )
+                              ) {
+                                setSecondCurrencyOptions([
+                                  ...secondCurrencyOptions,
+                                  apptoken,
+                                ]);
+                              }
+
+                              handleCurrencySelectChange(apptoken, "second");
+                            }}
                           />
                         </div>
                       </div>
