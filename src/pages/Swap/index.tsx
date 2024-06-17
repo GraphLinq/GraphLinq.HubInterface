@@ -10,13 +10,12 @@ import Select from "@components/Select";
 import TokenIcon from "@components/TokenIcon";
 import { GLQCHAIN_SWAP_ROUTER_ADDRESS } from "@constants/address";
 import { GLQCHAIN_CURRENCIES } from "@constants/apptoken";
-import { SITE_NAME, GLQ_EXPLORER_URL } from "@constants/index";
+import { GLQ_EXPLORER_URL } from "@constants/index";
 import { slippageOptions } from "@constants/slippage";
 import { getErrorMessage } from "@utils/errors";
 import { formatBigNumberToFixed, formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { useAccount } from "wagmi";
 
 import useChains from "../../composables/useChains";
@@ -26,8 +25,11 @@ import useNetwork from "../../composables/useNetwork";
 import useSound from "../../composables/useSound";
 import useTokenBalance from "../../composables/useTokenBalance";
 import useUniswap from "../../composables/useUniswap";
+import SEO from "@components/SEO";
 
-const seoTitle = `${SITE_NAME} — Swap`;
+const seoTitle = "GraphLinq Chain | Smart Contract | GraphLinq.io";
+const seoDesc =
+  "View tokens, transactions, balances, source code, and analytics for the GraphLinq smart contract.";
 
 function SwapPage() {
   const { address: account } = useAccount();
@@ -290,11 +292,7 @@ function SwapPage() {
 
   return (
     <>
-      <Helmet>
-        <title>{seoTitle}</title>
-        <meta property="og:title" content={seoTitle} />
-        <meta property="twitter:title" content={seoTitle} />
-      </Helmet>
+      <SEO title={seoTitle} description={seoDesc} />
       <div className="main-page swap">
         <div className="main-card">
           <div className="main-card-title">Swap</div>

@@ -17,7 +17,6 @@ import {
 } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
 import { useAccount, useBalance } from "wagmi";
 
@@ -26,6 +25,7 @@ import useExchangeRates from "../../composables/useExchangeRates";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
 import { Position, PositionStatus } from "../../model/pool";
+import SEO from "@components/SEO";
 
 const seoTitle = `${SITE_NAME} — Pool`;
 
@@ -291,11 +291,7 @@ function PoolSingleAddPage() {
 
   return (
     <>
-      <Helmet>
-        <title>{seoTitle}</title>
-        <meta property="og:title" content={seoTitle} />
-        <meta property="twitter:title" content={seoTitle} />
-      </Helmet>
+      <SEO title={seoTitle} />
       <div className="main-page pool">
         <div className="main-card">
           <div className="poolSingleAdd-header">

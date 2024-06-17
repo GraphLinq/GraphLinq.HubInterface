@@ -6,10 +6,8 @@ import Button from "@components/Button";
 import "./style.scss";
 import Pill from "@components/Pill";
 import TokenIcon from "@components/TokenIcon";
-import { SITE_NAME } from "@constants/index";
 import { formatNumberToFixed, isInfinity } from "@utils/number";
 import { useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { NavLink } from "react-router-dom";
 import { useAccount } from "wagmi";
 
@@ -17,8 +15,11 @@ import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
 import { PositionStatus } from "../../model/pool";
+import SEO from "@components/SEO";
 
-const seoTitle = `${SITE_NAME} — Pool`;
+const seoTitle = "Pool | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
+const seoDesc =
+  "View tokens, transactions, balances, source code, and analytics for the Pool smart contract on GLQ Smart Chain.";
 
 function PoolPage() {
   const { address: account } = useAccount();
@@ -34,11 +35,7 @@ function PoolPage() {
 
   return (
     <>
-      <Helmet>
-        <title>{seoTitle}</title>
-        <meta property="og:title" content={seoTitle} />
-        <meta property="twitter:title" content={seoTitle} />
-      </Helmet>
+      <SEO title={seoTitle} description={seoDesc} />
       <div className="main-page pool">
         <div className="main-card">
           <div className="main-card-title">Pool</div>

@@ -15,7 +15,6 @@ import {
 } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import InputRange from "react-input-range";
 import { useParams } from "react-router-dom";
 import { useAccount } from "wagmi";
@@ -26,6 +25,7 @@ import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
 import { Position, PositionStatus } from "../../model/pool";
 import "react-input-range/lib/css/index.css";
+import SEO from "@components/SEO";
 
 const seoTitle = `${SITE_NAME} — Pool`;
 
@@ -199,11 +199,7 @@ function PoolSinglePage() {
 
   return (
     <>
-      <Helmet>
-        <title>{seoTitle}</title>
-        <meta property="og:title" content={seoTitle} />
-        <meta property="twitter:title" content={seoTitle} />
-      </Helmet>
+      <SEO title={seoTitle} />
       <div className="main-page pool">
         <div className="main-card">
           <div className="poolSingle-header">

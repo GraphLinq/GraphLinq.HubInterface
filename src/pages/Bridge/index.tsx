@@ -8,11 +8,7 @@ import Pill from "@components/Pill";
 import Select from "@components/Select";
 import TokenIcon from "@components/TokenIcon";
 import { MAINNET_CURRENCIES, GLQCHAIN_CURRENCIES } from "@constants/apptoken";
-import {
-  SITE_NAME,
-  GLQ_EXPLORER_URL,
-  MAINNET_EXPLORER_URL,
-} from "@constants/index";
+import { GLQ_EXPLORER_URL, MAINNET_EXPLORER_URL } from "@constants/index";
 import { useAppContext } from "@context/AppContext";
 import { useQuery } from "@tanstack/react-query";
 import { GLQ_CHAIN_ID, MAINNET_CHAIN_ID, getChainName } from "@utils/chains";
@@ -20,7 +16,6 @@ import { getErrorMessage } from "@utils/errors";
 import { formatNumberToFixed } from "@utils/number";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { useAccount, useBalance, useChainId } from "wagmi";
 
 import useBridge from "../../composables/useBridge";
@@ -31,8 +26,11 @@ import useNetwork from "../../composables/useNetwork";
 import useSound from "../../composables/useSound";
 import { ExecutionState, TrackingInformation } from "../../model/tracking";
 import { getTrackingInformation } from "../../queries/api";
+import SEO from "@components/SEO";
 
-const seoTitle = `${SITE_NAME} — Bridge`;
+const seoTitle = "GraphLinq Hub — Dashboard";
+const seoDesc =
+  "Explore the hub, where everything happens over the GraphLinq ecosystem, through our app, connect and build around the GraphLinq chain: bridge, swap, launch a token, create and manage LP and much more!";
 
 function BridgePage() {
   const { address: account } = useAccount();
@@ -284,11 +282,7 @@ function BridgePage() {
 
   return (
     <>
-      <Helmet>
-        <title>{seoTitle}</title>
-        <meta property="og:title" content={seoTitle} />
-        <meta property="twitter:title" content={seoTitle} />
-      </Helmet>
+      <SEO title={seoTitle} description={seoDesc} />
       <div className="main-page bridge">
         <div className="main-card">
           <div className="main-card-title">Bridge</div>

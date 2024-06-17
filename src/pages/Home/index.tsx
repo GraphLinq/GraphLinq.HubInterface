@@ -4,15 +4,17 @@ import Info from "@assets/icons/info.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Swap from "@assets/icons/swap-coin.svg?react";
 import HomeGraph from "@components/HomeGraph";
-import { GLQ_EXPLORER_URL, SITE_NAME } from "@constants/index";
+import { GLQ_EXPLORER_URL } from "@constants/index";
 import { useQuery } from "@tanstack/react-query";
 import { formatNumberToDollars, formatNumberToFixed } from "@utils/number";
 import { formatDistanceToNow } from "date-fns";
-import { Helmet } from "react-helmet-async";
 
 import { getDashboardInformation } from "../../queries/api";
+import SEO from "@components/SEO";
 
-const seoTitle = `${SITE_NAME} — Dashboard`;
+const seoTitle = "GraphLinq Chain Hub | Complete GLQ Resource";
+const seoDesc =
+  "Our GraphLinq hub is a treasure trove of information that includes all the GLQ tools you will ever need.";
 
 function HomePage() {
   const qDashboardInformation = useQuery({
@@ -39,11 +41,7 @@ function HomePage() {
 
   return (
     <>
-      <Helmet>
-        <title>{seoTitle}</title>
-        <meta property="og:title" content={seoTitle} />
-        <meta property="twitter:title" content={seoTitle} />
-      </Helmet>
+      <SEO title={seoTitle} description={seoDesc} />
       <div className="main-page home">
         <div className="home-bubbles">
           <div className="home-bubble" data-gradient="1">

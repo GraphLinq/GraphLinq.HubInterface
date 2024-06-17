@@ -1,7 +1,6 @@
 import "./_style.scss";
 import { SITE_NAME } from "@constants/index";
 import { useQuery } from "@tanstack/react-query";
-import { Helmet } from "react-helmet-async";
 import { useAccount } from "wagmi";
 import Spinner from "@assets/icons/spinner.svg?react";
 
@@ -10,6 +9,7 @@ import {
   getChallengesInformation,
   getChallengesLadder,
 } from "../../queries/api";
+import SEO from "@components/SEO";
 
 const seoTitle = `${SITE_NAME} — Rewards`;
 
@@ -49,11 +49,7 @@ function RewardsPage() {
 
   return (
     <>
-      <Helmet>
-        <title>{seoTitle}</title>
-        <meta property="og:title" content={seoTitle} />
-        <meta property="twitter:title" content={seoTitle} />
-      </Helmet>
+      <SEO title={seoTitle} />
       <div className="home-wrapper">
         <div className="rewards">
           <div className="rewards-left">

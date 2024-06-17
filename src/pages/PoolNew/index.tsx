@@ -18,13 +18,13 @@ import { ethers } from "ethers";
 import MultiRangeSlider, { ChangeResult } from "multi-range-slider-react";
 import "./style.scss";
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useAccount, useBalance } from "wagmi";
 
 import useChains from "../../composables/useChains";
 import useNetwork from "../../composables/useNetwork";
 import usePool from "../../composables/usePool";
+import SEO from "@components/SEO";
 
 const seoTitle = `${SITE_NAME} — Create pool`;
 
@@ -331,11 +331,7 @@ function PoolNewPage() {
 
   return (
     <>
-      <Helmet>
-        <title>{seoTitle}</title>
-        <meta property="og:title" content={seoTitle} />
-        <meta property="twitter:title" content={seoTitle} />
-      </Helmet>
+      <SEO title={seoTitle} />
       <div className="main-page poolNew">
         <div className="main-card">
           <div className="poolNew-header">
