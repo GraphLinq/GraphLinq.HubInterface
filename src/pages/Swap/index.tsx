@@ -290,6 +290,23 @@ function SwapPage() {
 
   const trackingExplorer = `${GLQ_EXPLORER_URL}/tx/${success}`;
 
+  const ownAmountPriceNb = calculatePrice(
+    !isNaN(parseFloat(ownCurrencyAmount)) ? parseFloat(ownCurrencyAmount) : 0,
+    ownCurrency.exchangeRate,
+    "number"
+  );
+  const quoteAmountPriceNb = calculatePrice(
+    parseFloat(ethers.utils.formatEther(quoteAmount)),
+    tradeCurrency.exchangeRate,
+    "number"
+  );
+
+  const priceImpact =
+    quoteAmountPriceNb && ownAmountPriceNb
+      ? 100 -
+        ((quoteAmountPriceNb as number) / (ownAmountPriceNb as number)) * 100
+      : 0;
+
   return (
     <>
       <SEO title={seoTitle} description={seoDesc} />
@@ -435,6 +452,11 @@ function SwapPage() {
                         </div>
                       </div>
                     </div>
+                    {parseFloat(ownCurrencyAmount) > 0 && !loadingQuote && (
+                      <Alert type={priceImpact > 5 ? "error" : "info"}>
+                        <p>Price impact : {(priceImpact * -1).toFixed(2)} %</p>
+                      </Alert>
+                    )}
                     <div className="swap-submit">
                       <Button
                         onClick={handleSend}
