@@ -23,6 +23,7 @@ import {
 import { WagmiProvider } from "wagmi";
 
 import { config } from "./config";
+import LaunchpadPage from "@pages/Launchpad";
 
 function App() {
   const queryClient = new QueryClient();
@@ -84,6 +85,10 @@ function App() {
         {
           path: "/rewards",
           element: <RewardsPage />,
+        },
+        {
+          path: "/launchpad",
+          element: <LaunchpadPage />,
         },
         {
           path: "*", // Route "catch-all"

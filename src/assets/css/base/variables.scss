@@ -17,6 +17,7 @@
   --c-mint-green: #69ffa5;
   --c-mint-orange: #ff8c00;
   --c-mint-red: #ff4935;
+  --c-soft-green: #69ffa540;
 
   @include max($mobile-s) {
     --header-height: 72px;

@@ -1,0 +1,41 @@
+@import "../../assets/css/mixins/styles";
+@import "../../assets/css/mixins/medias";
+
+.launchpad {
+  --wrapper-size: 1280px;
+
+  .main-card {
+    width: var(--wrapper-size);
+  }
+  &-filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--c-white);
+
+      span {
+        font-size: 32px;
+
+        color: var(--c-fog);
+        margin-left: 4px;
+      }
+    }
+    &-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+  }
+
+  &-list {
+    width: var(--wrapper-size);
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+}

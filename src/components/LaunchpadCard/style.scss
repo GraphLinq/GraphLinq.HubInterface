@@ -1,0 +1,118 @@
+.launchpadCard {
+  border: 1px solid var(--c-martinique);
+  border-radius: 24px;
+  width: calc(100% / 3 - 16px / 3 * 2);
+  border-radius: 20px;
+  overflow: hidden;
+  background-color: rgba(12, 11, 15, 0.4);
+  max-width: 100%;
+
+  &-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px;
+    background-color: rgba(48, 43, 68, 0.4);
+
+    &-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  &-name {
+    font-size: 24px;
+  }
+  &-type {
+    color: var(--c-fog);
+  }
+  &-desc {
+    margin-top: 8px;
+  }
+
+  &-live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--c-martinique);
+    border-radius: 24px;
+    padding: 8px 16px;
+
+    &-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--c-mint-red);
+    }
+  }
+
+  &-verified {
+    path {
+      fill: var(--c-mint-green);
+    }
+  }
+
+  &-content {
+    padding: 20px;
+  }
+
+  &-block {
+    background-color: rgba(48, 43, 68, 0.2);
+    padding: 20px;
+    border-radius: 24px;
+  }
+  &-table {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+    padding: 20px;
+    border-radius: 24px;
+    background-color: rgba(48, 43, 68, 0.4);
+
+    &-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    &-col {
+      display: flex;
+      gap: 8px;
+      color: var(--c-lavender);
+      font-weight: 600;
+
+      span {
+        color: var(--c-white);
+      }
+
+      svg {
+        max-width: 20px;
+      }
+
+      path {
+        fill: var(--c-lavender);
+      }
+    }
+  }
+
+  &-range {
+    display: flex;
+    color: var(--c-lavender);
+    font-weight: 600;
+
+    &-col {
+      width: 50%;
+
+      & + & {
+        border-left: 1px solid var(--c-cinder);
+        padding-left: 16px;
+      }
+    }
+
+    span {
+      color: var(--c-white);
+    }
+  }
+}
