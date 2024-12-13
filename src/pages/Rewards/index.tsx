@@ -1,4 +1,4 @@
-import "./_style.scss";
+import "./style.scss";
 import { SITE_NAME } from "@constants/index";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";

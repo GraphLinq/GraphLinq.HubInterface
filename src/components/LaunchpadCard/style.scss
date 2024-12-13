@@ -1,3 +1,6 @@
+@import "../../assets/css/mixins/styles";
+@import "../../assets/css/mixins/medias";
+
 .launchpadCard {
   border: 1px solid var(--c-martinique);
   border-radius: 24px;
@@ -5,7 +8,13 @@
   border-radius: 20px;
   overflow: hidden;
   background-color: rgba(12, 11, 15, 0.4);
-  max-width: 100%;
+
+  @include max($desktop-s) {
+    width: calc(100% / 2 - 16px / 2 * 1);
+  }
+  @include max($mobile) {
+    width: 100%;
+  }
 
   &-header {
     display: flex;
@@ -14,6 +23,10 @@
     gap: 16px;
     padding: 24px;
     background-color: rgba(48, 43, 68, 0.4);
+
+    @include max($mobile) {
+      flex-direction: column-reverse;
+    }
 
     &-right {
       display: flex;
@@ -56,6 +69,10 @@
 
   &-content {
     padding: 20px;
+
+    > * + * {
+      margin-top: 16px;
+    }
   }
 
   &-block {
@@ -113,6 +130,115 @@
 
     span {
       color: var(--c-white);
+
+      &.color {
+        display: block;
+        font-size: 14px;
+        opacity: 0.5;
+        font-weight: 300;
+        margin-bottom: 4px;
+      }
     }
+  }
+
+  &-progress {
+    @include max($desktop-s) {
+      width: 100%;
+    }
+
+    &-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    &-value {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 24px;
+      color: var(--c-white);
+      font-weight: 600;
+
+      .color {
+        color: var(--c-lavender);
+        font-weight: 400;
+        font-size: 20px;
+      }
+    }
+
+    &-progress {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 4px;
+
+      &-text {
+        font-size: 14px;
+        color: var(--c-lavender);
+      }
+
+      &-done {
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--c-mint-green);
+      }
+    }
+
+    &-bar {
+      position: relative;
+      width: 100%;
+      height: 10px;
+
+      &-progress {
+        position: absolute;
+        inset: 0;
+        height: 100%;
+        background: linear-gradient(270deg, #9a23e6, #5519ee);
+        border-radius: 10px;
+      }
+
+      &-bg {
+        height: 100%;
+        width: 100%;
+        border-radius: 10px;
+        opacity: 0.6;
+        background-color: var(--c-martinique);
+      }
+    }
+
+    &-amount {
+      position: relative;
+      height: 100%;
+      border-radius: 15px;
+      background: linear-gradient(180deg, #0f0a14, #302b44);
+      padding: 8px;
+      text-align: center;
+
+      &:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        top: 0;
+        background: url(../../assets/img/reward_single.png) no-repeat center
+          bottom;
+      }
+
+      &-label {
+        font-size: 10px;
+        color: var(--c-fog);
+      }
+
+      &-value {
+        font-size: 16px;
+        color: var(--c-white);
+      }
+    }
+  }
+
+  &-cap {
+    margin-top: 16px;
   }
 }

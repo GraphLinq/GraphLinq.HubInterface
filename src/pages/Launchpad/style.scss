@@ -3,14 +3,25 @@
 
 .launchpad {
   --wrapper-size: 1280px;
+  padding: 0 24px;
 
   .main-card {
     width: var(--wrapper-size);
+
+    @include max($mobile) {
+      padding: 0;
+    }
   }
   &-filters {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    @include max($mobile-s) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
 
     &-title {
       font-size: 24px;

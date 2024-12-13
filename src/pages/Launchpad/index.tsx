@@ -44,7 +44,7 @@ function LaunchpadPage() {
         <div className="main-card">
           <div className="main-card-title">Launchpad</div>
           <div className="main-card-content">
-            <div className="main-card-desc">TODO</div>
+            <div className="main-card-desc">TODO DESC</div>
             <div className="launchpad-filters">
               <div className="launchpad-filters-left">
                 <div className="launchpad-filters-title">
