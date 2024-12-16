@@ -5,6 +5,7 @@ import SEO from "@components/SEO";
 import { useState } from "react";
 import InputText from "@components/InputText";
 import LaunchpadCard from "@components/LaunchpadCard/LaunchpadCard";
+import useLaunchpad from "../../composables/useLaunchpad";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
@@ -12,7 +13,12 @@ const seoDesc =
   "View tokens, transactions, balances, source code, and analytics for the Pool smart contract on GLQ Smart Chain.";
 
 function LaunchpadPage() {
-  const projects = ["0x1", "0x2", "0x3", "0x4"];
+  const projects = [
+    "0xA71A6DF9510Cb226bdb271E4d727bd7472e149d0",
+    "0x28A922134968AD9171b9C44B6b65202f96b57223",
+    "0xBf41BCB3C961C552648541f18F284584C294A529",
+    "0xbC9d87D7Eb9dDc6C3e26bCcba40f9F10E349F0A2",
+  ];
   const projectStatuses = ["All", "Active", "Failed", "Terminated", "Owned"];
   const [activeStatus, setActiveStatus] = useState(0);
   const [search, setSearch] = useState("");
@@ -20,6 +26,8 @@ function LaunchpadPage() {
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
   const [success, setSuccess] = useState("");
+
+  useLaunchpad();
 
   const resetFeedback = () => {
     setError("");

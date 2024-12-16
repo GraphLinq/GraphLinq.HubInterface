@@ -24,6 +24,7 @@ import { WagmiProvider } from "wagmi";
 
 import { config } from "./config";
 import LaunchpadPage from "@pages/Launchpad";
+import LaunchpadSinglePage from "@pages/LaunchpadSingle";
 
 function App() {
   const queryClient = new QueryClient();
@@ -89,6 +90,10 @@ function App() {
         {
           path: "/launchpad",
           element: <LaunchpadPage />,
+        },
+        {
+          path: "/launchpad/:id",
+          element: <LaunchpadSinglePage />,
         },
         {
           path: "*", // Route "catch-all"

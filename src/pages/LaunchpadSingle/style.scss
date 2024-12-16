@@ -1,0 +1,257 @@
+@import "../../assets/css/mixins/styles";
+@import "../../assets/css/mixins/medias";
+
+.launchpadSingle {
+  --wrapper-size: 1280px;
+  padding: 0 24px;
+
+  .main-card {
+    width: var(--wrapper-size);
+
+    @include max($mobile) {
+      padding: 0;
+    }
+  }
+
+  &-topheader {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  &-wrapper {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+
+    @include max($desktop-s) {
+      flex-direction: column;
+    }
+  }
+
+  &-left {
+    flex-grow: 1;
+  }
+
+  &-right {
+    flex-shrink: 0;
+    width: 40%;
+
+    @include max($desktop-s) {
+      width: 100%;
+    }
+
+    > * + * {
+      margin-top: 24px;
+    }
+  }
+
+  &-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px;
+    background-color: rgba(48, 43, 68, 0.4);
+    border-radius: 24px;
+
+    @include max($mobile) {
+      flex-direction: column-reverse;
+    }
+
+    &-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  &-name {
+    display: flex;
+    gap: 8px;
+    align-items: normal;
+    font-size: 24px;
+  }
+  &-type {
+    color: var(--c-fog);
+  }
+  &-desc {
+    margin-top: 8px;
+  }
+
+  &-live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--c-martinique);
+    border-radius: 24px;
+    padding: 8px 16px;
+
+    &-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--c-mint-red);
+    }
+  }
+
+  &-verified {
+    height: 32px;
+    svg {
+      vertical-align: baseline;
+    }
+    path {
+      fill: var(--c-mint-green);
+    }
+  }
+
+  &-url {
+    display: inline-block;
+    color: var(--c-lavender);
+    margin-top: 8px;
+
+    background-image: -webkit-gradient(
+      linear,
+      left top,
+      left bottom,
+      from(currentColor),
+      to(currentColor)
+    );
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 1px;
+    transition: background-size 0.2s ease-out;
+
+    &:hover {
+      animation: underline 0.4s ease-in-out;
+    }
+
+    @keyframes underline {
+      0% {
+        background-position: 100% 100%;
+        background-size: 100% 1px;
+      }
+
+      50% {
+        background-position: 100% 100%;
+        background-size: 0 1px;
+      }
+      51% {
+        background-position: 0 100%;
+        background-size: 0 1px;
+      }
+      100% {
+        background-position: 0 100%;
+        background-size: 100% 1px;
+      }
+    }
+  }
+
+  &-block {
+    background-color: rgba(48, 43, 68, 0.4);
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  &-subtitle {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    color: var(--c-lavender);
+    font-weight: 600;
+
+    span {
+      color: var(--c-white);
+    }
+  }
+  &-value {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    color: var(--c-lavender);
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 1.2;
+
+    &[data-small] {
+      font-size: 18px;
+    }
+
+    @include max($mobile) {
+      font-size: 24px;
+    }
+
+    span {
+      color: var(--c-white);
+    }
+  }
+
+  &-table {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+    padding: 20px;
+    border-radius: 24px;
+    background-color: rgba(48, 43, 68, 0.4);
+
+    &-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    &-col {
+      display: flex;
+      gap: 8px;
+      color: var(--c-lavender);
+      font-weight: 600;
+
+      span {
+        color: var(--c-white);
+      }
+
+      svg {
+        max-width: 20px;
+      }
+
+      path {
+        fill: var(--c-lavender);
+      }
+    }
+  }
+
+  &-progress {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &-details {
+    margin-top: 24px;
+
+    &-title {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    &-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0;
+      font-size: 18px;
+      & + & {
+        border-top: 1px solid var(--c-martinique);
+      }
+    }
+
+    &-label {
+      color: var(--c-lavender);
+    }
+  }
+}

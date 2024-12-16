@@ -36,6 +36,9 @@
   }
 
   &-name {
+    display: flex;
+    gap: 8px;
+    align-items: normal;
     font-size: 24px;
   }
   &-type {
@@ -62,6 +65,10 @@
   }
 
   &-verified {
+    height: 32px;
+    svg {
+      vertical-align: baseline;
+    }
     path {
       fill: var(--c-mint-green);
     }
@@ -99,6 +106,10 @@
       gap: 8px;
       color: var(--c-lavender);
       font-weight: 600;
+
+      & + & {
+        text-align: right;
+      }
 
       span {
         color: var(--c-white);

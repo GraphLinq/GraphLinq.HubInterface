@@ -5,6 +5,7 @@ import Users from "@assets/icons/users.svg?react";
 import Locktime from "@assets/icons/locktime.svg?react";
 import { formatNumberToDollars } from "@utils/number";
 import { formatDistanceToNow } from "date-fns";
+import { NavLink } from "react-router-dom";
 
 interface LaunchpadCardProps {
   address: string;
@@ -31,7 +32,7 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ address }) => {
 
   return (
     <>
-      <div className="launchpadCard">
+      <NavLink to={`/launchpad/${address}`} className="launchpadCard">
         <div className="launchpadCard-header">
           <div className="launchpadCard-header-left">
             <div className="launchpadCard-name">
@@ -45,14 +46,14 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ address }) => {
             <div className="launchpadCard-type">{data.projectType}</div>
             <div className="launchpadCard-desc">{data.projectDescription}</div>
           </div>
-          <div className="launchpadCard-header-right">
-            {data.live && (
+          {data.live && (
+            <div className="launchpadCard-header-right">
               <div className="launchpadCard-live">
                 <div className="launchpadCard-live-dot"></div>
                 Live
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         <div className="launchpadCard-content">
           <div className="launchpadCard-progress">
@@ -75,8 +76,7 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ address }) => {
                   className="launchpadCard-progress-bar-progress"
                   style={{
                     width: data.progressPercent + "%",
-                  }}
-                ></div>
+                  }}></div>
               </div>
               <div className="launchpadCard-progress-progress-text">
                 {data.progressPercent}%
@@ -137,7 +137,7 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ address }) => {
             </div>
           </div>
         </div>
-      </div>
+      </NavLink>
     </>
   );
 };
