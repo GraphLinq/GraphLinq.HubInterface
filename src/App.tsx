@@ -25,6 +25,7 @@ import { WagmiProvider } from "wagmi";
 import { config } from "./config";
 import LaunchpadPage from "@pages/Launchpad";
 import LaunchpadSinglePage from "@pages/LaunchpadSingle";
+import LaunchpadCreatePage from "@pages/LaunchpadCreate";
 
 function App() {
   const queryClient = new QueryClient();
@@ -90,6 +91,10 @@ function App() {
         {
           path: "/launchpad",
           element: <LaunchpadPage />,
+        },
+        {
+          path: "/launchpad/create",
+          element: <LaunchpadCreatePage />,
         },
         {
           path: "/launchpad/:id",

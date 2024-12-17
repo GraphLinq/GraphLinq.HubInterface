@@ -1,0 +1,36 @@
+@import "../../assets/css/mixins/styles";
+@import "../../assets/css/mixins/medias";
+
+.launchpadCreate {
+  padding: 0 24px;
+
+  &-steps {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &-sep {
+      height: 1px;
+      width: 100%;
+      background-color: var(--c-mulled-wine);
+    }
+
+    .pill {
+      flex-shrink: 0;
+      justify-content: center;
+      width: 160px;
+
+      &[data-done="true"] {
+        background-color: var(--c-martinique);
+
+        path {
+          fill: transparent;
+        }
+      }
+
+      &[data-active="true"] {
+        background-color: var(--c-mulled-wine);
+      }
+    }
+  }
+}
