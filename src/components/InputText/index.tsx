@@ -4,7 +4,6 @@ import Close from "@assets/icons/close.svg?react";
 
 interface InputTextProps {
   icon?: React.ReactNode;
-  afterText?: string;
   placeholder?: string;
   value: string;
   onChange?: (value: string) => void;
@@ -12,7 +11,6 @@ interface InputTextProps {
 
 const InputText: React.FC<InputTextProps> = ({
   icon,
-  afterText,
   placeholder,
   value,
   onChange,

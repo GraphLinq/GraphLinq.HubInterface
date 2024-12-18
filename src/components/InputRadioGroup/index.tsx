@@ -8,15 +8,17 @@ interface Option {
 }
 
 interface InputRadioGroupProps {
+  id: string;
   options: Option[];
-  defaultOption?: string;
+  value?: string;
   onChange?: (value: string) => void;
   type?: "large";
 }
 
 const InputRadioGroup: React.FC<InputRadioGroupProps> = ({
+  id,
   options,
-  defaultOption,
+  value,
   onChange,
   type,
 }) => {
@@ -29,14 +31,15 @@ const InputRadioGroup: React.FC<InputRadioGroupProps> = ({
 
   return (
     <div className="inputRadioGroup" data-type={type}>
+
       {options.map((option, index) => (
         <label key={index} className="inputRadioGroup-label">
           <input
             type="radio"
-            name="radioGroup"
+            name={id}
             value={option.value}
             onChange={handleRadioChange}
-            checked={option.value === defaultOption}
+            checked={option.value === value}
             className="inputRadioGroup-input"
           />
           <span>

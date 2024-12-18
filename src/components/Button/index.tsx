@@ -10,6 +10,7 @@ interface ButtonProps {
   disabled?: boolean;
   target?: string;
   type?: "secondary" | "tertiary";
+  [key: string]: any;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -20,6 +21,7 @@ const Button: React.FC<ButtonProps> = ({
   disabled,
   target,
   type,
+  ...props
 }) => {
   if (link) {
     return (
@@ -29,6 +31,7 @@ const Button: React.FC<ButtonProps> = ({
         className="button"
         data-disabled={disabled}
         data-type={type}
+        {...props}
       >
         {icon && <span className="button-icon">{icon}</span>}
         <span className="button-label">{children}</span>
@@ -42,6 +45,7 @@ const Button: React.FC<ButtonProps> = ({
       className="button"
       data-disabled={disabled}
       data-type={type}
+      {...props}
     >
       {icon && <span className="button-icon">{icon}</span>}
       <span className="button-label">{children}</span>

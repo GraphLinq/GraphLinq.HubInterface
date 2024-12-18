@@ -315,8 +315,7 @@ function SwapPage() {
           <div className="main-card-title">Swap</div>
           <div
             className="main-card-content"
-            data-disabled={loadingQuote || loadingBalance || formDisabled}
-          >
+            data-disabled={loadingQuote || loadingBalance || formDisabled}>
             {!account ? (
               <>
                 <div className="main-card-notlogged">
@@ -375,8 +374,7 @@ function SwapPage() {
                       </div>
                       <div
                         className="swap-choices-switch"
-                        onClick={handleSwapCurrencies}
-                      >
+                        onClick={handleSwapCurrencies}>
                         <Swap />
                       </div>
                       <div className="swap-choice">
@@ -412,8 +410,7 @@ function SwapPage() {
                     <div className="swap-summary" data-open={summaryOpen}>
                       <div
                         className="swap-summary-header"
-                        onClick={() => setSummaryOpen(!summaryOpen)}
-                      >
+                        onClick={() => setSummaryOpen(!summaryOpen)}>
                         <div className="swap-summary-header-info">
                           <span>1 {ownCurrency.name}</span>
                           <span className="color">
@@ -440,9 +437,10 @@ function SwapPage() {
                           <span>Max slippage</span>
                           <span className="bridge-amount-swap-actions">
                             <InputRadioGroup
+                              id="maxSlippage"
                               options={slippageOptions}
                               onChange={(val) => setMaxSlippage(val)}
-                              defaultOption={maxSlippage}
+                              value={maxSlippage}
                             />
                           </span>
                         </div>
@@ -461,8 +459,7 @@ function SwapPage() {
                       <Button
                         onClick={handleSend}
                         disabled={loadingQuote || loadingBalance}
-                        icon={loading && <Spinner />}
-                      >
+                        icon={loading && <Spinner />}>
                         Swap
                       </Button>
                     </div>

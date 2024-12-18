@@ -395,9 +395,10 @@ function PoolNewPage() {
                         <div className="poolNew-block-title">Fee Tier</div>
                         <div className="poolNew-block-content pool-fees">
                           <InputRadioGroup
+                            id="fees"
                             options={feesOptions}
                             onChange={(val) => handleFees(val)}
-                            defaultOption={fees}
+                            value={fees}
                             type="large"
                           />
                         </div>

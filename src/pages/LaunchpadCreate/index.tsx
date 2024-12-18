@@ -6,6 +6,7 @@ import Spinner from "@assets/icons/spinner.svg?react";
 import Pill from "@components/Pill";
 import LaunchpadStepInfos from "@components/LaunchpadStep/LaunchpadStepInfos";
 import { useLaunchpadCreateContext } from "@context/LaunchpadCreateContext";
+import LaunchpadStepCampaign from "@components/LaunchpadStep/LaunchpadStepCampaign";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
@@ -22,7 +23,6 @@ function LaunchpadCreatePage() {
         <div className="main-card">
           <div className="main-card-title">Project creation</div>
           <div className="main-card-content">
-            <div className="main-card-desc">TODO DESC</div>
             <div className="launchpadCreate-steps">
               <Pill
                 data-active={activeStep === "infos"}
@@ -76,6 +76,7 @@ function LaunchpadCreatePage() {
             </div>
 
             {activeStep === 'infos' && <LaunchpadStepInfos/>}
+            {activeStep === 'campaign' && <LaunchpadStepCampaign/>}
           </div>
         </div>
       </div>
