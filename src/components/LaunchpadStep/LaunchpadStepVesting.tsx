@@ -36,7 +36,7 @@ function LaunchpadStepVesting() {
       return;
     }
 
-    setActiveStep("campaign");
+    setActiveStep("recap");
   };
 
   const transformToSeconds = (val: string, ratio: number) => {
