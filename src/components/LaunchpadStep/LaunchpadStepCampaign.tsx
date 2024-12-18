@@ -23,17 +23,16 @@ export const campaignTypeOptions = [
 function LaunchpadStepCampaign() {
   const { formData, setFormData, setActiveStep } = useLaunchpadCreateContext();
 
-  const endTimeEmpty = formData.projectName === "";
+  const endTimeEmpty = formData.endTime === "";
   const minimumGoalEmpty = formData.minimumGoal === 0;
   const maximumGoalEmpty = formData.maximumGoal === 0;
   const pricePerTokenEmpty = formData.pricePerToken === 0;
-  const poolFeeEmpty = formData.poolFee === 0;
   const disableForm =
     formData.campaignType === "fair"
-      ? endTimeEmpty || minimumGoalEmpty || pricePerTokenEmpty || poolFeeEmpty
-      : maximumGoalEmpty || pricePerTokenEmpty || poolFeeEmpty;
+      ? endTimeEmpty || minimumGoalEmpty || pricePerTokenEmpty
+      : maximumGoalEmpty || pricePerTokenEmpty;
 
-  const updateField = (field: keyof typeof formData, value: string) => {
+  const updateField = (field: keyof typeof formData, value: any) => {
     setFormData((prevData) => ({
       ...prevData,
       [field]: value,

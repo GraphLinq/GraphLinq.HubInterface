@@ -19,7 +19,7 @@ function LaunchpadStepInfos() {
     raiseTokenEmpty ||
     saleTokenEmpty;
 
-  const updateField = (field: keyof typeof formData, value: string) => {
+  const updateField = (field: keyof typeof formData, value: any) => {
     setFormData((prevData) => ({
       ...prevData,
       [field]: value,

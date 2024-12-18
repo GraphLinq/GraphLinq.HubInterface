@@ -7,6 +7,7 @@ import Pill from "@components/Pill";
 import LaunchpadStepInfos from "@components/LaunchpadStep/LaunchpadStepInfos";
 import { useLaunchpadCreateContext } from "@context/LaunchpadCreateContext";
 import LaunchpadStepCampaign from "@components/LaunchpadStep/LaunchpadStepCampaign";
+import LaunchpadStepVesting from "@components/LaunchpadStep/LaunchpadStepVesting";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
@@ -77,6 +78,7 @@ function LaunchpadCreatePage() {
 
             {activeStep === 'infos' && <LaunchpadStepInfos/>}
             {activeStep === 'campaign' && <LaunchpadStepCampaign/>}
+            {activeStep === 'vesting' && <LaunchpadStepVesting/>}
           </div>
         </div>
       </div>

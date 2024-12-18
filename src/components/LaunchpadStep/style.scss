@@ -21,4 +21,13 @@
   &-error {
     color: var(--c-mint-red);
   }
+
+  &-row {
+    display: flex;
+    gap: 16px;
+
+    .inputNumber {
+      width: 100%;
+    }
+  }
 }

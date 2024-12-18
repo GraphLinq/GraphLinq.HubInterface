@@ -19,8 +19,14 @@ interface StepCampaign {
   poolFee: number;
   campaignType: 'stealth' | 'fair';
 }
+interface StepCampaign {
+  vestingStartDate: string;
+  vestingEndDate: string;
+  vestingDuration: number;
+  vestingDelta: number;
+}
 
-type FormData = StepInfos & StepCampaign;
+type FormData = StepInfos & StepCampaign & StepCampaign;
 
 interface LaunchpadCreateContextProps {
   formData: FormData;
@@ -52,8 +58,12 @@ export const LaunchpadCreateContextProvider = ({
     minimumGoal: 0,
     maximumGoal: 0,
     pricePerToken: 0,
-    poolFee: 0,
-    campaignType: "stealth"
+    poolFee: 0.3,
+    campaignType: "stealth",
+    vestingStartDate: "",
+    vestingEndDate: "",
+    vestingDuration: 0,
+    vestingDelta: 0,
   });
   const [activeStep, setActiveStep] = useState<Steps>("campaign");
 
