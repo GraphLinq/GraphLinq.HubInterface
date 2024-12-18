@@ -26,6 +26,7 @@ import { config } from "./config";
 import LaunchpadPage from "@pages/Launchpad";
 import LaunchpadSinglePage from "@pages/LaunchpadSingle";
 import LaunchpadCreatePage from "@pages/LaunchpadCreate";
+import { LaunchpadCreateContextProvider } from "@context/LaunchpadCreateContext";
 
 function App() {
   const queryClient = new QueryClient();
@@ -34,15 +35,17 @@ function App() {
     <HelmetProvider>
       <AppContextProvider>
         <WagmiProvider config={config}>
-          <QueryClientProvider client={queryClient}>
-            <Header />
-            <TxProgress />
-            <main className="main">
-              <Outlet />
-            </main>
-            <Footer />
-            <ScrollRestoration />
-          </QueryClientProvider>
+          <LaunchpadCreateContextProvider>
+            <QueryClientProvider client={queryClient}>
+              <Header />
+              <TxProgress />
+              <main className="main">
+                <Outlet />
+              </main>
+              <Footer />
+              <ScrollRestoration />
+            </QueryClientProvider>
+          </LaunchpadCreateContextProvider>
         </WagmiProvider>
       </AppContextProvider>
     </HelmetProvider>

@@ -1,11 +1,11 @@
 import "./style.scss";
 
 import SEO from "@components/SEO";
-import { useState } from "react";
-import useLaunchpad from "../../composables/useLaunchpad";
 import Check from "@assets/icons/check.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
 import Pill from "@components/Pill";
+import LaunchpadStepInfos from "@components/LaunchpadStep/LaunchpadStepInfos";
+import { useLaunchpadCreateContext } from "@context/LaunchpadCreateContext";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
@@ -13,18 +13,7 @@ const seoDesc =
   "View tokens, transactions, balances, source code, and analytics for the Pool smart contract on GLQ Smart Chain.";
 
 function LaunchpadCreatePage() {
-  const steps = ["Informations", "Campaign", "Vesting"];
-  const [activeStep, setActiveStep] = useState(0);
-
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState("");
-  const [success, setSuccess] = useState("");
-
-  const resetFeedback = () => {
-    setError("");
-    setPending("");
-    setSuccess("");
-  };
+  const { activeStep, setActiveStep } = useLaunchpadCreateContext();
 
   return (
     <>
@@ -35,28 +24,58 @@ function LaunchpadCreatePage() {
           <div className="main-card-content">
             <div className="main-card-desc">TODO DESC</div>
             <div className="launchpadCreate-steps">
-              {steps.map((step, index) => (
-                <>
-                {index !== 0 && (<div className="launchpadCreate-steps-sep"></div>)}
-                <Pill
-                  data-active={activeStep === index}
-                  data-done={index < activeStep}
-                  onClick={index < activeStep ? () => setActiveStep(index) : undefined}
-                  icon={
-                    activeStep === index ? (
-                      <Spinner />
-                    ) : (
-                      index < activeStep && <Check />
-                    )
-                  }>
-                  {step}
-                </Pill>
-
-                </>
-              ))}
+              <Pill
+                data-active={activeStep === "infos"}
+                data-done={["campaign", "vesting", "recap"].includes(
+                  activeStep
+                )}
+                onClick={
+                  ["campaign", "vesting", "recap"].includes(activeStep)
+                    ? () => setActiveStep("infos")
+                    : undefined
+                }
+                icon={activeStep === "infos" ? <Spinner /> : <Check />}>
+                Informations
+              </Pill>
+              <div className="launchpadCreate-steps-sep"></div>
+              <Pill
+                data-active={activeStep === "campaign"}
+                data-done={["vesting", "recap"].includes(activeStep)}
+                onClick={
+                  ["vesting", "recap"].includes(activeStep)
+                    ? () => setActiveStep("campaign")
+                    : undefined
+                }
+                icon={
+                  activeStep === "campaign" ? (
+                    <Spinner />
+                  ) : (
+                    ["vesting", "recap"].includes(activeStep) && <Check />
+                  )
+                }>
+                Campaign
+              </Pill>
+              <div className="launchpadCreate-steps-sep"></div>
+              <Pill
+                data-active={activeStep === "vesting"}
+                data-done={["recap"].includes(activeStep)}
+                onClick={
+                  ["recap"].includes(activeStep)
+                    ? () => setActiveStep("vesting")
+                    : undefined
+                }
+                icon={
+                  activeStep === "vesting" ? (
+                    <Spinner />
+                  ) : (
+                    ["recap"].includes(activeStep) && <Check />
+                  )
+                }>
+                Vesting
+              </Pill>
             </div>
 
-          
+            {activeStep === 'infos' && <LaunchpadStepInfos/>}
           </div>
         </div>
       </div>

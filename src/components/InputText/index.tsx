@@ -16,6 +16,7 @@ const InputText: React.FC<InputTextProps> = ({
   placeholder,
   value,
   onChange,
+  ...props
 }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -43,6 +44,7 @@ const InputText: React.FC<InputTextProps> = ({
         onChange={handleInputChange}
         placeholder={placeholder}
         className="inputText-input"
+        {...props}
       />
       <div
         className="inputText-reset"
