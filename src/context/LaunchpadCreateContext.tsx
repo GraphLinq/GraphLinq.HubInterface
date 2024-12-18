@@ -65,7 +65,7 @@ export const LaunchpadCreateContextProvider = ({
     vestingDuration: 0,
     vestingDelta: 0,
   });
-  const [activeStep, setActiveStep] = useState<Steps>("campaign");
+  const [activeStep, setActiveStep] = useState<Steps>("infos");
 
   return (
     <LaunchpadCreateContext.Provider
