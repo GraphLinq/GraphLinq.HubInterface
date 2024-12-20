@@ -17,7 +17,7 @@ interface StepCampaign {
   maximumGoal: number;
   pricePerToken: number;
   poolFee: number;
-  campaignType: 'stealth' | 'fair';
+  campaignType: "stealth" | "fair";
 }
 interface StepCampaign {
   vestingStartDate: string;
@@ -47,29 +47,47 @@ export const LaunchpadCreateContextProvider = ({
   const [formData, setFormData] = useState<
     LaunchpadCreateContextProps["formData"]
   >({
-    projectName: "",
-    description: "",
-    websiteLink: "",
-    raiseToken: "",
-    raiseTokenName: "TODO",
-    saleToken: "",
-    saleTokenName: "TODO",
-    endTime: "",
-    minimumGoal: 0,
-    maximumGoal: 0,
-    pricePerToken: 0,
+    // projectName: "",
+    // description: "",
+    // websiteLink: "",
+    // raiseToken: "",
+    // raiseTokenName: "TODO",
+    // saleToken: "",
+    // saleTokenName: "TODO",
+    // endTime: "",
+    // minimumGoal: 0,
+    // maximumGoal: 0,
+    // pricePerToken: 0,
+    // poolFee: 0.3,
+    // campaignType: "stealth",
+    // vestingStartDate: "",
+    // vestingEndDate: "",
+    // vestingDuration: 0,
+    // vestingDelta: 0,
+    projectName: "To the Moon",
+    description: "description",
+    websiteLink: "https://graphlinq.io/",
+    raiseToken: "0x1D3813e86293f7A70B5aaB881F6323C4Dff27D24",
+    raiseTokenName: "GLQ",
+    saleToken: "0x1D3816f86293f7A70B5baB882F6323D4Dff27D24",
+    saleTokenName: "TOTO",
+    endTime: "2024-12-20T13:43",
+    minimumGoal: 1000,
+    maximumGoal: 10000,
+    pricePerToken: 2,
     poolFee: 0.3,
     campaignType: "stealth",
-    vestingStartDate: "",
-    vestingEndDate: "",
-    vestingDuration: 0,
-    vestingDelta: 0,
+    vestingStartDate: "2024-12-13T13:43",
+    vestingEndDate: "2024-12-20T13:43",
+    vestingDuration: 360000,
+    vestingDelta: 10000,
   });
-  const [activeStep, setActiveStep] = useState<Steps>("infos");
+  const [activeStep, setActiveStep] = useState<Steps>("recap");
 
   return (
     <LaunchpadCreateContext.Provider
-      value={{ formData, setFormData, activeStep, setActiveStep }}>
+      value={{ formData, setFormData, activeStep, setActiveStep }}
+    >
       {children}
     </LaunchpadCreateContext.Provider>
   );

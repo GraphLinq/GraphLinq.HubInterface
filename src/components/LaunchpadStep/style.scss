@@ -30,4 +30,26 @@
       width: 100%;
     }
   }
+
+  &-details {
+    &-title {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    &-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0;
+      font-size: 18px;
+      & + & {
+        border-top: 1px solid var(--c-martinique);
+      }
+    }
+
+    &-label {
+      color: var(--c-lavender);
+    }
+  }
 }

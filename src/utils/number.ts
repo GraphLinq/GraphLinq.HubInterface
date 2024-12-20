@@ -1,3 +1,4 @@
+import { formatDuration, intervalToDuration } from "date-fns";
 import { ethers } from "ethers";
 
 const formatNumberToDollars = (number: number, digits = 5) => {
@@ -39,9 +40,19 @@ const toFixedFloor = (value: number, decimals: number) => {
   return (Math.floor(value * factor) / factor).toFixed(decimals);
 };
 
+const formatSecondsToReadableTime = (seconds: number) => {
+  const duration = intervalToDuration({ start: 0, end: seconds * 1000 });
+
+  return formatDuration(duration, {
+    format: ["days", "hours", "minutes"],
+    delimiter: ", ",
+  });
+};
+
 export {
   formatNumberToDollars,
   formatNumberToFixed,
   formatBigNumberToFixed,
+  formatSecondsToReadableTime,
   isInfinity,
 };
