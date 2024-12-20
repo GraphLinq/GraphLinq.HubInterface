@@ -1,37 +1,46 @@
 import "./style.scss";
+import Spinner from "@assets/icons/spinner.svg?react";
 
 import Button from "@components/Button";
-import InputDatetime from "@components/InputDatetime";
-import InputNumber from "@components/InputNumber";
-import Select from "@components/Select";
 import { useLaunchpadCreateContext } from "@context/LaunchpadCreateContext";
 import { formatSecondsToReadableTime } from "@utils/number";
 import { formatEthereumAddress } from "@utils/string";
 import { useState } from "react";
+import useLaunchpad from "../../composables/useLaunchpad";
+import TransactionList from "@components/TransactionList";
+import { useStore } from "../../store";
 
 function LaunchpadStepRecap() {
-  const { formData, setFormData, setActiveStep } = useLaunchpadCreateContext();
+  const { submitFundraiser } = useLaunchpad();
+  const { formData } = useLaunchpadCreateContext();
+  const store: any = useStore();
+  const library = store.getState().library;
+  const fundraisers = useStore((state) => state.fundraisers);
 
-  const vestingStartDateEmpty = formData.vestingStartDate === "";
-  const vestingEndDateEmpty = formData.vestingEndDate === "";
-  const vestingDurationEmpty = formData.vestingDuration === 0;
-  const vestingDeltaEmpty = formData.vestingDelta === 0;
-  const disableForm =
-    formData.campaignType === "stealth"
-      ? vestingDurationEmpty || vestingDeltaEmpty
-      : vestingStartDateEmpty || vestingEndDateEmpty;
+  const [loading, setLoading] = useState(false);
+  const [formDisabled, setFormDisabled] = useState(false);
+  const [createdAddress, setCreatedAddress] = useState<string | null>(null);
 
-  const updateField = (field: keyof typeof formData, value: any) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [field]: value,
-    }));
+  const reloadData = () => async () => {
+    console.log("reload");
+    // update active fundraisers
+    const activeFundraisers = await library.getAllFundraisers(0, 0, 0);
+    // search for all the new fundraisers in the active fundraisers that are unknown yet and add them
+    const newFundraisers = activeFundraisers.filter(
+      (fundraiser) => !fundraisers.includes(fundraiser)
+    );
+    console.log("newFundraisers", newFundraisers);
+    if (newFundraisers.length > 0) {
+      setCreatedAddress(newFundraisers[0]);
+    }
   };
 
-  const handleSubmit = () => {
-    if (disableForm) {
-      return;
-    }
+  const handleSubmit = async () => {
+    setLoading(true);
+    setFormDisabled(true);
+    await submitFundraiser(formData);
+    setLoading(false);
+    setFormDisabled(false);
   };
 
   return (
@@ -137,9 +146,19 @@ function LaunchpadStepRecap() {
           </div>
         )}
       </div>
-      <Button disabled={disableForm} onClick={handleSubmit}>
-        Confirm creation
-      </Button>
+      {createdAddress ? (
+        <Button link={"/launchpad/" + createdAddress}>View fundraiser</Button>
+      ) : (
+        <Button
+          disabled={formDisabled}
+          onClick={handleSubmit}
+          icon={loading && <Spinner />}
+        >
+          Confirm creation
+        </Button>
+      )}
+
+      <TransactionList library={library} onTransactionConfirmed={reloadData} />
     </div>
   );
 }

@@ -26,7 +26,7 @@ interface StepCampaign {
   vestingDelta: number;
 }
 
-type FormData = StepInfos & StepCampaign & StepCampaign;
+export type FormData = StepInfos & StepCampaign & StepCampaign;
 
 interface LaunchpadCreateContextProps {
   formData: FormData;
@@ -65,22 +65,22 @@ export const LaunchpadCreateContextProvider = ({
     // vestingDuration: 0,
     // vestingDelta: 0,
     projectName: "To the Moon",
-    description: "description",
-    websiteLink: "https://graphlinq.io/",
-    raiseToken: "0x1D3813e86293f7A70B5aaB881F6323C4Dff27D24",
+    description: "Description test",
+    websiteLink: "https://test.io/",
+    raiseToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     raiseTokenName: "GLQ",
-    saleToken: "0x1D3816f86293f7A70B5baB882F6323D4Dff27D24",
+    saleToken: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     saleTokenName: "TOTO",
     endTime: "2024-12-20T13:43",
     minimumGoal: 1000,
     maximumGoal: 10000,
     pricePerToken: 2,
-    poolFee: 0.3,
+    poolFee: 3000,
     campaignType: "stealth",
     vestingStartDate: "2024-12-13T13:43",
     vestingEndDate: "2024-12-20T13:43",
-    vestingDuration: 360000,
-    vestingDelta: 10000,
+    vestingDuration: 86400,
+    vestingDelta: 3600,
   });
   const [activeStep, setActiveStep] = useState<Steps>("recap");
 

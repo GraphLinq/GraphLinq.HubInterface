@@ -32,6 +32,14 @@ function LaunchpadStepCampaign() {
       ? endTimeEmpty || minimumGoalEmpty || pricePerTokenEmpty
       : maximumGoalEmpty || pricePerTokenEmpty;
 
+  const transformFeesToData = (fees: number) => {
+    return fees * 10000;
+  };
+
+  const transformDataToFees = (data: number) => {
+    return data / 10000;
+  };
+
   const updateField = (field: keyof typeof formData, value: any) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -123,8 +131,10 @@ function LaunchpadStepCampaign() {
           <InputRadioGroup
             id="fees"
             options={feesOptions}
-            onChange={(val) => updateField("poolFee", val)}
-            value={formData.poolFee.toString()}
+            onChange={(val) =>
+              updateField("poolFee", transformFeesToData(parseFloat(val)))
+            }
+            value={transformDataToFees(formData.poolFee).toString()}
             type="large"
           />
         </div>

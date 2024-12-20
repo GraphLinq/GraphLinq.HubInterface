@@ -2226,7 +2226,7 @@ class FundraiserWeb3Connect {
             }
             else if (error.data) {
                 try {
-                    const decodedReason = ethers.AbiCoder.defaultAbiCoder().decode(["string"], error.data)[0];
+                    const decodedReason = utils.AbiCoder.decode(["string"], error.data)[0];
                     throw mapRevertReasonToError(decodedReason);
                 }
                 catch {
@@ -2240,7 +2240,7 @@ class FundraiserWeb3Connect {
     }
     async createFundraiserStealthLaunch(signer, params, campaignParams) {
         return this.safeExecute(async () => {
-            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(ethers.AbiCoder.defaultAbiCoder().encode(["string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
+            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(utils.defaultAbiCoder.encode(["string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
                 params.projectName,
                 params.description,
                 params.websiteLink,
@@ -2249,13 +2249,13 @@ class FundraiserWeb3Connect {
                 params.vestingStartDelta,
                 params.vestingDuration,
                 params.poolFee,
-            ]), ethers.AbiCoder.defaultAbiCoder().encode(["uint256", "uint256"], [campaignParams.maxCap, campaignParams.pricePerToken]), 0);
+            ]), utils.defaultAbiCoder.encode(["uint256", "uint256"], [campaignParams.maxCap, campaignParams.pricePerToken]), 0);
             return await this.addTx(tx);
         });
     }
     async createFundraiserFairLaunch(signer, params, campaignParams) {
         return this.safeExecute(async () => {
-            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(ethers.AbiCoder.defaultAbiCoder().encode(["string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
+            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(utils.defaultAbiCoder.encode(["string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
                 params.projectName,
                 params.description,
                 params.websiteLink,
@@ -2264,13 +2264,13 @@ class FundraiserWeb3Connect {
                 params.vestingStartDelta,
                 params.vestingDuration,
                 params.poolFee,
-            ]), ethers.AbiCoder.defaultAbiCoder().encode(["uint256", "uint256", "uint256"], [campaignParams.endTime, campaignParams.minimumGoal, campaignParams.pricePerToken]), 1);
+            ]), utils.defaultAbiCoder.encode(["uint256", "uint256", "uint256"], [campaignParams.endTime, campaignParams.minimumGoal, campaignParams.pricePerToken]), 1);
             return await this.addTx(tx);
         });
     }
     async approveERC20(signer, tokenAddr, spenderAddr, amount) {
         return this.safeExecute(async () => {
-            const tokenContract = new ethers.Contract(tokenAddr, [
+            const tokenContract = new Contract(tokenAddr, [
                 "function approve(address spender, uint256 amount) public returns (bool)"
             ], signer);
             const tx = await tokenContract.approve(spenderAddr, amount);
@@ -2279,7 +2279,7 @@ class FundraiserWeb3Connect {
     }
     async transferERC20(signer, tokenAddr, recipientAddr, amount) {
         return this.safeExecute(async () => {
-            const tokenContract = new ethers.Contract(tokenAddr, [
+            const tokenContract = new Contract(tokenAddr, [
                 "function transfer(address recipient, uint256 amount) public returns (bool)"
             ], signer);
             const tx = await tokenContract.transfer(recipientAddr, amount);
@@ -2288,7 +2288,7 @@ class FundraiserWeb3Connect {
     }
     async checkAllowance(signer, tokenAddr, spenderAddr) {
         return this.safeExecute(async () => {
-            const tokenContract = new ethers.Contract(tokenAddr, [
+            const tokenContract = new Contract(tokenAddr, [
                 "function allowance(address owner, address spender) public view returns (uint256)"
             ], signer);
             const allowance = await tokenContract.allowance(signer.getAddress(), spenderAddr);
