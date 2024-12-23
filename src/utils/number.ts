@@ -49,10 +49,20 @@ const formatSecondsToReadableTime = (seconds: number) => {
   });
 };
 
+const transformFeesToData = (fees: number) => {
+  return fees * 10000;
+};
+
+const transformDataToFees = (data: number) => {
+  return data / 10000;
+};
+
 export {
   formatNumberToDollars,
   formatNumberToFixed,
   formatBigNumberToFixed,
   formatSecondsToReadableTime,
+  transformFeesToData,
+  transformDataToFees,
   isInfinity,
 };

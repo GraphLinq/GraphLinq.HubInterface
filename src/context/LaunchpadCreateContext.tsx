@@ -6,6 +6,7 @@ interface StepInfos {
   projectName: string;
   description: string;
   websiteLink: string;
+  logoUrl: string;
   raiseToken: string;
   raiseTokenName: string;
   saleToken: string;
@@ -50,6 +51,7 @@ export const LaunchpadCreateContextProvider = ({
     // projectName: "",
     // description: "",
     // websiteLink: "",
+    // logoUrl: "",
     // raiseToken: "",
     // raiseTokenName: "TODO",
     // saleToken: "",
@@ -67,6 +69,7 @@ export const LaunchpadCreateContextProvider = ({
     projectName: "To the Moon",
     description: "Description test",
     websiteLink: "https://test.io/",
+    logoUrl: "https://s2.coinmarketcap.com/static/img/coins/64x64/9029.png",
     raiseToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     raiseTokenName: "GLQ",
     saleToken: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",

@@ -3,12 +3,17 @@ import Spinner from "@assets/icons/spinner.svg?react";
 
 import Button from "@components/Button";
 import { useLaunchpadCreateContext } from "@context/LaunchpadCreateContext";
-import { formatSecondsToReadableTime } from "@utils/number";
+import {
+  formatSecondsToReadableTime,
+  transformDataToFees,
+} from "@utils/number";
 import { formatEthereumAddress } from "@utils/string";
 import { useState } from "react";
 import useLaunchpad from "../../composables/useLaunchpad";
 import TransactionList from "@components/TransactionList";
 import { useStore } from "../../store";
+import Alert from "@components/Alert";
+import { getErrorMessage } from "@utils/errors";
 
 function LaunchpadStepRecap() {
   const { submitFundraiser } = useLaunchpad();
@@ -17,30 +22,49 @@ function LaunchpadStepRecap() {
   const library = store.getState().library;
   const fundraisers = useStore((state) => state.fundraisers);
 
+  const [success, setSuccess] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [formDisabled, setFormDisabled] = useState(false);
   const [createdAddress, setCreatedAddress] = useState<string | null>(null);
 
-  const reloadData = () => async () => {
-    console.log("reload");
-    // update active fundraisers
+  const resetFeedback = () => {
+    setError("");
+    setPending("");
+    setSuccess(null);
+  };
+
+  const reloadData = async () => {
     const activeFundraisers = await library.getAllFundraisers(0, 0, 0);
-    // search for all the new fundraisers in the active fundraisers that are unknown yet and add them
     const newFundraisers = activeFundraisers.filter(
       (fundraiser) => !fundraisers.includes(fundraiser)
     );
-    console.log("newFundraisers", newFundraisers);
     if (newFundraisers.length > 0) {
-      setCreatedAddress(newFundraisers[0]);
+      setCreatedAddress(newFundraisers[newFundraisers.length - 1]);
+
+      resetFeedback();
+      setSuccess(true);
     }
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
-    setFormDisabled(true);
-    await submitFundraiser(formData);
-    setLoading(false);
-    setFormDisabled(false);
+    resetFeedback();
+
+    try {
+      setLoading(true);
+      setFormDisabled(true);
+
+      setPending("Waiting for confirmations...");
+      await submitFundraiser(formData);
+    } catch (error) {
+      resetFeedback();
+      setError(getErrorMessage(error));
+    } finally {
+      setLoading(false);
+      setFormDisabled(false);
+    }
   };
 
   return (
@@ -64,6 +88,10 @@ function LaunchpadStepRecap() {
           <div className="launchpadStep-details-value">
             {formData.websiteLink}
           </div>
+        </div>
+        <div className="launchpadStep-details-row">
+          <div className="launchpadStep-details-label">Logo image url</div>
+          <div className="launchpadStep-details-value">{formData.logoUrl}</div>
         </div>
         <div className="launchpadStep-details-row">
           <div className="launchpadStep-details-label">Campaign type</div>
@@ -109,7 +137,9 @@ function LaunchpadStepRecap() {
         </div>
         <div className="launchpadStep-details-row">
           <div className="launchpadStep-details-label">Pool fee</div>
-          <div className="launchpadStep-details-value">{formData.poolFee}%</div>
+          <div className="launchpadStep-details-value">
+            {transformDataToFees(formData.poolFee)}%
+          </div>
         </div>
         {formData.campaignType === "fair" && (
           <div className="launchpadStep-details-row">
@@ -146,6 +176,26 @@ function LaunchpadStepRecap() {
           </div>
         )}
       </div>
+
+      {(error || pending || success) && (
+        <div className="popin-alert">
+          {error && (
+            <Alert type="error">
+              <p>{error}</p>
+            </Alert>
+          )}
+          {pending && (
+            <Alert type="warning">
+              <p>{pending}</p>
+            </Alert>
+          )}
+          {success && (
+            <Alert type="success">
+              <p>Your fundraiser is now successfully created.</p>
+            </Alert>
+          )}
+        </div>
+      )}
       {createdAddress ? (
         <Button link={"/launchpad/" + createdAddress}>View fundraiser</Button>
       ) : (

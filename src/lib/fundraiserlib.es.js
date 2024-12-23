@@ -2217,33 +2217,35 @@ class FundraiserWeb3Connect {
         this.provider.removeAllListeners();
     }
     async safeExecute(action) {
-        try {
+        // try {
             return await action();
-        }
-        catch (error) {
-            if (error.reason) {
-                throw mapRevertReasonToError(error.reason);
-            }
-            else if (error.data) {
-                try {
-                    const decodedReason = utils.AbiCoder.decode(["string"], error.data)[0];
-                    throw mapRevertReasonToError(decodedReason);
-                }
-                catch {
-                    throw new UnknownError(`Revert data could not be decoded. Raw data: ${error.data}`);
-                }
-            }
-            else {
-                throw new UnknownError(error.message);
-            }
-        }
+        // }
+        // catch (error) {
+        //     console.log(error)
+        //     if (error.reason) {
+        //         throw mapRevertReasonToError(error.reason);
+        //     }
+        //     else if (error.data) {
+        //         try {
+        //             const decodedReason = utils.AbiCoder.decode(["string"], error.data)[0];
+        //             throw mapRevertReasonToError(decodedReason);
+        //         }
+        //         catch {
+        //             throw new UnknownError(`Revert data could not be decoded. Raw data: ${error.data}`);
+        //         }
+        //     }
+        //     else {
+        //         throw new UnknownError(error.message);
+        //     }
+        // }
     }
     async createFundraiserStealthLaunch(signer, params, campaignParams) {
         return this.safeExecute(async () => {
-            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(utils.defaultAbiCoder.encode(["string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
+            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(utils.defaultAbiCoder.encode(["string", "string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
                 params.projectName,
                 params.description,
                 params.websiteLink,
+                params.logoUrl,
                 params.saleToken,
                 params.raiseToken,
                 params.vestingStartDelta,
@@ -2255,10 +2257,11 @@ class FundraiserWeb3Connect {
     }
     async createFundraiserFairLaunch(signer, params, campaignParams) {
         return this.safeExecute(async () => {
-            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(utils.defaultAbiCoder.encode(["string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
+            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(utils.defaultAbiCoder.encode(["string", "string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
                 params.projectName,
                 params.description,
                 params.websiteLink,
+                params.logoUrl,
                 params.saleToken,
                 params.raiseToken,
                 params.vestingStartDelta,
@@ -2490,9 +2493,28 @@ class FundraiserWeb3Connect {
         this.pending.push(tx);
         return tx;
     }
+    async getConfirmationsV5(txHash) {
+        if (!txHash) {
+          throw new Error("Transaction hash is required to check confirmations.");
+        }
+      
+        const receipt = await this.provider.getTransactionReceipt(txHash);
+      
+        if (!receipt) {
+          console.log("Transaction is not yet mined.");
+          return 0;
+        }
+      
+        const currentBlock = await this.provider.getBlockNumber();
+      
+        const confirmations = currentBlock - receipt.blockNumber + 1;
+      
+        console.log(`Transaction has ${confirmations} confirmations.`);
+        return confirmations;
+      }
     async updatePendingTransactions() {
         this.pending = await Promise.all(this.pending.map(async (tx) => {
-            const confirmations = await tx.confirmations();
+            const confirmations = await this.getConfirmationsV5(tx.hash);
             if (confirmations === 0) {
                 const updatedTx = await this.provider.getTransaction(tx.hash);
                 if (updatedTx) {
@@ -2504,7 +2526,7 @@ class FundraiserWeb3Connect {
     }
     async purgeMinedTransactions() {
         const pendingTransactions = await Promise.all(this.pending.map(async (tx) => {
-            const confirmations = await tx.confirmations();
+            const confirmations = await this.getConfirmationsV5(tx.hash);
             return confirmations > 0 ? null : tx;
         }));
         this.pending = pendingTransactions.filter((tx) => tx !== null);

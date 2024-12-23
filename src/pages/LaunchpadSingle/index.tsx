@@ -350,7 +350,8 @@ function LaunchpadSinglePage() {
                     <a
                       href={fundraiserState.projetInfo.websiteLink}
                       target="_blank"
-                      className="launchpadSingle-url">
+                      className="launchpadSingle-url"
+                    >
                       {fundraiserState.projetInfo.websiteLink}
                     </a>
                   )}
@@ -454,7 +455,8 @@ function LaunchpadSinglePage() {
                         className="launchpadCard-progress-bar-progress"
                         style={{
                           width: progress + "%",
-                        }}></div>
+                        }}
+                      ></div>
                     </div>
                     <div className="launchpadCard-progress-progress-text">
                       {progress.toFixed(2)}%

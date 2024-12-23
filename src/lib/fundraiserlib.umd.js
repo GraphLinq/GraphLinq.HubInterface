@@ -2241,10 +2241,11 @@
         }
         async createFundraiserStealthLaunch(signer, params, campaignParams) {
             return this.safeExecute(async () => {
-                const tx = await this.fundraiserFactory.connect(signer).createFundraiser(ethers.ethers.AbiCoder.defaultAbiCoder().encode(["string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
+                const tx = await this.fundraiserFactory.connect(signer).createFundraiser(ethers.ethers.AbiCoder.defaultAbiCoder().encode(["string", "string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
                     params.projectName,
                     params.description,
                     params.websiteLink,
+                    params.logoUrl,
                     params.saleToken,
                     params.raiseToken,
                     params.vestingStartDelta,
@@ -2256,10 +2257,11 @@
         }
         async createFundraiserFairLaunch(signer, params, campaignParams) {
             return this.safeExecute(async () => {
-                const tx = await this.fundraiserFactory.connect(signer).createFundraiser(ethers.ethers.AbiCoder.defaultAbiCoder().encode(["string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
+                const tx = await this.fundraiserFactory.connect(signer).createFundraiser(ethers.ethers.AbiCoder.defaultAbiCoder().encode(["string", "string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
                     params.projectName,
                     params.description,
                     params.websiteLink,
+                    params.logoUrl,
                     params.saleToken,
                     params.raiseToken,
                     params.vestingStartDelta,

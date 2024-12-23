@@ -4,6 +4,10 @@
   gap: 24px;
   margin-top: 48px !important;
 
+  .popin-alert {
+    margin-top: 0;
+  }
+
   &-field {
     display: flex;
     flex-direction: column;
@@ -50,6 +54,10 @@
 
     &-label {
       color: var(--c-lavender);
+    }
+
+    &-value {
+      word-break: break-all;
     }
   }
 }

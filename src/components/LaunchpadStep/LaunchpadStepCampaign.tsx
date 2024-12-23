@@ -6,6 +6,7 @@ import InputRadioGroup from "@components/InputRadioGroup";
 import { feesOptions } from "@constants/fees";
 import { useLaunchpadCreateContext } from "@context/LaunchpadCreateContext";
 import InputDatetime from "@components/InputDatetime";
+import { transformDataToFees, transformFeesToData } from "@utils/number";
 
 export const campaignTypeOptions = [
   {
@@ -31,14 +32,6 @@ function LaunchpadStepCampaign() {
     formData.campaignType === "fair"
       ? endTimeEmpty || minimumGoalEmpty || pricePerTokenEmpty
       : maximumGoalEmpty || pricePerTokenEmpty;
-
-  const transformFeesToData = (fees: number) => {
-    return fees * 10000;
-  };
-
-  const transformDataToFees = (data: number) => {
-    return data / 10000;
-  };
 
   const updateField = (field: keyof typeof formData, value: any) => {
     setFormData((prevData) => ({

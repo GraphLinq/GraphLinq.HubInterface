@@ -27,6 +27,7 @@ export declare class FundraiserWeb3Connect {
       projectName: string;
       description: string;
       websiteLink: string;
+      logoUrl: string;
       saleToken: string;
       raiseToken: string;
       vestingStartDelta: bigint;
@@ -44,6 +45,7 @@ export declare class FundraiserWeb3Connect {
       projectName: string;
       description: string;
       websiteLink: string;
+      logoUrl: string;
       saleToken: string;
       raiseToken: string;
       vestingStartDelta: bigint;
@@ -160,6 +162,7 @@ export declare class FundraiserWeb3Connect {
     type: number
   ): Promise<string[]>;
   private addTx;
+  getConfirmationsV5(string): Promise<number>;
   updatePendingTransactions(): Promise<void>;
   purgeMinedTransactions(): Promise<void>;
   deployERC20(

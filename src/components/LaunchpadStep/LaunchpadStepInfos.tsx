@@ -10,12 +10,14 @@ function LaunchpadStepInfos() {
   const projectNameEmpty = formData.projectName === "";
   const descriptionEmpty = formData.description === "";
   const websiteLinkEmpty = formData.websiteLink === "";
+  const logoUrlEmpty = formData.logoUrl === "";
   const raiseTokenEmpty = formData.raiseToken === "";
   const saleTokenEmpty = formData.saleToken === "";
   const disableForm =
     projectNameEmpty ||
     descriptionEmpty ||
     websiteLinkEmpty ||
+    logoUrlEmpty ||
     raiseTokenEmpty ||
     saleTokenEmpty;
 
@@ -65,6 +67,17 @@ function LaunchpadStepInfos() {
             placeholder="Enter website link"
             value={formData.websiteLink}
             onChange={(val) => updateField("websiteLink", val)}
+          />
+        </div>
+      </div>
+
+      <div className="launchpadStep-field">
+        <div className="launchpadStep-label">Logo image url</div>
+        <div className="launchpadStep-input">
+          <InputText
+            placeholder="Enter logo image url"
+            value={formData.logoUrl}
+            onChange={(val) => updateField("logoUrl", val)}
           />
         </div>
       </div>

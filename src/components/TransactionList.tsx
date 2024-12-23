@@ -26,7 +26,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
       try {
         // Update the library's pending transactions
         await library.updatePendingTransactions();
-
         // Fetch the updated list of transactions
         const txs = [...library.pending];
         if (isMounted) setTransactions(txs);
@@ -34,10 +33,12 @@ const TransactionList: React.FC<TransactionListProps> = ({
         // Update statuses for each transaction
         const statusUpdates = await Promise.all(
           txs.map(async (tx) => {
-            const confirmations = await tx.confirmations();
+            const confirmations = await library.getConfirmationsV5(tx.hash);
 
+            console.log(confirmations, confirmedTransactions);
             // Trigger the callback if the transaction is confirmed
             if (confirmations > 0 && !confirmedTransactions.has(tx.hash)) {
+              console.log("là", onTransactionConfirmed);
               confirmedTransactions.add(tx.hash); // Mark transaction as confirmed
               onTransactionConfirmed?.(tx); // Fire the callback
             }
@@ -85,28 +86,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
     };
   }, [library, onTransactionConfirmed]);
 
-  return (
-    <div
-      style={{ padding: "1rem", border: "1px solid #ccc", borderRadius: "8px" }}
-    >
-      <h3>Pending Transactions</h3>
-      {transactions.length === 0 ? (
-        <p>No pending transactions</p>
-      ) : (
-        <ul>
-          {transactions.map((tx, index) => (
-            <li key={tx.hash} style={{ marginBottom: "0.5rem" }}>
-              <div>
-                <strong>Transaction #{index + 1}</strong>
-              </div>
-              <div>Hash: {tx.hash}</div>
-              <div>Status: {statuses[tx.hash] || "Checking..."}</div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+  return null;
 };
 
 export default TransactionList;
