@@ -1,7 +1,12 @@
-import { BRIDGE_API_URL, DASHBOARD_API_URL } from "@constants/index";
+import {
+  BRIDGE_API_URL,
+  DASHBOARD_API_URL,
+  LAUNCHPAD_API_URL,
+} from "@constants/index";
 import { TrackingInformation } from "../model/tracking";
 import { DashboardInformation } from "../model/dashboard";
 import { ChallengeInformation, ChallengeLadderUser } from "../model/rewards";
+import { TokenInfo } from "../model/launchpad";
 
 // Monitoring
 export const getTrackingInformation = async (address: string) =>
@@ -29,6 +34,10 @@ export const getChallengesLadder = async () =>
     `${DASHBOARD_API_URL}/ladder?page=1&size=10`,
     "getChallengesLadder"
   );
+
+// Launchpad
+export const getTokenInfo = async (address: string) =>
+  request<TokenInfo>(`${LAUNCHPAD_API_URL}/token/${address}`, "getTokenInfo");
 
 // Functions
 async function request<T>(

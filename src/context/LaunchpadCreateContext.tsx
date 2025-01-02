@@ -85,7 +85,7 @@ export const LaunchpadCreateContextProvider = ({
     vestingDuration: 86400,
     vestingDelta: 3600,
   });
-  const [activeStep, setActiveStep] = useState<Steps>("recap");
+  const [activeStep, setActiveStep] = useState<Steps>("infos");
 
   return (
     <LaunchpadCreateContext.Provider

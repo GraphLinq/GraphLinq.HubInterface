@@ -3,6 +3,8 @@ import "./style.scss";
 import Button from "@components/Button";
 import InputText from "@components/InputText";
 import { useLaunchpadCreateContext } from "@context/LaunchpadCreateContext";
+import { useQuery } from "@tanstack/react-query";
+import { getTokenInfo } from "../../queries/api";
 
 function LaunchpadStepInfos() {
   const { formData, setFormData, setActiveStep } = useLaunchpadCreateContext();
@@ -21,6 +23,17 @@ function LaunchpadStepInfos() {
     raiseTokenEmpty ||
     saleTokenEmpty;
 
+  const qRaiseTokenInfo = useQuery({
+    queryKey: ["raiseTokenInfo"],
+    queryFn: () => getTokenInfo(formData.raiseToken!),
+    enabled: formData.raiseToken !== "",
+  });
+  const qSaleTokenInfo = useQuery({
+    queryKey: ["raiseTokenInfo"],
+    queryFn: () => getTokenInfo(formData.saleToken!),
+    enabled: formData.saleToken !== "",
+  });
+
   const updateField = (field: keyof typeof formData, value: any) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -38,6 +51,7 @@ function LaunchpadStepInfos() {
 
   return (
     <div className="launchpadStep">
+      {JSON.stringify(qRaiseTokenInfo.data)}
       <div className="launchpadStep-field">
         <div className="launchpadStep-label">Project name</div>
         <div className="launchpadStep-input">

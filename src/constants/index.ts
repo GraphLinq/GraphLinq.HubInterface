@@ -9,6 +9,7 @@ export const MAINNET_EXPLORER_URL = "https://etherscan.io";
 export const GLQ_EXPLORER_URL = "https://explorer.graphlinq.io";
 export const BRIDGE_API_URL = "https://api-bridge.graphlinq.io/api/v1";
 export const DASHBOARD_API_URL = "https://api-hub.graphlinq.io";
+export const LAUNCHPAD_API_URL = "https://api-launchpad.graphlinq.io/api";
 export const HUB_URL = "https://hub.graphlinq.io/";
 export const METAMASK_URL = "https://metamask.io/";
 export const GLQ_RPC_URL = "https://glq-dataseed.graphlinq.io";
