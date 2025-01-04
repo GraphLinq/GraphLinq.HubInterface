@@ -3,36 +3,40 @@ import React, { useState } from "react";
 import Approved from "@assets/icons/approved.svg?react";
 import Users from "@assets/icons/users.svg?react";
 import Locktime from "@assets/icons/locktime.svg?react";
-import { formatNumberToDollars } from "@utils/number";
+import {
+  formatNumberToDollars,
+  formatSecondsToReadableTime,
+} from "@utils/number";
 import { formatDistanceToNow } from "date-fns";
 import { NavLink } from "react-router-dom";
+import { FundraiserSmall } from "../../model/launchpad";
 
 interface LaunchpadCardProps {
-  address: string;
+  fundraiser: FundraiserSmall;
 }
 
-const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ address }) => {
-  const data = {
-    live: Math.random() > 0.5,
-    finished: Math.random() > 0.2,
-    verified: Math.random() > 0.3,
-    projectName: "Nexus Protocol",
-    projectDescription: "Decentralized exchange",
-    projectType: "Liquidity Pool",
-    symbol: "GLQ",
-    soft: Math.round(5000 + Math.random() * 5000),
-    hard: Math.round(30000 + Math.random() * 10000),
-    progress: 15000 + Math.random() * 5000,
-    progressPercent: Math.round(Math.random() * 100),
-    raiseTokenPriceUSD: 0.092,
-    raiseTokenName: "GLQ",
-    lockup: new Date().getTime() - Math.random() * 100000000,
-    participants: Math.round(Math.random() * 100),
-  };
+const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ fundraiser: data }) => {
+  // const data = {
+  //   live: Math.random() > 0.5,
+  //   finished: Math.random() > 0.2,
+  //   verified: Math.random() > 0.3,
+  //   projectName: "Nexus Protocol",
+  //   projectDescription: "Decentralized exchange",
+  //   projectType: "Liquidity Pool",
+  //   symbol: "GLQ",
+  //   soft: Math.round(5000 + Math.random() * 5000),
+  //   hard: Math.round(30000 + Math.random() * 10000),
+  //   progress: 15000 + Math.random() * 5000,
+  //   progressPercent: Math.round(Math.random() * 100),
+  //   raiseTokenPriceUSD: 0.092,
+  //   raiseTokenName: "GLQ",
+  //   lockup: new Date().getTime() - Math.random() * 100000000,
+  //   participants: Math.round(Math.random() * 100),
+  // };
 
   return (
     <>
-      <NavLink to={`/launchpad/${address}`} className="launchpadCard">
+      <NavLink to={`/launchpad/${data.address}`} className="launchpadCard">
         <div className="launchpadCard-header">
           <div className="launchpadCard-header-left">
             <div className="launchpadCard-name">
@@ -60,7 +64,7 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ address }) => {
             <div className="launchpadCard-progress-header">
               <div className="launchpadCard-progress-title">Progress</div>
               <div className="launchpadCard-progress-value">
-                {Math.round(data.progress)} {data.raiseTokenName}
+                {Math.round(data.progress)} {data.symbol}
                 <span className="color">
                   {formatNumberToDollars(
                     data.progress * data.raiseTokenPriceUSD,
@@ -76,7 +80,8 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ address }) => {
                   className="launchpadCard-progress-bar-progress"
                   style={{
                     width: data.progressPercent + "%",
-                  }}></div>
+                  }}
+                ></div>
               </div>
               <div className="launchpadCard-progress-progress-text">
                 {data.progressPercent}%
@@ -88,7 +93,7 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ address }) => {
               <div className="launchpadCard-range-col">
                 <div>
                   <span>
-                    {data.soft} {data.raiseTokenName}{" "}
+                    {data.soft} {data.symbol}{" "}
                   </span>
                   <span className="color">
                     {formatNumberToDollars(
@@ -102,7 +107,7 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ address }) => {
               <div className="launchpadCard-range-col">
                 <div>
                   <span>
-                    {data.hard} {data.raiseTokenName}{" "}
+                    {data.hard} {data.symbol}{" "}
                     <span className="color">
                       {formatNumberToDollars(
                         data.hard * data.raiseTokenPriceUSD,
@@ -123,9 +128,7 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ address }) => {
                 <span>Lockup time</span>
               </div>
               <div className="launchpadCard-table-col">
-                {formatDistanceToNow(new Date(data.lockup), {
-                  addSuffix: true,
-                })}
+                {formatSecondsToReadableTime(data.lockup)}
               </div>
             </div>
             <div className="launchpadCard-table-row">

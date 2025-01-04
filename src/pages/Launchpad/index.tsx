@@ -1,5 +1,7 @@
 import Select from "@components/Select";
 import "./style.scss";
+import Spinner from "@assets/icons/spinner.svg?react";
+import SearchEmpty from "@assets/icons/search-empty.svg?react";
 
 import SEO from "@components/SEO";
 import { useState } from "react";
@@ -15,13 +17,6 @@ const seoDesc =
   "View tokens, transactions, balances, source code, and analytics for the Pool smart contract on GLQ Smart Chain.";
 
 function LaunchpadPage() {
-  const projects = [
-    "0x1645700Fffdaa0510Fdd9Ffb38C6E0c3EA0A5c5F",
-    "0xA71A6DF9510Cb226bdb271E4d727bd7472e149d0",
-    "0x28A922134968AD9171b9C44B6b65202f96b57223",
-    "0xBf41BCB3C961C552648541f18F284584C294A529",
-    "0xbC9d87D7Eb9dDc6C3e26bCcba40f9F10E349F0A2",
-  ];
   const projectStatuses = ["All", "Active", "Failed", "Terminated", "Owned"];
   const [activeStatus, setActiveStatus] = useState(0);
   const [search, setSearch] = useState("");
@@ -57,7 +52,6 @@ function LaunchpadPage() {
     <>
       <SEO title={seoTitle} description={seoDesc} />
       <div className="main-page launchpad">
-        {JSON.stringify(qFundraisers.data)}
         <div className="main-card">
           <div className="main-card-title">Launchpad</div>
           <div className="main-card-content">
@@ -65,7 +59,8 @@ function LaunchpadPage() {
             <div className="launchpad-filters">
               <div className="launchpad-filters-left">
                 <div className="launchpad-filters-title">
-                  Projects <span>{projects.length}</span>
+                  Projects{" "}
+                  <span>{qFundraisers.data && qFundraisers.data.length}</span>
                 </div>
               </div>
 
@@ -87,11 +82,35 @@ function LaunchpadPage() {
           </div>
         </div>
 
-        <div className="launchpad-list">
-          {projects.map((address) => (
-            <LaunchpadCard address={address} />
-          ))}
-        </div>
+        {qFundraisers.data ? (
+          <div className="launchpad-list">
+            {qFundraisers.data.map((fundraiser) => (
+              <LaunchpadCard fundraiser={fundraiser} />
+            ))}
+          </div>
+        ) : (
+          <>
+            {qFundraisers.isLoading ? (
+              <div className="launchpad-list-empty">
+                <div className="launchpad-empty">
+                  <div className="launchpad-empty-info">
+                    <Spinner />
+                    <div className="launchpad-empty-label">
+                      Loading projects...
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="launchpad-empty">
+                <div className="launchpad-empty-info">
+                  <SearchEmpty />
+                  <div className="launchpad-empty-label">No projects found</div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </>
   );
