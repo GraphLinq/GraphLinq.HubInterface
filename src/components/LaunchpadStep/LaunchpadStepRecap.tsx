@@ -57,7 +57,6 @@ function LaunchpadStepRecap() {
       setFormDisabled(true);
 
       setPending("Waiting for confirmations...");
-      console.log(formData);
       await submitFundraiser(formData);
     } catch (error) {
       resetFeedback();

@@ -64,8 +64,6 @@ function LaunchpadSinglePage() {
     (state) => state.tokenInfo[fundraiserState?.raiseToken] || null
   );
 
-  console.log(fundraiserState);
-
   const reloadData = () => async () => {
     const fundraiserState = await library.getFundraiserState(fundraiserAddr);
     store.getState().setFundraiseState(fundraiserAddr, fundraiserState);
