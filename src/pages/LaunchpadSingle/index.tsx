@@ -19,6 +19,8 @@ import { FundraiserManager } from "../../services/FundraiserManager";
 import useLaunchpad from "../../composables/useLaunchpad";
 import { ethers } from "ethers";
 import { formatNumberToDollars } from "@utils/number";
+import { useQuery } from "@tanstack/react-query";
+import { getFundraiser } from "../../queries/api";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
@@ -28,6 +30,12 @@ const seoDesc =
 function LaunchpadSinglePage() {
   const { id: fundraiserAddr } = useParams();
   useLaunchpad();
+
+  const qFundraiser = useQuery({
+    queryKey: ["fundraisers"],
+    queryFn: () => getFundraiser(fundraiserAddr!),
+    enabled: () => !!fundraiserAddr,
+  });
 
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
@@ -275,7 +283,7 @@ function LaunchpadSinglePage() {
       fundraiserState.raisedAmount >= fundraiserState.config[1]) ||
     isStealthLaunch;
 
-  const isVerified = true; // @TODO
+  const isVerified = false; // @TODO
 
   const fail = async () => {
     await fundraiserManager.failFundraiser(fundraiserAddr);
@@ -323,6 +331,7 @@ function LaunchpadSinglePage() {
     <>
       <SEO title={seoTitle} description={seoDesc} />
       <div className="main-page launchpadSingle">
+        {JSON.stringify(qFundraiser.data)}
         <div className="main-card">
           <div className="launchpadSingle-topheader">
             <Button link="/launchpad" type="tertiary" icon={<ArrowBack />}>

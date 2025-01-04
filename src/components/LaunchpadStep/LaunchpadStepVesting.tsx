@@ -1,3 +1,4 @@
+import Alert from "@components/Alert";
 import "./style.scss";
 
 import Button from "@components/Button";
@@ -16,13 +17,17 @@ function LaunchpadStepVesting() {
   const [activeDeltaOption, setActiveDeltaOption] = useState(0);
 
   const vestingStartDateEmpty = formData.vestingStartDate === "";
+  const vestingStartDateInvalid =
+    !vestingStartDateEmpty &&
+    formData.endTime !== "" &&
+    new Date(formData.vestingStartDate) < new Date(formData.endTime);
   const vestingEndDateEmpty = formData.vestingEndDate === "";
   const vestingDurationEmpty = formData.vestingDuration === 0;
   const vestingDeltaEmpty = formData.vestingDelta === 0;
   const disableForm =
     formData.campaignType === "stealth"
       ? vestingDurationEmpty || vestingDeltaEmpty
-      : vestingStartDateEmpty || vestingEndDateEmpty;
+      : vestingStartDateEmpty || vestingStartDateInvalid || vestingEndDateEmpty;
 
   const updateField = (field: keyof typeof formData, value: any) => {
     setFormData((prevData) => ({
@@ -40,31 +45,39 @@ function LaunchpadStepVesting() {
   };
 
   const transformToSeconds = (val: string, ratio: number) => {
-    if (val === '') return 0;
+    if (val === "") return 0;
 
     return parseInt(val) * ratio;
-  }
+  };
   const transformToDaysOrHours = (val: number, ratio: number) => {
     return val / ratio;
-  }
+  };
 
   return (
     <div className="launchpadStep">
       {formData.campaignType === "fair" && (
-        <div className="launchpadStep-field">
-          <div className="launchpadStep-label">Vesting Start date</div>
-          <div className="launchpadStep-input">
-            <InputDatetime
-              placeholder="Pick a date and time"
-              onChange={(val) => updateField("vestingStartDate", val)}
-              value={
-                formData.vestingStartDate !== ""
-                  ? formData.vestingStartDate
-                  : null
-              }
-            />
+        <>
+          <div className="launchpadStep-field">
+            <div className="launchpadStep-label">Vesting Start date</div>
+            <div className="launchpadStep-input">
+              <InputDatetime
+                placeholder="Pick a date and time"
+                onChange={(val) => updateField("vestingStartDate", val)}
+                value={
+                  formData.vestingStartDate !== ""
+                    ? formData.vestingStartDate
+                    : null
+                }
+              />
+            </div>
           </div>
-        </div>
+          {vestingStartDateInvalid && (
+            <Alert type="error">
+              Vesting Start date must be after Campaign End time :{" "}
+              <b>{new Date(formData.endTime).toLocaleString()}</b>
+            </Alert>
+          )}
+        </>
       )}
       {formData.campaignType === "fair" && (
         <div className="launchpadStep-field">
@@ -86,9 +99,17 @@ function LaunchpadStepVesting() {
           <div className="launchpadStep-label">Vesting duration</div>
           <div className="launchpadStep-input launchpadStep-row">
             <InputNumber
-              value={transformToDaysOrHours(formData.vestingDuration, durations[activeDurationOption]).toString()}
+              value={transformToDaysOrHours(
+                formData.vestingDuration,
+                durations[activeDurationOption]
+              ).toString()}
               max={Infinity}
-              onChange={(val) => updateField("vestingDuration", transformToSeconds(val, durations[activeDurationOption]))}
+              onChange={(val) =>
+                updateField(
+                  "vestingDuration",
+                  transformToSeconds(val, durations[activeDurationOption])
+                )
+              }
             />
             <Select
               active={activeDurationOption}
@@ -109,9 +130,17 @@ function LaunchpadStepVesting() {
           <div className="launchpadStep-label">Vesting delta</div>
           <div className="launchpadStep-input launchpadStep-row">
             <InputNumber
-              value={transformToDaysOrHours(formData.vestingDelta, durations[activeDeltaOption]).toString()}
+              value={transformToDaysOrHours(
+                formData.vestingDelta,
+                durations[activeDeltaOption]
+              ).toString()}
               max={Infinity}
-              onChange={(val) => updateField("vestingDelta", transformToSeconds(val, durations[activeDeltaOption]))}
+              onChange={(val) =>
+                updateField(
+                  "vestingDelta",
+                  transformToSeconds(val, durations[activeDeltaOption])
+                )
+              }
             />
             <Select
               active={activeDeltaOption}

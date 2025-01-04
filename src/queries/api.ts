@@ -36,6 +36,15 @@ export const getChallengesLadder = async () =>
   );
 
 // Launchpad
+export const getFundraisers = async () =>
+  request<TokenInfo>(`${LAUNCHPAD_API_URL}/fundraisers`, "getFundraisers");
+
+export const getFundraiser = async (address: string) =>
+  request<TokenInfo>(
+    `${LAUNCHPAD_API_URL}/fundraiser/${address}`,
+    "getFundraiser"
+  );
+
 export const getTokenInfo = async (address: string) =>
   request<TokenInfo>(`${LAUNCHPAD_API_URL}/token/${address}`, "getTokenInfo");
 

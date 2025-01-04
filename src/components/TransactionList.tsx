@@ -35,10 +35,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
           txs.map(async (tx) => {
             const confirmations = await library.getConfirmationsV5(tx.hash);
 
-            console.log(confirmations, confirmedTransactions);
+            // console.log(confirmations, confirmedTransactions);
             // Trigger the callback if the transaction is confirmed
             if (confirmations > 0 && !confirmedTransactions.has(tx.hash)) {
-              console.log("là", onTransactionConfirmed);
               confirmedTransactions.add(tx.hash); // Mark transaction as confirmed
               onTransactionConfirmed?.(tx); // Fire the callback
             }

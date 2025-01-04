@@ -6,6 +6,8 @@ import { useState } from "react";
 import InputText from "@components/InputText";
 import LaunchpadCard from "@components/LaunchpadCard/LaunchpadCard";
 import useLaunchpad from "../../composables/useLaunchpad";
+import { getFundraisers } from "../../queries/api";
+import { useQuery } from "@tanstack/react-query";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
@@ -30,6 +32,11 @@ function LaunchpadPage() {
 
   useLaunchpad();
 
+  const qFundraisers = useQuery({
+    queryKey: ["fundraisers"],
+    queryFn: () => getFundraisers(),
+  });
+
   const resetFeedback = () => {
     setError("");
     setPending("");
@@ -50,6 +57,7 @@ function LaunchpadPage() {
     <>
       <SEO title={seoTitle} description={seoDesc} />
       <div className="main-page launchpad">
+        {JSON.stringify(qFundraisers.data)}
         <div className="main-card">
           <div className="main-card-title">Launchpad</div>
           <div className="main-card-content">

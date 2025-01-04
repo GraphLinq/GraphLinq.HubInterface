@@ -5,34 +5,42 @@ import InputText from "@components/InputText";
 import { useLaunchpadCreateContext } from "@context/LaunchpadCreateContext";
 import { useQuery } from "@tanstack/react-query";
 import { getTokenInfo } from "../../queries/api";
+import Alert from "@components/Alert";
+import Spinner from "@assets/icons/spinner.svg?react";
 
 function LaunchpadStepInfos() {
   const { formData, setFormData, setActiveStep } = useLaunchpadCreateContext();
+
+  const qRaiseTokenInfo = useQuery({
+    queryKey: ["raiseTokenInfo", formData.raiseToken],
+    queryFn: () => getTokenInfo(formData.raiseToken!),
+    enabled: formData.raiseToken !== "",
+  });
+  const qSaleTokenInfo = useQuery({
+    queryKey: ["saleTokenInfo"],
+    queryFn: () => getTokenInfo(formData.saleToken!),
+    enabled: formData.saleToken !== "",
+  });
 
   const projectNameEmpty = formData.projectName === "";
   const descriptionEmpty = formData.description === "";
   const websiteLinkEmpty = formData.websiteLink === "";
   const logoUrlEmpty = formData.logoUrl === "";
-  const raiseTokenEmpty = formData.raiseToken === "";
-  const saleTokenEmpty = formData.saleToken === "";
+  const raiseTokenEmpty =
+    formData.raiseToken === "" ||
+    !!qRaiseTokenInfo.error ||
+    !qRaiseTokenInfo.data;
+  const saleTokenEmpty =
+    formData.saleToken === "" || !!qSaleTokenInfo.error || !qSaleTokenInfo.data;
+  const sameToken = formData.raiseToken === formData.saleToken;
   const disableForm =
     projectNameEmpty ||
     descriptionEmpty ||
     websiteLinkEmpty ||
     logoUrlEmpty ||
     raiseTokenEmpty ||
-    saleTokenEmpty;
-
-  const qRaiseTokenInfo = useQuery({
-    queryKey: ["raiseTokenInfo"],
-    queryFn: () => getTokenInfo(formData.raiseToken!),
-    enabled: formData.raiseToken !== "",
-  });
-  const qSaleTokenInfo = useQuery({
-    queryKey: ["raiseTokenInfo"],
-    queryFn: () => getTokenInfo(formData.saleToken!),
-    enabled: formData.saleToken !== "",
-  });
+    saleTokenEmpty ||
+    sameToken;
 
   const updateField = (field: keyof typeof formData, value: any) => {
     setFormData((prevData) => ({
@@ -46,12 +54,14 @@ function LaunchpadStepInfos() {
       return;
     }
 
+    updateField("raiseTokenName", qRaiseTokenInfo.data.symbol);
+    updateField("saleTokenName", qSaleTokenInfo.data.symbol);
+
     setActiveStep("campaign");
   };
 
   return (
     <div className="launchpadStep">
-      {JSON.stringify(qRaiseTokenInfo.data)}
       <div className="launchpadStep-field">
         <div className="launchpadStep-label">Project name</div>
         <div className="launchpadStep-input">
@@ -97,7 +107,10 @@ function LaunchpadStepInfos() {
       </div>
 
       <div className="launchpadStep-field">
-        <div className="launchpadStep-label">Raise token</div>
+        <div className="launchpadStep-label">
+          <p>Raise token</p>
+          {qRaiseTokenInfo.isLoading && <Spinner />}
+        </div>
         <div className="launchpadStep-input">
           <InputText
             placeholder="Enter raise token address"
@@ -105,11 +118,19 @@ function LaunchpadStepInfos() {
             onChange={(val) => updateField("raiseToken", val)}
           />
         </div>
-        <div className="launchpadStep-extra">TODO token info</div>
+        {qRaiseTokenInfo.error && <Alert type="error">Token not found.</Alert>}
+        {qRaiseTokenInfo.data && (
+          <Alert type="success">
+            Token found : <b>{qRaiseTokenInfo.data.symbol}</b>
+          </Alert>
+        )}
       </div>
 
       <div className="launchpadStep-field">
-        <div className="launchpadStep-label">Sale token</div>
+        <div className="launchpadStep-label">
+          <p>Sale token</p>
+          {qSaleTokenInfo.isLoading && <Spinner />}
+        </div>
         <div className="launchpadStep-input">
           <InputText
             placeholder="Enter sale token address"
@@ -117,8 +138,19 @@ function LaunchpadStepInfos() {
             onChange={(val) => updateField("saleToken", val)}
           />
         </div>
-        <div className="launchpadStep-extra">TODO token info</div>
+        {qSaleTokenInfo.error && <Alert type="error">Token not found.</Alert>}
+        {qSaleTokenInfo.data && (
+          <Alert type="success">
+            Token found : <b>{qSaleTokenInfo.data.symbol}</b>
+          </Alert>
+        )}
       </div>
+
+      {sameToken && (
+        <Alert type="error">
+          You can't have the same token for raise and sale.
+        </Alert>
+      )}
 
       <Button disabled={disableForm} onClick={handleSubmit}>
         Next
