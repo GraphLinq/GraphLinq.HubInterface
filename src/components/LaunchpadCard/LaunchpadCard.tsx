@@ -33,7 +33,6 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ fundraiser: data }) => {
   //   lockup: new Date().getTime() - Math.random() * 100000000,
   //   participants: Math.round(Math.random() * 100),
   // };
-
   return (
     <>
       <NavLink to={`/launchpad/${data.address}`} className="launchpadCard">

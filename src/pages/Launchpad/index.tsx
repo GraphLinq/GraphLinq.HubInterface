@@ -28,8 +28,8 @@ function LaunchpadPage() {
   useLaunchpad();
 
   const qFundraisers = useQuery({
-    queryKey: ["fundraisers"],
-    queryFn: () => getFundraisers(),
+    queryKey: ["fundraisers", activeStatus, search],
+    queryFn: ({ signal }) => getFundraisers({ activeStatus, search }, signal),
   });
 
   const resetFeedback = () => {
@@ -82,7 +82,7 @@ function LaunchpadPage() {
           </div>
         </div>
 
-        {qFundraisers.data ? (
+        {qFundraisers.data && qFundraisers.data.length ? (
           <div className="launchpad-list">
             {qFundraisers.data.map((fundraiser) => (
               <LaunchpadCard fundraiser={fundraiser} />

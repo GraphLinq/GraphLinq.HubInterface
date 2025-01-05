@@ -36,11 +36,29 @@ export const getChallengesLadder = async () =>
   );
 
 // Launchpad
-export const getFundraisers = async () =>
-  request<FundraiserSmall[]>(
-    `${LAUNCHPAD_API_URL}/fundraisers`,
-    "getFundraisers"
+export const getFundraisers = async (
+  filters: { activeStatus?: number; search?: string },
+  signal?: AbortSignal
+) => {
+  const params = new URLSearchParams();
+
+  if (filters.activeStatus !== undefined && filters.activeStatus !== 0) {
+    params.append("type", (filters.activeStatus - 1).toString());
+  }
+
+  if (filters.search) {
+    params.append("search", filters.search);
+  }
+
+  const url = `${LAUNCHPAD_API_URL}/fundraisers?${params.toString()}`;
+  return request<FundraiserSmall[]>(
+    url,
+    "getFundraisers",
+    "GET",
+    undefined,
+    signal
   );
+};
 
 export const getFundraiser = async (address: string) =>
   request<Fundraiser>(
@@ -56,7 +74,8 @@ async function request<T>(
   url: string,
   name: string,
   method: "GET" | "POST" = "GET",
-  body?: any
+  body?: any,
+  signal?: AbortSignal
 ) {
   const response: Response = await fetch(url, {
     method: method,
@@ -64,6 +83,7 @@ async function request<T>(
       "Content-Type": "application/json",
     },
     body: method === "POST" ? JSON.stringify(body) : undefined,
+    signal,
   });
 
   if (!response.ok) {
