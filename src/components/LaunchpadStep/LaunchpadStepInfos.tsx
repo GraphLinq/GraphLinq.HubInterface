@@ -17,7 +17,7 @@ function LaunchpadStepInfos() {
     enabled: formData.raiseToken !== "",
   });
   const qSaleTokenInfo = useQuery({
-    queryKey: ["saleTokenInfo"],
+    queryKey: ["saleTokenInfo", formData.saleToken],
     queryFn: () => getTokenInfo(formData.saleToken!),
     enabled: formData.saleToken !== "",
   });

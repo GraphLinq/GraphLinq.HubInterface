@@ -31,6 +31,13 @@ const formatBigNumberToFixed = (
   return formattedAmount;
 };
 
+const formatBigNumberToCustomDecimals = (
+  amount: ethers.BigNumber,
+  decimals: number
+) => {
+  return parseInt(ethers.utils.formatUnits(amount, decimals));
+};
+
 const isInfinity = (value: number) => {
   return value > 1e26;
 };
@@ -65,6 +72,7 @@ export {
   formatNumberToDollars,
   formatNumberToFixed,
   formatBigNumberToFixed,
+  formatBigNumberToCustomDecimals,
   formatSecondsToReadableTime,
   transformFeesToData,
   transformDataToFees,

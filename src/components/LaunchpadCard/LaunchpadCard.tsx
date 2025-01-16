@@ -10,6 +10,8 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { NavLink } from "react-router-dom";
 import { FundraiserSmall } from "../../model/launchpad";
+import { ethers } from "ethers";
+import { formatTokenDecimals } from "@utils/launchpad";
 
 interface LaunchpadCardProps {
   fundraiser: FundraiserSmall;
@@ -63,10 +65,19 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ fundraiser: data }) => {
             <div className="launchpadCard-progress-header">
               <div className="launchpadCard-progress-title">Progress</div>
               <div className="launchpadCard-progress-value">
-                {Math.round(data.progress)} {data.symbol}
+                {formatTokenDecimals(
+                  data.progress,
+                  parseInt(data.raiseTokenInfo.decimals)
+                )}{" "}
+                {data.symbol}
                 <span className="color">
                   {formatNumberToDollars(
-                    data.progress * data.raiseTokenPriceUSD,
+                    parseFloat(
+                      formatTokenDecimals(
+                        data.progress,
+                        parseInt(data.raiseTokenInfo.decimals)
+                      )
+                    ) * data.raiseTokenPriceUSD,
                     0
                   )}
                 </span>
@@ -92,11 +103,20 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ fundraiser: data }) => {
               <div className="launchpadCard-range-col">
                 <div>
                   <span>
-                    {data.soft} {data.symbol}{" "}
+                    {formatTokenDecimals(
+                      data.soft,
+                      parseInt(data.raiseTokenInfo.decimals)
+                    )}{" "}
+                    {data.symbol}{" "}
                   </span>
                   <span className="color">
                     {formatNumberToDollars(
-                      data.soft * data.raiseTokenPriceUSD,
+                      parseFloat(
+                        formatTokenDecimals(
+                          data.soft,
+                          parseInt(data.raiseTokenInfo.decimals)
+                        )
+                      ) * data.raiseTokenPriceUSD,
                       0
                     )}
                   </span>
@@ -106,10 +126,19 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ fundraiser: data }) => {
               <div className="launchpadCard-range-col">
                 <div>
                   <span>
-                    {data.hard} {data.symbol}{" "}
+                    {formatTokenDecimals(
+                      data.hard,
+                      parseInt(data.raiseTokenInfo.decimals)
+                    )}{" "}
+                    {data.symbol}{" "}
                     <span className="color">
                       {formatNumberToDollars(
-                        data.hard * data.raiseTokenPriceUSD,
+                        parseFloat(
+                          formatTokenDecimals(
+                            data.hard,
+                            parseInt(data.raiseTokenInfo.decimals)
+                          )
+                        ) * data.raiseTokenPriceUSD,
                         0
                       )}
                     </span>

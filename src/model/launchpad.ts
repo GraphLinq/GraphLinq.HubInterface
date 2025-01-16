@@ -1,7 +1,7 @@
 export interface TokenInfo {
   name: string;
   symbol: string;
-  decimals: bigint;
+  decimals: string;
 }
 
 export interface FundraiserSmall {
@@ -13,9 +13,9 @@ export interface FundraiserSmall {
   projectType: string;
   projectLogo: string;
   symbol: string;
-  soft: number;
-  hard: number;
-  progress: number;
+  soft: bigint;
+  hard: bigint;
+  progress: bigint;
   progressPercent: number;
   raiseTokenPriceUSD: number;
   raiseTokenName: string;
@@ -23,31 +23,35 @@ export interface FundraiserSmall {
   participants: number;
   type: number;
   address: string;
+  raiseToken: string;
+  saleToken: string;
+  raiseTokenInfo: TokenInfo;
+  saleTokenInfo: TokenInfo;
 }
 
 export interface Fundraiser {
-  vestingStartDelta: bigint;
-  vestingDuration: bigint;
-  raisedAmount: bigint;
-  soldAmount: bigint;
-  createdTimestamp: bigint;
-  finalizedTimestamp: bigint;
+  vestingStartDelta: string;
+  vestingDuration: string;
+  raisedAmount: string;
+  soldAmount: string;
+  createdTimestamp: string;
+  finalizedTimestamp: string;
   saleToken: string;
   raiseToken: string;
   stateString: string;
-  poolFee: bigint;
-  projectInfo: [string, string, string] & {
+  poolFee: string;
+  projectInfo: {
     projectName: string;
     projectLogo: string;
     description: string;
     websiteLink: string;
   };
   campaignDetails: [string, string, string];
-  pricePerToken: bigint;
-  saleTokenBalance: bigint;
-  raiseTokenBalance: bigint;
-  config: bigint[];
-  participants: bigint;
+  pricePerToken: string;
+  saleTokenBalance: string;
+  raiseTokenBalance: string;
+  config: string[];
+  participants: string;
   poolAddr: string;
   owner: string;
 }

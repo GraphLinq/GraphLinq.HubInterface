@@ -1,0 +1,18 @@
+.launchpadVestingInfos {
+  .launchpadSingle-subtitle {
+    margin-bottom: 8px;
+  }
+
+  .launchpadSingle-details-row {
+    font-size: 16px;
+    padding: 8px 0;
+  }
+
+  &-actions {
+    margin-top: 12px;
+
+    button {
+      width: 100%;
+    }
+  }
+}

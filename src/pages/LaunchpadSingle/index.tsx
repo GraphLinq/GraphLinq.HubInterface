@@ -1,26 +1,28 @@
 import "./style.scss";
-import ArrowBack from "@assets/icons/arrow-back.svg?react";
 import Approved from "@assets/icons/approved.svg?react";
-
-import SEO from "@components/SEO";
-import { useEffect, useState } from "react";
+import ArrowBack from "@assets/icons/arrow-back.svg?react";
+import Spinner from "@assets/icons/spinner.svg?react";
 import Button from "@components/Button";
-import { useNavigate, useParams } from "react-router-dom";
-import { VestingState } from "../../types/launchpad";
-import { useStore } from "../../store";
-import { useWalletClient } from "wagmi";
+import SEO from "@components/SEO";
+import { useQuery } from "@tanstack/react-query";
 import {
   formatTimestamp,
   formatTimestampToDate,
   formatTokenDecimals,
   formatTokenSymbol,
 } from "@utils/launchpad";
-import { FundraiserManager } from "../../services/FundraiserManager";
-import useLaunchpad from "../../composables/useLaunchpad";
 import { ethers } from "ethers";
-import { formatNumberToDollars } from "@utils/number";
-import { useQuery } from "@tanstack/react-query";
-import { getFundraiser } from "../../queries/api";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useWalletClient } from "wagmi";
+
+import { useEthersSigner } from "../../composables/useEthersProvider";
+import useLaunchpad from "../../composables/useLaunchpad";
+import { getFundraiser, getTokenInfo } from "../../queries/api";
+import { FundraiserManager } from "../../services/FundraiserManager";
+import { useStore } from "../../store";
+import { VestingState } from "../../types/launchpad";
+import { VestingInformation } from "@components/LaunchpadVestingInfos/LaunchpadVestingInfos";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
@@ -29,13 +31,13 @@ const seoDesc =
 
 function LaunchpadSinglePage() {
   const { id: fundraiserAddr } = useParams();
-  useLaunchpad();
+  const navigate = useNavigate();
+  const provider = useEthersSigner();
+  const store: any = useStore();
+  const library = store.getState().library;
+  const { data: walletClient } = useWalletClient();
 
-  const qFundraiser = useQuery({
-    queryKey: ["fundraisers"],
-    queryFn: () => getFundraiser(fundraiserAddr!),
-    enabled: () => !!fundraiserAddr,
-  });
+  useLaunchpad();
 
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
@@ -47,166 +49,76 @@ function LaunchpadSinglePage() {
     setSuccess("");
   };
 
-  // Helper function to format bigint to readable number
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [contribution, setContribution] = useState<string | null>(null);
-  const [hasClaimed, setClaimed] = useState<boolean | null>(null);
-  const [vestingInfo, setVestingInfo] = useState<VestingState | null>(null);
+  const qFundraiser = useQuery({
+    queryKey: ["fundraiser", fundraiserAddr],
+    queryFn: () => getFundraiser(fundraiserAddr!),
+    enabled: () => !!fundraiserAddr,
+  });
 
-  const fundraiserState = useStore(
-    (state) => state.fundraiserStates[fundraiserAddr as string] || null
-  );
-  const saleTokenInfo = useStore(
-    (state) => state.tokenInfo[fundraiserState?.saleToken] || null
-  );
-  const raiseTokenInfo = useStore(
-    (state) => state.tokenInfo[fundraiserState?.raiseToken] || null
-  );
+  const qRaiseTokenInfo = useQuery({
+    queryKey: ["raiseTokenInfo", qFundraiser.data?.raiseToken],
+    queryFn: () => getTokenInfo(qFundraiser.data!.raiseToken),
+    enabled: qFundraiser.data && qFundraiser.data.raiseToken !== "",
+  });
+  const qSaleTokenInfo = useQuery({
+    queryKey: ["saleTokenInfo", qFundraiser.data?.saleToken],
+    queryFn: () => getTokenInfo(qFundraiser.data!.saleToken!),
+    enabled: qFundraiser.data && qFundraiser.data.saleToken !== "",
+  });
 
-  const reloadData = () => async () => {
-    const fundraiserState = await library.getFundraiserState(fundraiserAddr);
-    store.getState().setFundraiseState(fundraiserAddr, fundraiserState);
-    const saleToken = await library.getTokenInfo(fundraiserState.saleToken);
-    store.getState().setTokenInfo(fundraiserState.saleToken, saleToken);
-    const raiseToken = await library.getTokenInfo(fundraiserState.raiseToken);
-    store.getState().setTokenInfo(fundraiserState.raiseToken, raiseToken);
-  };
+  const fundraiserState = qFundraiser.data;
+  const raiseTokenInfo = qRaiseTokenInfo.data;
+  const saleTokenInfo = qSaleTokenInfo.data;
 
-  const store: any = useStore();
-  const library = store.getState().library;
-  const { data: walletClient } = useWalletClient();
+  const { data: contribution } = useQuery({
+    queryKey: ["contribution", fundraiserAddr],
+    queryFn: async () => {
+      const amount = await library.getContribution(provider, fundraiserAddr);
+      return formatTokenDecimals(amount, parseInt(raiseTokenInfo!.decimals));
+    },
+    enabled: !!library && !!raiseTokenInfo,
+  });
 
-  useEffect(() => {
-    const fetchDataIfNeeded = async () => {
-      setLoading(true); // Show loading state
-      try {
-        // Fetch fundraiser state if not in the store
-        let state = fundraiserState;
-        if (!state) {
-          state = await library.getFundraiserState(fundraiserAddr);
-          console.log("state", state);
-          store.getState().setFundraiseState(fundraiserAddr, state);
-        }
+  const { data: hasClaimed }: { data?: boolean } = useQuery({
+    queryKey: ["hasClaimed", fundraiserAddr],
+    queryFn: () => library.checkClaimed(provider, fundraiserAddr),
+    enabled: !!library,
+  });
 
-        // Fetch sale token info if missing
-        if (!saleTokenInfo && state.saleToken) {
-          const saleToken = await library.getTokenInfo(state.saleToken);
-          store.getState().setTokenInfo(state.saleToken, saleToken);
-        }
+  const qVestingInfo = useQuery({
+    queryKey: ["vestingInfo", fundraiserAddr],
+    queryFn: () => {
+      console.log("ici");
+      return library.getVestingInfo(provider, fundraiserAddr);
+    },
+    enabled:
+      !!library &&
+      fundraiserState &&
+      parseInt(fundraiserState.vestingDuration) > 0,
+  });
 
-        // Fetch raise token info if missing
-        if (!raiseTokenInfo && state.raiseToken) {
-          const raiseToken = await library.getTokenInfo(state.raiseToken);
-          store.getState().setTokenInfo(state.raiseToken, raiseToken);
-        }
-      } catch (error) {
-        console.error("Error loading data:", error);
-      } finally {
-        setLoading(false); // Hide loading state
-      }
-    };
+  if (!fundraiserAddr || !ethers.utils.isAddress(fundraiserAddr)) {
+    navigate("/launchpad");
+    return null;
+  }
 
-    fetchDataIfNeeded();
-  }, [
-    fundraiserAddr,
-    fundraiserState,
-    saleTokenInfo,
-    raiseTokenInfo,
-    library,
-    store,
-  ]);
+  const loading =
+    qFundraiser.isLoading ||
+    qRaiseTokenInfo.isLoading ||
+    qSaleTokenInfo.isLoading;
+  const noData = !fundraiserState || !raiseTokenInfo || !saleTokenInfo;
 
-  useEffect(() => {
-    const fetchContribution = async () => {
-      if (!library || !walletClient || !fundraiserState || !raiseTokenInfo) {
-        return;
-      }
-      try {
-        // @ts-ignore
-        const ethersProvider = new ethers.providers.Web3Provider(
-          walletClient.transport
-        );
-        const signer = await ethersProvider.getSigner();
-
-        // Fetch the contribution
-        const contributionAmount = await library.getContribution(
-          signer,
-          fundraiserAddr
-        );
-
-        // Convert contribution amount to a readable format
-        const formattedContribution = formatTokenDecimals(
-          contributionAmount,
-          raiseTokenInfo.decimals
-        );
-
-        setContribution(formattedContribution);
-      } catch (error) {
-        console.error("Error fetching contribution:", error);
-        setContribution(null);
-      }
-    };
-
-    fetchContribution();
-  }, [library, walletClient, fundraiserState, raiseTokenInfo]);
-
-  useEffect(() => {
-    const fetchClaimed = async () => {
-      if (!library || !walletClient) {
-        return;
-      }
-      try {
-        // @ts-ignore
-        const ethersProvider = new ethers.providers.Web3Provider(
-          walletClient.transport
-        );
-        const signer = await ethersProvider.getSigner();
-
-        const hasClaimed = await library.checkClaimed(signer, fundraiserAddr);
-        setClaimed(hasClaimed);
-      } catch (error) {
-        console.error("Error fetching claimed data:", error);
-        setClaimed(null);
-      }
-    };
-
-    fetchClaimed();
-  }, [library, walletClient, fundraiserAddr]);
-
-  useEffect(() => {
-    const fetchVestingInfo = async () => {
-      if (
-        !library ||
-        !walletClient ||
-        !fundraiserState ||
-        Number(fundraiserState.vestingDuration) === 0
-      ) {
-        return;
-      }
-      try {
-        // @ts-ignore
-        const ethersProvider = new ethers.providers.Web3Provider(
-          walletClient.transport
-        );
-        const signer = await ethersProvider.getSigner();
-
-        const vestingInfo = await library.getVestingInfo(
-          signer,
-          fundraiserAddr
-        );
-        setVestingInfo(vestingInfo);
-      } catch (error) {
-        console.error("Error fetching vesting data:", error);
-        setVestingInfo(null);
-      }
-    };
-
-    fetchVestingInfo();
-  }, [library, walletClient, fundraiserAddr, fundraiserState]);
-
-  if (loading) {
-    return <p>Loading...</p>;
+  if (loading || noData) {
+    return (
+      <div className="launchpad-list-empty">
+        <div className="launchpad-empty">
+          <div className="launchpad-empty-info">
+            <Spinner />
+            <div className="launchpad-empty-label">Loading project...</div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Initialize the manager
@@ -225,16 +137,19 @@ function LaunchpadSinglePage() {
 
   // Calculate progress percentage
   const raisedAmountDecimals = parseFloat(
-    formatTokenDecimals(fundraiserState.raisedAmount, raiseTokenInfo.decimals)
+    formatTokenDecimals(
+      BigInt(fundraiserState.raisedAmount),
+      parseInt(raiseTokenInfo.decimals)
+    )
   );
   const softCap = isFairLaunch ? fundraiserState.config[1] : BigInt(0);
   const hardCap = isStealthLaunch ? fundraiserState.config[0] : BigInt(0);
 
   const softCapDecimals = parseFloat(
-    formatTokenDecimals(softCap, raiseTokenInfo.decimals)
+    formatTokenDecimals(BigInt(softCap), parseInt(raiseTokenInfo.decimals))
   );
   const hardCapDecimals = parseFloat(
-    formatTokenDecimals(hardCap, raiseTokenInfo.decimals)
+    formatTokenDecimals(BigInt(hardCap), parseInt(raiseTokenInfo.decimals))
   );
 
   let progress = 100; // Default to 100% if no caps are set
@@ -254,7 +169,7 @@ function LaunchpadSinglePage() {
   const startDate = formatTimestampToDate(
     Number(fundraiserState.createdTimestamp)
   );
-  let endDate = formatTimestampToDate(
+  let endDate: string | null = formatTimestampToDate(
     Number(fundraiserState.finalizedTimestamp)
   );
   if (isFairLaunch) {
@@ -284,52 +199,51 @@ function LaunchpadSinglePage() {
   const isVerified = false; // @TODO
 
   const fail = async () => {
-    await fundraiserManager.failFundraiser(fundraiserAddr);
+    await fundraiserManager.failFundraiser(fundraiserAddr!);
   };
 
   const finalize = async () => {
     await fundraiserManager.finalizeFundraiser(
-      fundraiserAddr,
+      fundraiserAddr!,
       fundraiserState.saleToken,
-      fundraiserState.soldAmount
+      BigInt(fundraiserState.soldAmount)
     );
   };
 
   const createPair = async () => {
     await fundraiserManager.createSwapPair(
-      fundraiserAddr,
+      fundraiserAddr!,
       fundraiserState.saleToken,
       fundraiserState.raiseToken,
-      raiseTokenInfo.decimals,
+      parseInt(raiseTokenInfo.decimals),
       raiseTokenInfo.symbol
     );
   };
 
   const contribute = async () => {
     await fundraiserManager.contribute(
-      fundraiserAddr,
+      fundraiserAddr!,
       "10",
-      raiseTokenInfo.decimals
+      parseInt(raiseTokenInfo.decimals)
     );
   };
 
   const claimBack = async () => {
-    await fundraiserManager.claimBack(fundraiserAddr);
+    await fundraiserManager.claimBack(fundraiserAddr!);
   };
 
   const claimTokens = async () => {
-    await fundraiserManager.claimTokens(fundraiserAddr);
+    await fundraiserManager.claimTokens(fundraiserAddr!);
   };
 
   const claimVestedTokens = async () => {
-    await fundraiserManager.claimVestedTokens(fundraiserAddr);
+    await fundraiserManager.claimVestedTokens(fundraiserAddr!);
   };
 
   return (
     <>
       <SEO title={seoTitle} description={seoDesc} />
       <div className="main-page launchpadSingle">
-        {JSON.stringify(qFundraiser.data)}
         <div className="main-card">
           <div className="launchpadSingle-topheader">
             <Button link="/launchpad" type="tertiary" icon={<ArrowBack />}>
@@ -342,7 +256,7 @@ function LaunchpadSinglePage() {
               <div className="launchpadSingle-header">
                 <div className="launchpadSingle-header-left">
                   <div className="main-card-title launchpadSingle-name">
-                    {fundraiserState.projetInfo.projectName}{" "}
+                    {fundraiserState.projectInfo.projectName}{" "}
                     {isVerified && (
                       <span className="launchpadSingle-verified">
                         <Approved />
@@ -353,15 +267,15 @@ function LaunchpadSinglePage() {
                     {fundraiserState.campaignDetails[0]}
                   </div>
                   <div className="launchpadSingle-desc">
-                    {fundraiserState.projetInfo.description}
+                    {fundraiserState.projectInfo.description}
                   </div>
-                  {fundraiserState.projetInfo.websiteLink && (
+                  {fundraiserState.projectInfo.websiteLink && (
                     <a
-                      href={fundraiserState.projetInfo.websiteLink}
+                      href={fundraiserState.projectInfo.websiteLink}
                       target="_blank"
                       className="launchpadSingle-url"
                     >
-                      {fundraiserState.projetInfo.websiteLink}
+                      {fundraiserState.projectInfo.websiteLink}
                     </a>
                   )}
                 </div>
@@ -442,8 +356,8 @@ function LaunchpadSinglePage() {
                   <span>
                     {" "}
                     {formatTokenDecimals(
-                      fundraiserState.raisedAmount,
-                      raiseTokenInfo.decimals
+                      BigInt(fundraiserState.raisedAmount),
+                      parseInt(raiseTokenInfo.decimals)
                     )}{" "}
                     {formatTokenSymbol(raiseTokenInfo.symbol)}
                   </span>
@@ -451,8 +365,8 @@ function LaunchpadSinglePage() {
                 <div className="launchpadSingle-value" data-small>
                   Sold:{" "}
                   {formatTokenDecimals(
-                    fundraiserState.soldAmount,
-                    saleTokenInfo.decimals
+                    BigInt(fundraiserState.soldAmount),
+                    parseInt(saleTokenInfo.decimals)
                   )}{" "}
                   {saleTokenInfo.symbol}
                 </div>
@@ -483,7 +397,17 @@ function LaunchpadSinglePage() {
                   </span>
                 </div>
               </div>
-
+              {qVestingInfo.data && (
+                <VestingInformation
+                  vestingInfo={qVestingInfo.data}
+                  fundraiser={{
+                    state: fundraiserState,
+                    saleTokenInfo,
+                    raiseTokenInfo,
+                  }}
+                  claimVestedTokens={claimVestedTokens}
+                />
+              )}
               <div className="launchpadSingle-actions">
                 {isActive && <Button onClick={contribute}>Invest</Button>}
                 {isFailed && <Button onClick={claimBack}>Claim back</Button>}

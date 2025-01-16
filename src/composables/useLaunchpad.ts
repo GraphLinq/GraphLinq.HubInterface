@@ -29,6 +29,7 @@ function useLaunchpad() {
   }, [setLibrary]);
 
   const submitFundraiser = async (formData: FormData) => {
+    console.log(library, walletClient);
     if (!library || !walletClient) {
       console.error("Library or walletClient is not initialized.");
       return;
@@ -37,8 +38,13 @@ function useLaunchpad() {
     const ethersProvider = new ethers.providers.Web3Provider(
       walletClient.transport
     );
+    console.log("1");
+
     const signer = await ethersProvider.getSigner();
+    console.log("2");
+
     const raiseTokenInfo = await library.getTokenInfo(formData.raiseToken);
+    console.log("3");
 
     const pricePerTokenDecimals = ethers.utils.parseUnits(
       formData.pricePerToken.toString(),
@@ -54,6 +60,7 @@ function useLaunchpad() {
     );
 
     if (formData.campaignType === "stealth") {
+      console.log("stealth");
       await library.createFundraiserStealthLaunch(
         signer,
         {
@@ -72,7 +79,10 @@ function useLaunchpad() {
           pricePerToken: pricePerTokenDecimals,
         }
       );
+      console.log("stealth done");
     } else if (formData.campaignType === "fair") {
+      console.log("fair");
+
       const vestingStartDelta =
         (new Date(formData.vestingStartDate).getTime() -
           new Date(formData.endTime).getTime()) /
@@ -102,6 +112,8 @@ function useLaunchpad() {
           pricePerToken: pricePerTokenDecimals,
         }
       );
+
+      console.log("fair done");
     }
   };
 
