@@ -23,6 +23,10 @@ import { FundraiserManager } from "../../services/FundraiserManager";
 import { useStore } from "../../store";
 import { VestingState } from "../../types/launchpad";
 import { VestingInformation } from "@components/LaunchpadVestingInfos/LaunchpadVestingInfos";
+import Alert from "@components/Alert";
+import { getErrorMessage } from "@utils/errors";
+import InputNumber from "@components/InputNumber";
+import TokenIcon from "@components/TokenIcon";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
@@ -39,9 +43,12 @@ function LaunchpadSinglePage() {
 
   useLaunchpad();
 
+  const [formInProgress, setFormInProgress] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
   const [success, setSuccess] = useState("");
+
+  const [contributeAmount, setContributeAmount] = useState("");
 
   const resetFeedback = () => {
     setError("");
@@ -70,7 +77,7 @@ function LaunchpadSinglePage() {
   const raiseTokenInfo = qRaiseTokenInfo.data;
   const saleTokenInfo = qSaleTokenInfo.data;
 
-  const { data: contribution } = useQuery({
+  const qContribution = useQuery({
     queryKey: ["contribution", fundraiserAddr],
     queryFn: async () => {
       const amount = await library.getContribution(provider, fundraiserAddr);
@@ -87,10 +94,7 @@ function LaunchpadSinglePage() {
 
   const qVestingInfo = useQuery({
     queryKey: ["vestingInfo", fundraiserAddr],
-    queryFn: () => {
-      console.log("ici");
-      return library.getVestingInfo(provider, fundraiserAddr);
-    },
+    queryFn: () => library.getVestingInfo(provider, fundraiserAddr),
     enabled:
       !!library &&
       fundraiserState &&
@@ -133,7 +137,9 @@ function LaunchpadSinglePage() {
   const isFinalized = fundraiserState.stateString === "Finalized";
   const isClaimable = fundraiserState.stateString === "SwapPairCreated";
   const hasClaimableContribution =
-    contribution && parseFloat(contribution) > 0 && hasClaimed === false;
+    qContribution.data &&
+    parseFloat(qContribution.data) > 0 &&
+    hasClaimed === false;
 
   // Calculate progress percentage
   const raisedAmountDecimals = parseFloat(
@@ -172,6 +178,7 @@ function LaunchpadSinglePage() {
   let endDate: string | null = formatTimestampToDate(
     Number(fundraiserState.finalizedTimestamp)
   );
+
   if (isFairLaunch) {
     // in case of fair launch we know the end date since the beginning
     endDate = formatTimestampToDate(Number(fundraiserState.config[0]));
@@ -221,11 +228,36 @@ function LaunchpadSinglePage() {
   };
 
   const contribute = async () => {
-    await fundraiserManager.contribute(
-      fundraiserAddr!,
-      "10",
-      parseInt(raiseTokenInfo.decimals)
-    );
+    resetFeedback();
+
+    if (
+      isNaN(parseFloat(contributeAmount)) ||
+      parseFloat(contributeAmount) <= 0
+    ) {
+      return;
+    }
+
+    try {
+      setFormInProgress(true);
+
+      setPending("Waiting for confirmations...");
+      await fundraiserManager.contribute(
+        fundraiserAddr!,
+        contributeAmount,
+        parseInt(raiseTokenInfo.decimals)
+      );
+      await qContribution.refetch();
+      await qFundraiser.refetch();
+
+      resetFeedback();
+      setSuccess("Your contribution is confirmed.");
+      setContributeAmount("");
+    } catch (error) {
+      resetFeedback();
+      setError(getErrorMessage(error));
+    } finally {
+      setFormInProgress(false);
+    }
   };
 
   const claimBack = async () => {
@@ -393,7 +425,8 @@ function LaunchpadSinglePage() {
                 </div>
                 <div className="launchpadSingle-value">
                   <span>
-                    {contribution} {formatTokenSymbol(raiseTokenInfo.symbol)}
+                    {qContribution.data}{" "}
+                    {formatTokenSymbol(raiseTokenInfo.symbol)}
                   </span>
                 </div>
               </div>
@@ -409,7 +442,27 @@ function LaunchpadSinglePage() {
                 />
               )}
               <div className="launchpadSingle-actions">
-                {isActive && <Button onClick={contribute}>Invest</Button>}
+                {isActive && (
+                  <>
+                    <InputNumber
+                      value={contributeAmount}
+                      max={Infinity}
+                      onChange={(val) => setContributeAmount(val)}
+                      icon={<TokenIcon tokenKey={"GLQ"} />}
+                    />
+                    <Button
+                      onClick={contribute}
+                      disabled={
+                        formInProgress ||
+                        isNaN(parseFloat(contributeAmount)) ||
+                        parseFloat(contributeAmount) <= 0
+                      }
+                      icon={formInProgress && <Spinner />}
+                    >
+                      Invest
+                    </Button>
+                  </>
+                )}
                 {isFailed && <Button onClick={claimBack}>Claim back</Button>}
                 {isClaimable && hasClaimableContribution && (
                   <Button onClick={claimTokens}>
@@ -424,6 +477,26 @@ function LaunchpadSinglePage() {
                 )}
                 {isOwner && isFinalized && (
                   <Button onClick={createPair}>Init pair</Button>
+                )}
+
+                {(error || pending || success) && (
+                  <div className="popin-alert">
+                    {error && (
+                      <Alert type="error">
+                        <p>{error}</p>
+                      </Alert>
+                    )}
+                    {pending && (
+                      <Alert type="warning">
+                        <p>{pending}</p>
+                      </Alert>
+                    )}
+                    {success && (
+                      <Alert type="success">
+                        <p>Your fundraiser is now successfully created.</p>
+                      </Alert>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

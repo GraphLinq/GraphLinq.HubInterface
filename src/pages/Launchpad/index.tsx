@@ -17,7 +17,13 @@ const seoDesc =
   "View tokens, transactions, balances, source code, and analytics for the Pool smart contract on GLQ Smart Chain.";
 
 function LaunchpadPage() {
-  const projectStatuses = ["All", "Pending", "Active", "Finished", "Failed"];
+  const projectStatuses = [
+    "All",
+    "Active",
+    "Finalized",
+    "Failed",
+    "Terminated",
+  ];
   const [activeStatus, setActiveStatus] = useState(0);
   const [search, setSearch] = useState("");
 

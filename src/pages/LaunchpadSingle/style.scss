@@ -229,6 +229,10 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+
+    .popin-alert {
+      margin-top: 0;
+    }
   }
 
   &-details {

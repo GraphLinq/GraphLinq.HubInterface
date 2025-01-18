@@ -13,7 +13,9 @@ export class FundraiserManager {
     if (!this.walletClient) {
       throw new Error("Wallet client is not connected");
     }
-    const ethersProvider = new providers.Web3Provider(this.walletClient.transport);
+    const ethersProvider = new providers.Web3Provider(
+      this.walletClient.transport
+    );
     return ethersProvider.getSigner();
   }
 
@@ -36,7 +38,12 @@ export class FundraiserManager {
     console.log("Finalizing Fundraiser");
     try {
       const signer = await this.getSigner();
-      await this.library.approveERC20(signer, saleToken, fundraiserAddr, soldAmount);
+      await this.library.approveERC20(
+        signer,
+        saleToken,
+        fundraiserAddr,
+        soldAmount
+      );
       await this.library.finalizeFundraiser(signer, fundraiserAddr);
       console.log("Fundraiser finalized successfully");
     } catch (error) {
@@ -54,35 +61,54 @@ export class FundraiserManager {
     console.log("Initializing Swap Pair");
     try {
       const signer = await this.getSigner();
-      const initialRaiseTokenLiquidity = ethers.parseUnits("10", decimals);
+      const initialRaiseTokenLiquidity = ethers.utils.parseUnits(
+        "10",
+        decimals
+      );
       const requiredSaleTokens = await this.library.getSaleTokenLiquidityInfo(
         fundraiserAddr,
         initialRaiseTokenLiquidity
       );
 
-      await this.library.approveERC20(signer, saleToken, fundraiserAddr, requiredSaleTokens);
+      await this.library.approveERC20(
+        signer,
+        saleToken,
+        fundraiserAddr,
+        requiredSaleTokens
+      );
 
       if (raiseTokenSymbol !== "WETH") {
-        await this.library.approveERC20(signer, raiseToken, fundraiserAddr, initialRaiseTokenLiquidity);
+        await this.library.approveERC20(
+          signer,
+          raiseToken,
+          fundraiserAddr,
+          initialRaiseTokenLiquidity
+        );
       }
 
-      await this.library.initSwapPair(signer, fundraiserAddr, -887220, 887220, initialRaiseTokenLiquidity);
+      await this.library.initSwapPair(
+        signer,
+        fundraiserAddr,
+        -887220,
+        887220,
+        initialRaiseTokenLiquidity
+      );
       console.log("Swap Pair initialized successfully");
     } catch (error) {
       console.error("Error initializing swap pair:", error);
     }
   }
 
-  async contribute(fundraiserAddr: string, amount: string, decimals: number): Promise<void> {
+  async contribute(
+    fundraiserAddr: string,
+    amount: string,
+    decimals: number
+  ): Promise<void> {
     console.log("Contributing to Fundraiser");
-    try {
-      const signer = await this.getSigner();
-      const contributionAmount = ethers.parseUnits(amount, decimals);
-      await this.library.contribute(signer, fundraiserAddr, contributionAmount);
-      console.log("Contribution successful");
-    } catch (error) {
-      console.error("Error contributing to fundraiser:", error);
-    }
+    const signer = await this.getSigner();
+    const contributionAmount = ethers.utils.parseUnits(amount, decimals);
+    await this.library.contribute(signer, fundraiserAddr, contributionAmount);
+    console.log("Contribution successful");
   }
 
   async claimBack(fundraiserAddr: string): Promise<void> {
