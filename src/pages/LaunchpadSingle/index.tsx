@@ -14,11 +14,15 @@ import {
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useWalletClient } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 
 import { useEthersSigner } from "../../composables/useEthersProvider";
 import useLaunchpad from "../../composables/useLaunchpad";
-import { getFundraiser, getTokenInfo } from "../../queries/api";
+import {
+  getFundraiser,
+  getFundraiserRefresh,
+  getTokenInfo,
+} from "../../queries/api";
 import { FundraiserManager } from "../../services/FundraiserManager";
 import { useStore } from "../../store";
 import { VestingState } from "../../types/launchpad";
@@ -36,6 +40,7 @@ const seoDesc =
 function LaunchpadSinglePage() {
   const { id: fundraiserAddr } = useParams();
   const navigate = useNavigate();
+  const { address: account } = useAccount();
   const provider = useEthersSigner();
   const store: any = useStore();
   const library = store.getState().library;
@@ -60,6 +65,12 @@ function LaunchpadSinglePage() {
     queryKey: ["fundraiser", fundraiserAddr],
     queryFn: () => getFundraiser(fundraiserAddr!),
     enabled: () => !!fundraiserAddr,
+  });
+
+  const qFundraiserRefresh = useQuery({
+    queryKey: ["fundraiser", fundraiserAddr],
+    queryFn: () => getFundraiserRefresh(fundraiserAddr!),
+    enabled: () => false,
   });
 
   const qRaiseTokenInfo = useQuery({
@@ -131,7 +142,7 @@ function LaunchpadSinglePage() {
   const isFairLaunch = fundraiserState.campaignDetails[0] === "Fair Launch";
   const isStealthLaunch =
     fundraiserState.campaignDetails[0] === "Stealth Launch";
-  const isOwner = fundraiserState.owner === store.getState().address;
+  const isOwner = fundraiserState.owner === account;
   const isActive = fundraiserState.stateString === "Active";
   const isFailed = fundraiserState.stateString === "Failed";
   const isFinalized = fundraiserState.stateString === "Finalized";
@@ -218,13 +229,31 @@ function LaunchpadSinglePage() {
   };
 
   const createPair = async () => {
-    await fundraiserManager.createSwapPair(
-      fundraiserAddr!,
-      fundraiserState.saleToken,
-      fundraiserState.raiseToken,
-      parseInt(raiseTokenInfo.decimals),
-      raiseTokenInfo.symbol
-    );
+    resetFeedback();
+
+    try {
+      setFormInProgress(true);
+
+      setPending("Waiting for confirmations...");
+      await fundraiserManager.createSwapPair(
+        fundraiserAddr!,
+        fundraiserState.saleToken,
+        fundraiserState.raiseToken,
+        parseInt(raiseTokenInfo.decimals),
+        raiseTokenInfo.symbol
+      );
+      await qFundraiserRefresh.refetch();
+      await qContribution.refetch();
+      await qFundraiser.refetch();
+
+      resetFeedback();
+      setSuccess("The pair has been initialized.");
+    } catch (error) {
+      resetFeedback();
+      setError(getErrorMessage(error));
+    } finally {
+      setFormInProgress(false);
+    }
   };
 
   const contribute = async () => {
@@ -246,6 +275,7 @@ function LaunchpadSinglePage() {
         contributeAmount,
         parseInt(raiseTokenInfo.decimals)
       );
+      await qFundraiserRefresh.refetch();
       await qContribution.refetch();
       await qFundraiser.refetch();
 
@@ -271,6 +301,8 @@ function LaunchpadSinglePage() {
   const claimVestedTokens = async () => {
     await fundraiserManager.claimVestedTokens(fundraiserAddr!);
   };
+
+  console.log(fundraiserState);
 
   return (
     <>
@@ -347,6 +379,31 @@ function LaunchpadSinglePage() {
                     )}/${formatTokenSymbol(raiseTokenInfo.symbol)}`}
                   </div>
                 </div>
+                {hardCapDecimals && (
+                  <div className="launchpadSingle-details-row">
+                    <div className="launchpadSingle-details-label">
+                      Hard cap
+                    </div>
+                    <div className="launchpadSingle-details-value">
+                      {`${hardCapDecimals} ${formatTokenSymbol(
+                        raiseTokenInfo.symbol
+                      )}`}
+                    </div>
+                  </div>
+                )}
+
+                {!hardCapDecimals && softCapDecimals && (
+                  <div className="launchpadSingle-details-row">
+                    <div className="launchpadSingle-details-label">
+                      Soft cap
+                    </div>
+                    <div className="launchpadSingle-details-value">
+                      {`${softCapDecimals} ${formatTokenSymbol(
+                        raiseTokenInfo.symbol
+                      )}`}
+                    </div>
+                  </div>
+                )}
                 <div className="launchpadSingle-details-row">
                   <div className="launchpadSingle-details-label">
                     Pool Address
@@ -476,7 +533,13 @@ function LaunchpadSinglePage() {
                   <Button onClick={finalize}>Finalize</Button>
                 )}
                 {isOwner && isFinalized && (
-                  <Button onClick={createPair}>Init pair</Button>
+                  <Button
+                    onClick={createPair}
+                    disabled={formInProgress}
+                    icon={formInProgress && <Spinner />}
+                  >
+                    Init pair
+                  </Button>
                 )}
 
                 {(error || pending || success) && (

@@ -59,44 +59,37 @@ export class FundraiserManager {
     raiseTokenSymbol: string
   ): Promise<void> {
     console.log("Initializing Swap Pair");
-    try {
-      const signer = await this.getSigner();
-      const initialRaiseTokenLiquidity = ethers.utils.parseUnits(
-        "10",
-        decimals
-      );
-      const requiredSaleTokens = await this.library.getSaleTokenLiquidityInfo(
-        fundraiserAddr,
-        initialRaiseTokenLiquidity
-      );
+    const signer = await this.getSigner();
+    const initialRaiseTokenLiquidity = ethers.utils.parseUnits("10", decimals);
+    const requiredSaleTokens = await this.library.getSaleTokenLiquidityInfo(
+      fundraiserAddr,
+      initialRaiseTokenLiquidity
+    );
 
+    await this.library.approveERC20(
+      signer,
+      saleToken,
+      fundraiserAddr,
+      requiredSaleTokens
+    );
+
+    if (raiseTokenSymbol !== "WETH") {
       await this.library.approveERC20(
         signer,
-        saleToken,
+        raiseToken,
         fundraiserAddr,
-        requiredSaleTokens
-      );
-
-      if (raiseTokenSymbol !== "WETH") {
-        await this.library.approveERC20(
-          signer,
-          raiseToken,
-          fundraiserAddr,
-          initialRaiseTokenLiquidity
-        );
-      }
-
-      await this.library.initSwapPair(
-        signer,
-        fundraiserAddr,
-        -887220,
-        887220,
         initialRaiseTokenLiquidity
       );
-      console.log("Swap Pair initialized successfully");
-    } catch (error) {
-      console.error("Error initializing swap pair:", error);
     }
+
+    await this.library.initSwapPair(
+      signer,
+      fundraiserAddr,
+      -887220,
+      887220,
+      initialRaiseTokenLiquidity
+    );
+    console.log("Swap Pair initialized successfully");
   }
 
   async contribute(

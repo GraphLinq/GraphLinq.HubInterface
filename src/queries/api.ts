@@ -6,7 +6,12 @@ import {
 import { TrackingInformation } from "../model/tracking";
 import { DashboardInformation } from "../model/dashboard";
 import { ChallengeInformation, ChallengeLadderUser } from "../model/rewards";
-import { Fundraiser, FundraiserSmall, TokenInfo } from "../model/launchpad";
+import {
+  Fundraiser,
+  FundraiserSmall,
+  TokenInfo,
+  RefreshConfirmation,
+} from "../model/launchpad";
 
 // Monitoring
 export const getTrackingInformation = async (address: string) =>
@@ -64,6 +69,12 @@ export const getFundraiser = async (address: string) =>
   request<Fundraiser>(
     `${LAUNCHPAD_API_URL}/fundraiser/${address}`,
     "getFundraiser"
+  );
+
+export const getFundraiserRefresh = async (address: string) =>
+  request<RefreshConfirmation>(
+    `${LAUNCHPAD_API_URL}/fundraiser/${address}/refresh`,
+    "getFundraiserRefresh"
   );
 
 export const getTokenInfo = async (address: string) =>

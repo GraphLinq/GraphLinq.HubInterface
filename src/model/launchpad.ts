@@ -55,3 +55,7 @@ export interface Fundraiser {
   poolAddr: string;
   owner: string;
 }
+
+export interface RefreshConfirmation {
+  success: boolean;
+}

@@ -90,8 +90,8 @@ function LaunchpadPage() {
 
         {qFundraisers.data && qFundraisers.data.length ? (
           <div className="launchpad-list">
-            {qFundraisers.data.map((fundraiser) => (
-              <LaunchpadCard fundraiser={fundraiser} />
+            {qFundraisers.data.map((fundraiser, i) => (
+              <LaunchpadCard fundraiser={fundraiser} key={"fundraiser-" + i} />
             ))}
           </div>
         ) : (
