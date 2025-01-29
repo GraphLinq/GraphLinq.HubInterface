@@ -73,6 +73,8 @@ function useLaunchpad() {
           vestingStartDelta: BigInt(formData.vestingDelta),
           vestingDuration: BigInt(formData.vestingDuration),
           poolFee: BigInt(formData.poolFee),
+          poolLiquidity: formData.poolLiquidity,
+          liquidityLockDuration: BigInt(formData.liquidityLockDuration),
         },
         {
           maxCap: maxCapDecimals,
@@ -105,6 +107,8 @@ function useLaunchpad() {
           vestingStartDelta: BigInt(vestingStartDelta),
           vestingDuration: BigInt(vestingDuration),
           poolFee: BigInt(formData.poolFee),
+          poolLiquidity: formData.poolLiquidity,
+          liquidityLockDuration: BigInt(formData.liquidityLockDuration),
         },
         {
           endTime: BigInt(new Date(formData.endTime).getTime()),

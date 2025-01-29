@@ -25,6 +25,8 @@ interface StepCampaign {
   vestingEndDate: string;
   vestingDuration: number;
   vestingDelta: number;
+  poolLiquidity: number;
+  liquidityLockDuration: number;
 }
 
 export type FormData = StepInfos & StepCampaign & StepCampaign;
@@ -84,8 +86,10 @@ export const LaunchpadCreateContextProvider = ({
     vestingEndDate: "2025-02-20T13:43",
     vestingDuration: 86400,
     vestingDelta: 3600,
+    poolLiquidity: 50,
+    liquidityLockDuration: 120,
   });
-  const [activeStep, setActiveStep] = useState<Steps>("infos");
+  const [activeStep, setActiveStep] = useState<Steps>("vesting");
 
   return (
     <LaunchpadCreateContext.Provider

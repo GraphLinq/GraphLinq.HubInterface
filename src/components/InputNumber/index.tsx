@@ -5,6 +5,7 @@ interface InputNumberProps {
   icon?: React.ReactNode;
   currencyText?: string;
   value: string;
+  min?: number;
   max: number;
   onChange?: (value: string) => void;
 }
@@ -12,12 +13,17 @@ interface InputNumberProps {
 const InputNumber: React.FC<InputNumberProps> = ({
   icon,
   currencyText,
+  min,
   max,
   value,
   onChange,
 }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = e.target.value.replace(',', '.');
+    let newValue = e.target.value.replace(",", ".");
+
+    if (min && parseFloat(newValue) < min) {
+      newValue = min.toString();
+    }
 
     if (parseFloat(newValue) > max) {
       newValue = max.toString();
@@ -36,6 +42,7 @@ const InputNumber: React.FC<InputNumberProps> = ({
         pattern="^[0-9]*[.,]?[0-9]*$"
         value={value}
         placeholder="0"
+        min={min}
         max={max}
         autoComplete="off"
         autoCorrect="off"

@@ -11,6 +11,16 @@
     @include max($mobile) {
       padding: 0;
     }
+
+    &-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .button-label {
+        font-size: 16px;
+      }
+    }
   }
   &-filters {
     display: flex;
@@ -35,6 +45,7 @@
         margin-left: 4px;
       }
     }
+    &-left,
     &-right {
       display: flex;
       align-items: center;

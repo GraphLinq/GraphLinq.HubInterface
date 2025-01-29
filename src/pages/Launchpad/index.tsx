@@ -10,6 +10,7 @@ import LaunchpadCard from "@components/LaunchpadCard/LaunchpadCard";
 import useLaunchpad from "../../composables/useLaunchpad";
 import { getFundraisers } from "../../queries/api";
 import { useQuery } from "@tanstack/react-query";
+import Button from "@components/Button";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
@@ -59,7 +60,10 @@ function LaunchpadPage() {
       <SEO title={seoTitle} description={seoDesc} />
       <div className="main-page launchpad">
         <div className="main-card">
-          <div className="main-card-title">Launchpad</div>
+          <div className="main-card-title">
+            <span>Launchpad</span>
+            <Button link="/launchpad/create">Create new project</Button>
+          </div>
           <div className="main-card-content">
             <div className="main-card-desc">TODO DESC</div>
             <div className="launchpad-filters">

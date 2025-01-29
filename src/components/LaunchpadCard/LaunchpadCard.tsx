@@ -51,7 +51,6 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ fundraiser: data }) => {
             <div className="launchpadCard-type">{data.projectType}</div>
             <div className="launchpadCard-desc">{data.projectDescription}</div>
           </div>
-          {JSON.stringify(data.live)}
           {data.live && (
             <div className="launchpadCard-header-right">
               <div className="launchpadCard-live">

@@ -33,6 +33,8 @@ export declare class FundraiserWeb3Connect {
       vestingStartDelta: bigint;
       vestingDuration: bigint;
       poolFee: bigint;
+      poolLiquidity: number;
+      liquidityLockDuration: bigint;
     },
     campaignParams: {
       maxCap: BigNumberish;
@@ -51,6 +53,8 @@ export declare class FundraiserWeb3Connect {
       vestingStartDelta: bigint;
       vestingDuration: bigint;
       poolFee: bigint;
+      poolLiquidity: number;
+      liquidityLockDuration: bigint;
     },
     campaignParams: {
       endTime: bigint;

@@ -15,6 +15,7 @@ function LaunchpadStepVesting() {
   const { formData, setFormData, setActiveStep } = useLaunchpadCreateContext();
   const [activeDurationOption, setActiveDurationOption] = useState(0);
   const [activeDeltaOption, setActiveDeltaOption] = useState(0);
+  const [activeLockOption, setActiveLockOption] = useState(0);
 
   const vestingStartDateEmpty = formData.vestingStartDate === "";
   const vestingStartDateInvalid =
@@ -155,6 +156,47 @@ function LaunchpadStepVesting() {
           </div>
         </div>
       )}
+
+      <div className="launchpadStep-field">
+        <div className="launchpadStep-label">Pool liquidity percentage</div>
+        <div className="launchpadStep-input">
+          <InputNumber
+            value={formData.poolLiquidity.toString()}
+            min={0}
+            max={100}
+            onChange={(val) => updateField("poolLiquidity", val)}
+          />
+        </div>
+      </div>
+
+      <div className="launchpadStep-field">
+        <div className="launchpadStep-label">Liquidity lock duration</div>
+        <div className="launchpadStep-input launchpadStep-row">
+          <InputNumber
+            value={transformToDaysOrHours(
+              formData.liquidityLockDuration,
+              durations[activeLockOption]
+            ).toString()}
+            max={Infinity}
+            onChange={(val) =>
+              updateField(
+                "liquidityLockDuration",
+                transformToSeconds(val, durations[activeLockOption])
+              )
+            }
+          />
+          <Select
+            active={activeLockOption}
+            options={durationLabels.map((label) => (
+              <span>{label}</span>
+            ))}
+            onChange={(active) => {
+              updateField("liquidityLockDuration", 0);
+              setActiveLockOption(active);
+            }}
+          />
+        </div>
+      </div>
 
       <Button disabled={disableForm} onClick={handleSubmit}>
         Next

@@ -48,7 +48,7 @@ function LaunchpadSinglePage() {
 
   useLaunchpad();
 
-  const [formInProgress, setFormInProgress] = useState(false);
+  const [formInProgress, setFormInProgress] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [pending, setPending] = useState("");
   const [success, setSuccess] = useState("");
@@ -91,7 +91,7 @@ function LaunchpadSinglePage() {
   const qContribution = useQuery({
     queryKey: ["contribution", fundraiserAddr],
     queryFn: async () => {
-      const amount = await library.getContribution(provider, fundraiserAddr);
+      const amount = await library.getContribution(account, fundraiserAddr);
       return formatTokenDecimals(amount, parseInt(raiseTokenInfo!.decimals));
     },
     enabled: !!library && !!raiseTokenInfo,
@@ -180,7 +180,7 @@ function LaunchpadSinglePage() {
   }
 
   // Clamp the progress value to ensure it's between 0 and 100
-  progress = Math.min(Math.max(progress, 0), 100);
+  progress = Math.max(progress, 0);
 
   // Convert timestamps to readable dates
   const startDate = formatTimestampToDate(
@@ -217,22 +217,56 @@ function LaunchpadSinglePage() {
   const isVerified = false; // @TODO
 
   const fail = async () => {
-    await fundraiserManager.failFundraiser(fundraiserAddr!);
+    resetFeedback();
+
+    try {
+      setFormInProgress("fail");
+
+      setPending("Waiting for confirmations...");
+      await fundraiserManager.failFundraiser(fundraiserAddr!);
+      await qFundraiserRefresh.refetch();
+      await qFundraiser.refetch();
+
+      resetFeedback();
+      setSuccess("The fundraiser has been set to failed.");
+    } catch (error) {
+      resetFeedback();
+      setError(getErrorMessage(error));
+    } finally {
+      setFormInProgress(null);
+    }
   };
 
   const finalize = async () => {
-    await fundraiserManager.finalizeFundraiser(
-      fundraiserAddr!,
-      fundraiserState.saleToken,
-      BigInt(fundraiserState.soldAmount)
-    );
+    resetFeedback();
+
+    try {
+      setFormInProgress("finalize");
+
+      setPending("Waiting for confirmations...");
+      await fundraiserManager.finalizeFundraiser(
+        fundraiserAddr!,
+        fundraiserState.saleToken,
+        BigInt(fundraiserState.soldAmount)
+      );
+      await qFundraiserRefresh.refetch();
+      await qFundraiser.refetch();
+
+      resetFeedback();
+      setSuccess("The fundraiser has been finalized.");
+    } catch (error) {
+      resetFeedback();
+      setError(getErrorMessage(error));
+    } finally {
+      setFormInProgress(null);
+    }
   };
 
   const createPair = async () => {
     resetFeedback();
 
     try {
-      setFormInProgress(true);
+      setFormInProgress("createPair");
 
       setPending("Waiting for confirmations...");
       await fundraiserManager.createSwapPair(
@@ -243,7 +277,6 @@ function LaunchpadSinglePage() {
         raiseTokenInfo.symbol
       );
       await qFundraiserRefresh.refetch();
-      await qContribution.refetch();
       await qFundraiser.refetch();
 
       resetFeedback();
@@ -252,7 +285,7 @@ function LaunchpadSinglePage() {
       resetFeedback();
       setError(getErrorMessage(error));
     } finally {
-      setFormInProgress(false);
+      setFormInProgress(null);
     }
   };
 
@@ -267,7 +300,7 @@ function LaunchpadSinglePage() {
     }
 
     try {
-      setFormInProgress(true);
+      setFormInProgress("contribute");
 
       setPending("Waiting for confirmations...");
       await fundraiserManager.contribute(
@@ -286,23 +319,72 @@ function LaunchpadSinglePage() {
       resetFeedback();
       setError(getErrorMessage(error));
     } finally {
-      setFormInProgress(false);
+      setFormInProgress(null);
     }
   };
 
   const claimBack = async () => {
-    await fundraiserManager.claimBack(fundraiserAddr!);
+    resetFeedback();
+
+    try {
+      setFormInProgress("claimBack");
+
+      setPending("Waiting for confirmations...");
+      await fundraiserManager.claimBack(fundraiserAddr!);
+      await qFundraiserRefresh.refetch();
+      await qFundraiser.refetch();
+
+      resetFeedback();
+      setSuccess("Your tokens has been successfully claimed.");
+    } catch (error) {
+      resetFeedback();
+      setError(getErrorMessage(error));
+    } finally {
+      setFormInProgress(null);
+    }
   };
 
   const claimTokens = async () => {
-    await fundraiserManager.claimTokens(fundraiserAddr!);
+    resetFeedback();
+
+    try {
+      setFormInProgress("claimTokens");
+
+      setPending("Waiting for confirmations...");
+      await fundraiserManager.claimTokens(fundraiserAddr!);
+      await qFundraiserRefresh.refetch();
+      await qFundraiser.refetch();
+
+      resetFeedback();
+      setSuccess("Your tokens has been successfully claimed.");
+    } catch (error) {
+      resetFeedback();
+      setError(getErrorMessage(error));
+    } finally {
+      setFormInProgress(null);
+    }
   };
 
   const claimVestedTokens = async () => {
-    await fundraiserManager.claimVestedTokens(fundraiserAddr!);
-  };
+    resetFeedback();
 
-  console.log(fundraiserState);
+    try {
+      setFormInProgress("claimVestedTokens");
+
+      setPending("Waiting for confirmations...");
+      await fundraiserManager.claimVestedTokens(fundraiserAddr!);
+      await qFundraiserRefresh.refetch();
+      await qFundraiser.refetch();
+
+      resetFeedback();
+      setSuccess("Your vested tokens has been successfully claimed.");
+    } catch (error) {
+      resetFeedback();
+      setError(getErrorMessage(error));
+    } finally {
+      setFormInProgress(null);
+    }
+  };
 
   return (
     <>
@@ -482,7 +564,7 @@ function LaunchpadSinglePage() {
                 </div>
                 <div className="launchpadSingle-value">
                   <span>
-                    {qContribution.data}{" "}
+                    {qContribution.data || 0}{" "}
                     {formatTokenSymbol(raiseTokenInfo.symbol)}
                   </span>
                 </div>
@@ -495,6 +577,7 @@ function LaunchpadSinglePage() {
                     saleTokenInfo,
                     raiseTokenInfo,
                   }}
+                  formInProgress={formInProgress}
                   claimVestedTokens={claimVestedTokens}
                 />
               )}
@@ -510,33 +593,58 @@ function LaunchpadSinglePage() {
                     <Button
                       onClick={contribute}
                       disabled={
-                        formInProgress ||
+                        formInProgress != null ||
                         isNaN(parseFloat(contributeAmount)) ||
                         parseFloat(contributeAmount) <= 0
                       }
-                      icon={formInProgress && <Spinner />}
+                      icon={formInProgress === "contribute" && <Spinner />}
                     >
                       Invest
                     </Button>
                   </>
                 )}
-                {isFailed && <Button onClick={claimBack}>Claim back</Button>}
+                {isFailed && (
+                  <Button
+                    onClick={claimBack}
+                    disabled={formInProgress != null}
+                    icon={formInProgress === "claimBack" && <Spinner />}
+                  >
+                    Claim back
+                  </Button>
+                )}
                 {isClaimable && hasClaimableContribution && (
-                  <Button onClick={claimTokens}>
+                  <Button
+                    onClick={claimTokens}
+                    disabled={formInProgress != null}
+                    icon={formInProgress === "claimTokens" && <Spinner />}
+                  >
                     Claim {formatTokenSymbol(saleTokenInfo.symbol)}
                   </Button>
                 )}
                 {isOwner && isActive && canFail && (
-                  <Button onClick={fail}>Set failed</Button>
+                  <Button
+                    onClick={fail}
+                    disabled={formInProgress != null}
+                    icon={formInProgress === "fail" && <Spinner />}
+                    type="secondary"
+                  >
+                    Set failed
+                  </Button>
                 )}
                 {isOwner && isActive && canFinalize && (
-                  <Button onClick={finalize}>Finalize</Button>
+                  <Button
+                    onClick={finalize}
+                    disabled={formInProgress != null}
+                    icon={formInProgress === "finalize" && <Spinner />}
+                  >
+                    Finalize
+                  </Button>
                 )}
                 {isOwner && isFinalized && (
                   <Button
                     onClick={createPair}
-                    disabled={formInProgress}
-                    icon={formInProgress && <Spinner />}
+                    disabled={formInProgress != null}
+                    icon={formInProgress === "createPair" && <Spinner />}
                   >
                     Init pair
                   </Button>
@@ -556,7 +664,7 @@ function LaunchpadSinglePage() {
                     )}
                     {success && (
                       <Alert type="success">
-                        <p>Your fundraiser is now successfully created.</p>
+                        <p>{success}</p>
                       </Alert>
                     )}
                   </div>

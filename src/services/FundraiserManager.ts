@@ -21,13 +21,9 @@ export class FundraiserManager {
 
   async failFundraiser(fundraiserAddr: string): Promise<void> {
     console.log("Failing Fundraiser");
-    try {
-      const signer = await this.getSigner();
-      await this.library.cancelFundraiser(signer, fundraiserAddr);
-      console.log("Fundraiser canceled the fundraiser successfully");
-    } catch (error) {
-      console.error("Error failing fundraiser:", error);
-    }
+    const signer = await this.getSigner();
+    await this.library.cancelFundraiser(signer, fundraiserAddr);
+    console.log("Fundraiser canceled the fundraiser successfully");
   }
 
   async finalizeFundraiser(
@@ -36,19 +32,15 @@ export class FundraiserManager {
     soldAmount: bigint
   ): Promise<void> {
     console.log("Finalizing Fundraiser");
-    try {
-      const signer = await this.getSigner();
-      await this.library.approveERC20(
-        signer,
-        saleToken,
-        fundraiserAddr,
-        soldAmount
-      );
-      await this.library.finalizeFundraiser(signer, fundraiserAddr);
-      console.log("Fundraiser finalized successfully");
-    } catch (error) {
-      console.error("Error finalizing fundraiser:", error);
-    }
+    const signer = await this.getSigner();
+    await this.library.approveERC20(
+      signer,
+      saleToken,
+      fundraiserAddr,
+      soldAmount
+    );
+    await this.library.finalizeFundraiser(signer, fundraiserAddr);
+    console.log("Fundraiser finalized successfully");
   }
 
   async createSwapPair(
@@ -106,34 +98,22 @@ export class FundraiserManager {
 
   async claimBack(fundraiserAddr: string): Promise<void> {
     console.log("Claiming back funds");
-    try {
-      const signer = await this.getSigner();
-      await this.library.claimFunds(signer, fundraiserAddr);
-      console.log("Funds claimed back successfully");
-    } catch (error) {
-      console.error("Error claiming back funds:", error);
-    }
+    const signer = await this.getSigner();
+    await this.library.claimFunds(signer, fundraiserAddr);
+    console.log("Funds claimed back successfully");
   }
 
   async claimTokens(fundraiserAddr: string): Promise<void> {
     console.log("Claiming tokens");
-    try {
-      const signer = await this.getSigner();
-      await this.library.claimTokens(signer, fundraiserAddr);
-      console.log("Tokens claimed successfully");
-    } catch (error) {
-      console.error("Error claiming tokens:", error);
-    }
+    const signer = await this.getSigner();
+    await this.library.claimTokens(signer, fundraiserAddr);
+    console.log("Tokens claimed successfully");
   }
 
   async claimVestedTokens(fundraiserAddr: string): Promise<void> {
     console.log("Claiming vested tokens");
-    try {
-      const signer = await this.getSigner();
-      await this.library.claimVested(signer, fundraiserAddr);
-      console.log("Vested tokens claimed successfully");
-    } catch (error) {
-      console.error("Error claiming vested tokens:", error);
-    }
+    const signer = await this.getSigner();
+    await this.library.claimVested(signer, fundraiserAddr);
+    console.log("Vested tokens claimed successfully");
   }
 }

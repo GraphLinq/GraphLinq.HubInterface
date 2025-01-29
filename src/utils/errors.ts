@@ -9,9 +9,12 @@ export const getErrorMessage = (error: any): string => {
       errorMessage = "Insufficent funds for gas + fees.";
       break;
     case "UNPREDICTABLE_GAS_LIMIT":
-      console.log(error.message);
+      console.error(error.message);
       if (error.message.includes("transfer amount exceeds balance")) {
         errorMessage = "Insufficient ERC20 balance.";
+      }
+      if (error.message.includes("Funds already claimed")) {
+        errorMessage = "Funds already claimed.";
       }
       break;
     default:

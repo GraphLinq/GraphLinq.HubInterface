@@ -5,6 +5,7 @@ import {
   formatTokenDecimals,
   formatTokenSymbol,
 } from "@utils/launchpad";
+import Spinner from "@assets/icons/spinner.svg?react";
 
 import { Fundraiser, TokenInfo } from "../../model/launchpad";
 import { VestingState } from "../../types/launchpad";
@@ -16,12 +17,14 @@ interface LaunchpadVestingInfosProps {
     saleTokenInfo: TokenInfo;
     raiseTokenInfo: TokenInfo;
   };
+  formInProgress: string | null;
   claimVestedTokens: () => Promise<void>;
 }
 
 export function VestingInformation({
   vestingInfo,
   fundraiser,
+  formInProgress,
   claimVestedTokens,
 }: LaunchpadVestingInfosProps) {
   return (
@@ -80,7 +83,13 @@ export function VestingInformation({
 
         {vestingInfo && vestingInfo.releasableAmount > 0n && (
           <div className="launchpadVestingInfos-actions">
-            <Button onClick={claimVestedTokens}>Claim Vested Tokens</Button>
+            <Button
+              onClick={claimVestedTokens}
+              disabled={formInProgress != null}
+              icon={formInProgress === "claimBack" && <Spinner />}
+            >
+              Claim Vested Tokens
+            </Button>
           </div>
         )}
       </div>

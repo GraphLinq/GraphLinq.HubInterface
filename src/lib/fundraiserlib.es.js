@@ -2241,7 +2241,7 @@ class FundraiserWeb3Connect {
     }
     async createFundraiserStealthLaunch(signer, params, campaignParams) {
         return this.safeExecute(async () => {
-            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(utils.defaultAbiCoder.encode(["string", "string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
+            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(utils.defaultAbiCoder.encode(["string", "string", "string", "string", "address", "address", "uint256", "uint256", "uint24", "uint8", "uint256"], [
                 params.projectName,
                 params.description,
                 params.websiteLink,
@@ -2251,13 +2251,15 @@ class FundraiserWeb3Connect {
                 params.vestingStartDelta,
                 params.vestingDuration,
                 params.poolFee,
+                params.poolLiquidity,
+                params.liquidityLockDuration
             ]), utils.defaultAbiCoder.encode(["uint256", "uint256"], [campaignParams.maxCap, campaignParams.pricePerToken]), 0);
             return await this.addTx(tx);
         });
     }
     async createFundraiserFairLaunch(signer, params, campaignParams) {
         return this.safeExecute(async () => {
-            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(utils.defaultAbiCoder.encode(["string", "string", "string", "string", "address", "address", "uint256", "uint256", "uint24"], [
+            const tx = await this.fundraiserFactory.connect(signer).createFundraiser(utils.defaultAbiCoder.encode(["string", "string", "string", "string", "address", "address", "uint256", "uint256", "uint24", "uint8", "uint256"], [
                 params.projectName,
                 params.description,
                 params.websiteLink,
@@ -2267,6 +2269,8 @@ class FundraiserWeb3Connect {
                 params.vestingStartDelta,
                 params.vestingDuration,
                 params.poolFee,
+                params.poolLiquidity,
+                params.liquidityLockDuration
             ]), utils.defaultAbiCoder.encode(["uint256", "uint256", "uint256"], [campaignParams.endTime, campaignParams.minimumGoal, campaignParams.pricePerToken]), 1);
             return await this.addTx(tx);
         });
@@ -2313,11 +2317,11 @@ class FundraiserWeb3Connect {
             }
         });
     }
-    async getContribution(signer, fundraiserAddr) {
+    async getContribution(userAddr, fundraiserAddr) {
         return this.safeExecute(async () => {
             const fundraiser = Fundraiser__factory.connect(fundraiserAddr, this.provider);
-            const userAddr = await signer.getAddress();
             const contribution = await fundraiser.contributions(userAddr);
+
             return contribution;
         });
     }
