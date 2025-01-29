@@ -28,10 +28,6 @@ function LaunchpadPage() {
   const [activeStatus, setActiveStatus] = useState(0);
   const [search, setSearch] = useState("");
 
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState("");
-  const [success, setSuccess] = useState("");
-
   useLaunchpad();
 
   const qFundraisers = useQuery({
@@ -39,19 +35,11 @@ function LaunchpadPage() {
     queryFn: ({ signal }) => getFundraisers({ activeStatus, search }, signal),
   });
 
-  const resetFeedback = () => {
-    setError("");
-    setPending("");
-    setSuccess("");
-  };
-
   const handleSelectChange = (active: number) => {
-    resetFeedback();
     setActiveStatus(active);
   };
 
   const handleSearchChange = (val: string) => {
-    resetFeedback();
     setSearch(val);
   };
 

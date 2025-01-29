@@ -12,7 +12,7 @@ import {
   formatTokenSymbol,
 } from "@utils/launchpad";
 import { ethers } from "ethers";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAccount, useWalletClient } from "wagmi";
 
@@ -25,7 +25,6 @@ import {
 } from "../../queries/api";
 import { FundraiserManager } from "../../services/FundraiserManager";
 import { useStore } from "../../store";
-import { VestingState } from "../../types/launchpad";
 import { VestingInformation } from "@components/LaunchpadVestingInfos/LaunchpadVestingInfos";
 import Alert from "@components/Alert";
 import { getErrorMessage } from "@utils/errors";

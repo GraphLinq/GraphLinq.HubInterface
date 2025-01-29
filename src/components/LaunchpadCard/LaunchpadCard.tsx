@@ -1,5 +1,5 @@
 import "./style.scss";
-import React, { useState } from "react";
+import React from "react";
 import Approved from "@assets/icons/approved.svg?react";
 import Users from "@assets/icons/users.svg?react";
 import Locktime from "@assets/icons/locktime.svg?react";
@@ -7,10 +7,8 @@ import {
   formatNumberToDollars,
   formatSecondsToReadableTime,
 } from "@utils/number";
-import { formatDistanceToNow } from "date-fns";
 import { NavLink } from "react-router-dom";
 import { FundraiserSmall } from "../../model/launchpad";
-import { ethers } from "ethers";
 import { formatTokenDecimals } from "@utils/launchpad";
 
 interface LaunchpadCardProps {

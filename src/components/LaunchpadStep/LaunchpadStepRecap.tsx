@@ -37,7 +37,11 @@ function LaunchpadStepRecap() {
   };
 
   const reloadData = async () => {
-    const activeFundraisers = await library.getAllFundraisers(0, 0, 0);
+    const activeFundraisers: string[] = await library.getAllFundraisers(
+      0,
+      0,
+      0
+    );
     const newFundraisers = activeFundraisers.filter(
       (fundraiser) => !fundraisers.includes(fundraiser)
     );

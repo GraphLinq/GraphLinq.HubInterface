@@ -13,8 +13,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
   library,
   onTransactionConfirmed,
 }) => {
-  const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
-  const [statuses, setStatuses] = useState<Record<string, string>>({});
+  const [, setTransactions] = useState<TransactionResponse[]>([]);
+  const [, setStatuses] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!library) return;

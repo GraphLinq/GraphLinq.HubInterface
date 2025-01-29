@@ -510,13 +510,15 @@ const usePool = () => {
         tickMin = nearestUsableTick(
           minPriceFromCurrent === -100
             ? TickMath.MIN_TICK
-            : priceToClosestTick(minTargetPrice),
+            : // @ts-ignore
+              priceToClosestTick(minTargetPrice),
           state.tickSpacing
         );
         tickMax = nearestUsableTick(
           maxPriceFromCurrent === Infinity
             ? TickMath.MAX_TICK
-            : priceToClosestTick(maxTargetPrice),
+            : // @ts-ignore
+              priceToClosestTick(maxTargetPrice),
           state.tickSpacing
         );
       }
