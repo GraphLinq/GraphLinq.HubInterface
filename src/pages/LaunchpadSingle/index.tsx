@@ -2,9 +2,14 @@ import "./style.scss";
 import Approved from "@assets/icons/approved.svg?react";
 import ArrowBack from "@assets/icons/arrow-back.svg?react";
 import Spinner from "@assets/icons/spinner.svg?react";
+import Alert from "@components/Alert";
 import Button from "@components/Button";
+import InputNumber from "@components/InputNumber";
+import { VestingInformation } from "@components/LaunchpadVestingInfos/LaunchpadVestingInfos";
 import SEO from "@components/SEO";
+import TokenIcon from "@components/TokenIcon";
 import { useQuery } from "@tanstack/react-query";
+import { getErrorMessage } from "@utils/errors";
 import {
   formatTimestamp,
   formatTimestampToDate,
@@ -25,11 +30,6 @@ import {
 } from "../../queries/api";
 import { FundraiserManager } from "../../services/FundraiserManager";
 import { useStore } from "../../store";
-import { VestingInformation } from "@components/LaunchpadVestingInfos/LaunchpadVestingInfos";
-import Alert from "@components/Alert";
-import { getErrorMessage } from "@utils/errors";
-import InputNumber from "@components/InputNumber";
-import TokenIcon from "@components/TokenIcon";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
