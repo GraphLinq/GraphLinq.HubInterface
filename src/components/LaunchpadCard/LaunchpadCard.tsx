@@ -9,7 +9,7 @@ import {
 } from "@utils/number";
 import { NavLink } from "react-router-dom";
 import { FundraiserSmall } from "../../model/launchpad";
-import { formatTokenDecimals } from "@utils/launchpad";
+import { formatTokenDecimals, formatTokenSymbol } from "@utils/launchpad";
 
 interface LaunchpadCardProps {
   fundraiser: FundraiserSmall;
@@ -67,7 +67,7 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ fundraiser: data }) => {
                   data.progress,
                   parseInt(data.raiseTokenInfo.decimals)
                 )}{" "}
-                {data.symbol}
+                {formatTokenSymbol(data.symbol)}
                 <span className="color">
                   {formatNumberToDollars(
                     parseFloat(
@@ -105,7 +105,7 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ fundraiser: data }) => {
                       data.soft,
                       parseInt(data.raiseTokenInfo.decimals)
                     )}{" "}
-                    {data.symbol}{" "}
+                    {formatTokenSymbol(data.symbol)}{" "}
                   </span>
                   <span className="color">
                     {formatNumberToDollars(
@@ -128,7 +128,7 @@ const LaunchpadCard: React.FC<LaunchpadCardProps> = ({ fundraiser: data }) => {
                       data.hard,
                       parseInt(data.raiseTokenInfo.decimals)
                     )}{" "}
-                    {data.symbol}{" "}
+                    {formatTokenSymbol(data.symbol)}{" "}
                     <span className="color">
                       {formatNumberToDollars(
                         parseFloat(

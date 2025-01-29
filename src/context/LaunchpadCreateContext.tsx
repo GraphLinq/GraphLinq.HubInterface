@@ -85,11 +85,11 @@ export const LaunchpadCreateContextProvider = ({
     vestingStartDate: "2025-02-13T13:43",
     vestingEndDate: "2025-02-20T13:43",
     vestingDuration: 86400,
-    vestingDelta: 3600,
+    vestingDelta: 86400,
     poolLiquidity: 50,
-    liquidityLockDuration: 120,
+    liquidityLockDuration: 86400,
   });
-  const [activeStep, setActiveStep] = useState<Steps>("vesting");
+  const [activeStep, setActiveStep] = useState<Steps>("infos");
 
   return (
     <LaunchpadCreateContext.Provider
