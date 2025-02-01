@@ -246,7 +246,9 @@ function LaunchpadSinglePage() {
       await fundraiserManager.finalizeFundraiser(
         fundraiserAddr!,
         fundraiserState.saleToken,
-        BigInt(fundraiserState.soldAmount)
+        BigInt(fundraiserState.soldAmount),
+        BigInt(fundraiserState.poolLiquidity),
+        BigInt(fundraiserState.raisedAmount)
       );
       await qFundraiserRefresh.refetch();
       await qFundraiser.refetch();

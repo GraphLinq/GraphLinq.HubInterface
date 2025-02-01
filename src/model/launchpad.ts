@@ -54,6 +54,8 @@ export interface Fundraiser {
   participants: string;
   poolAddr: string;
   owner: string;
+  poolLiquidity: bigint;
+  liquidityLockDuration: bigint;
 }
 
 export interface RefreshConfirmation {

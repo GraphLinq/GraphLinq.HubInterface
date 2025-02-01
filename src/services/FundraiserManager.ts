@@ -29,15 +29,19 @@ export class FundraiserManager {
   async finalizeFundraiser(
     fundraiserAddr: string,
     saleToken: string,
-    soldAmount: bigint
+    soldAmount: bigint,
+    poolLiquidity: bigint,
+    raisedAmount: bigint
   ): Promise<void> {
-    console.log("Finalizing Fundraiser");
+    console.log("Finalizing Fundraiser, raisedAmount :", raisedAmount);
     const signer = await this.getSigner();
+    const requiredLiquidity =
+      soldAmount + (soldAmount * poolLiquidity) / BigInt(100);
     await this.library.approveERC20(
       signer,
       saleToken,
       fundraiserAddr,
-      soldAmount
+      requiredLiquidity
     );
     await this.library.finalizeFundraiser(signer, fundraiserAddr);
     console.log("Fundraiser finalized successfully");

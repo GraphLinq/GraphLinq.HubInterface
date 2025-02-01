@@ -179,6 +179,23 @@ function LaunchpadStepRecap() {
             </div>
           </div>
         )}
+
+        <div className="launchpadStep-details-row">
+          <div className="launchpadStep-details-label">
+            Pool liquidity percentage
+          </div>
+          <div className="launchpadStep-details-value">
+            {formData.poolLiquidity}%
+          </div>
+        </div>
+        <div className="launchpadStep-details-row">
+          <div className="launchpadStep-details-label">
+            Liquidity lock duration
+          </div>
+          <div className="launchpadStep-details-value">
+            {formatSecondsToReadableTime(formData.liquidityLockDuration)}
+          </div>
+        </div>
       </div>
 
       {(error || pending || success) && (
