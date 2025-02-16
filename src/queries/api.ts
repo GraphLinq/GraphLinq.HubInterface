@@ -65,6 +65,12 @@ export const getFundraisers = async (
   );
 };
 
+export const getFundraisersRefresh = async () =>
+  request<RefreshConfirmation>(
+    `${LAUNCHPAD_API_URL}/fundraisers/refresh`,
+    "getFundraisersRefresh"
+  );
+
 export const getFundraiser = async (address: string) =>
   request<Fundraiser>(
     `${LAUNCHPAD_API_URL}/fundraiser/${address}`,

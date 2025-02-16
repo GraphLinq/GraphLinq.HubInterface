@@ -14,6 +14,8 @@ import TransactionList from "@components/TransactionList";
 import { useStore } from "../../store";
 import Alert from "@components/Alert";
 import { getErrorMessage } from "@utils/errors";
+import { useQuery } from "@tanstack/react-query";
+import { getFundraisersRefresh } from "../../queries/api";
 
 function LaunchpadStepRecap() {
   const { submitFundraiser } = useLaunchpad();
@@ -29,6 +31,12 @@ function LaunchpadStepRecap() {
   const [loading, setLoading] = useState(false);
   const [formDisabled, setFormDisabled] = useState(false);
   const [createdAddress, setCreatedAddress] = useState<string | null>(null);
+
+  const qFundraisersRefresh = useQuery({
+    queryKey: ["fundraisersRefresh"],
+    queryFn: () => getFundraisersRefresh(),
+    enabled: () => false,
+  });
 
   const resetFeedback = () => {
     setError("");
@@ -62,6 +70,8 @@ function LaunchpadStepRecap() {
 
       setPending("Waiting for confirmations...");
       await submitFundraiser(formData);
+
+      qFundraisersRefresh.refetch();
     } catch (error) {
       resetFeedback();
       setError(getErrorMessage(error));

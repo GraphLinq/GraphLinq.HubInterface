@@ -68,7 +68,7 @@ function LaunchpadSinglePage() {
   });
 
   const qFundraiserRefresh = useQuery({
-    queryKey: ["fundraiser", fundraiserAddr],
+    queryKey: ["fundraiserRefresh", fundraiserAddr],
     queryFn: () => getFundraiserRefresh(fundraiserAddr!),
     enabled: () => false,
   });
