@@ -30,6 +30,7 @@ import {
 } from "../../queries/api";
 import { FundraiserManager } from "../../services/FundraiserManager";
 import { useStore } from "../../store";
+import { formatSecondsToReadableTime } from "@utils/number";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
@@ -462,7 +463,7 @@ function LaunchpadSinglePage() {
                     )}/${formatTokenSymbol(raiseTokenInfo.symbol)}`}
                   </div>
                 </div>
-                {hardCapDecimals && (
+                {hardCapDecimals !== 0 && (
                   <div className="launchpadSingle-details-row">
                     <div className="launchpadSingle-details-label">
                       Hard cap
@@ -475,7 +476,7 @@ function LaunchpadSinglePage() {
                   </div>
                 )}
 
-                {!hardCapDecimals && softCapDecimals && (
+                {hardCapDecimals === 0 && softCapDecimals !== 0 && (
                   <div className="launchpadSingle-details-row">
                     <div className="launchpadSingle-details-label">
                       Soft cap
@@ -510,6 +511,28 @@ function LaunchpadSinglePage() {
                     </div>
                     <div className="launchpadSingle-details-value">
                       {endDate}
+                    </div>
+                  </div>
+                )}
+                {fundraiserState.poolLiquidity && (
+                  <div className="launchpadSingle-details-row">
+                    <div className="launchpadSingle-details-label">
+                      Pool liquidity percentage
+                    </div>
+                    <div className="launchpadSingle-details-value">
+                      {fundraiserState.poolLiquidity}%
+                    </div>
+                  </div>
+                )}
+                {fundraiserState.liquidityLockDuration && (
+                  <div className="launchpadSingle-details-row">
+                    <div className="launchpadSingle-details-label">
+                      Liquidity lock duration
+                    </div>
+                    <div className="launchpadSingle-details-value">
+                      {formatSecondsToReadableTime(
+                        parseInt(fundraiserState.liquidityLockDuration)
+                      )}
                     </div>
                   </div>
                 )}
