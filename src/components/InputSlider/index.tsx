@@ -15,11 +15,11 @@ const InputSlider: React.FC<InputSliderProps> = ({
   value,
   onChange,
 }) => {
-  const handleInputChange = (value: string) => {
+  const handleInputChange = (value: number) => {
     const newValue = value;
 
     if (onChange) {
-      onChange(newValue);
+      onChange(newValue.toString());
     }
   };
 
@@ -31,7 +31,7 @@ const InputSlider: React.FC<InputSliderProps> = ({
         min={min}
         max={max}
         onChange={handleInputChange}
-        renderThumb={({ key, ...restProps }) => (
+        renderThumb={({ key, ...restProps }: { key: string }) => (
           <div key={key} {...restProps}></div>
         )}
       />
