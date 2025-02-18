@@ -16,11 +16,29 @@
 
   &-label {
     display: flex;
+    align-items: baseline;
     gap: 8px;
     font-size: 18px;
 
     span {
       color: var(--c-lavender);
+    }
+  }
+
+  &-sublabel {
+    font-size: 12px;
+    color: var(--c-lavender);
+    margin-top: -8px;
+  }
+
+  &-input {
+    &-extra {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--c-lavender);
+      margin-top: 4px;
     }
   }
 

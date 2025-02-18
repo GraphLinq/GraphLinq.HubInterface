@@ -7,6 +7,7 @@ import InputNumber from "@components/InputNumber";
 import Select from "@components/Select";
 import { useLaunchpadCreateContext } from "@context/LaunchpadCreateContext";
 import { useState } from "react";
+import InputSlider from "@components/InputSlider";
 
 const durationLabels = ["days", "hours"];
 const durations = [86400, 3600];
@@ -128,7 +129,10 @@ function LaunchpadStepVesting() {
 
       {formData.campaignType === "stealth" && (
         <div className="launchpadStep-field">
-          <div className="launchpadStep-label">Vesting delta</div>
+          <div className="launchpadStep-label">Cliff duration</div>
+          <div className="launchpadStep-sublabel">
+            Time after the fundraiser ends before the vesting starts.
+          </div>
           <div className="launchpadStep-input launchpadStep-row">
             <InputNumber
               value={transformToDaysOrHours(
@@ -159,11 +163,15 @@ function LaunchpadStepVesting() {
 
       <div className="launchpadStep-field">
         <div className="launchpadStep-label">Pool liquidity percentage</div>
+        <div className="launchpadStep-sublabel">
+          Percentage of the funds that will be automatically added as liquidity
+          on GLQ Swap at the end of the fundraiser.
+        </div>
         <div className="launchpadStep-input">
-          <InputNumber
+          <InputSlider
             value={formData.poolLiquidity.toString()}
-            min={0}
-            max={100}
+            min={10}
+            max={80}
             onChange={(val) => updateField("poolLiquidity", val)}
           />
         </div>
