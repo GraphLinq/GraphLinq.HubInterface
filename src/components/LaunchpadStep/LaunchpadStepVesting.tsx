@@ -24,12 +24,27 @@ function LaunchpadStepVesting() {
     formData.endTime !== "" &&
     new Date(formData.vestingStartDate) < new Date(formData.endTime);
   const vestingEndDateEmpty = formData.vestingEndDate === "";
+  const vestingEndDateInvalid =
+    !vestingStartDateEmpty &&
+    !vestingEndDateEmpty &&
+    new Date(formData.vestingEndDate) < new Date(formData.vestingStartDate);
   const vestingDurationEmpty = formData.vestingDuration === 0;
   const vestingDeltaEmpty = formData.vestingDelta === 0;
   const disableForm =
     formData.campaignType === "stealth"
       ? vestingDurationEmpty || vestingDeltaEmpty
       : vestingStartDateEmpty || vestingStartDateInvalid || vestingEndDateEmpty;
+  console.log(formData.endTime);
+  const minVestingStart = new Date(
+    new Date(formData.endTime).getTime() + 86400000
+  )
+    .toISOString()
+    .slice(0, 16);
+  const minVestingEnd = new Date(
+    new Date(formData.vestingStartDate).getTime() + 86400000
+  )
+    .toISOString()
+    .slice(0, 16);
 
   const updateField = (field: keyof typeof formData, value: any) => {
     setFormData((prevData) => ({
@@ -65,6 +80,7 @@ function LaunchpadStepVesting() {
               <InputDatetime
                 placeholder="Pick a date and time"
                 onChange={(val) => updateField("vestingStartDate", val)}
+                min={minVestingStart}
                 value={
                   formData.vestingStartDate !== ""
                     ? formData.vestingStartDate
@@ -82,18 +98,28 @@ function LaunchpadStepVesting() {
         </>
       )}
       {formData.campaignType === "fair" && (
-        <div className="launchpadStep-field">
-          <div className="launchpadStep-label">Vesting End date</div>
-          <div className="launchpadStep-input">
-            <InputDatetime
-              placeholder="Pick a date and time"
-              onChange={(val) => updateField("vestingEndDate", val)}
-              value={
-                formData.vestingEndDate !== "" ? formData.vestingEndDate : null
-              }
-            />
+        <>
+          <div className="launchpadStep-field">
+            <div className="launchpadStep-label">Vesting End date</div>
+            <div className="launchpadStep-input">
+              <InputDatetime
+                placeholder="Pick a date and time"
+                onChange={(val) => updateField("vestingEndDate", val)}
+                min={minVestingEnd}
+                value={
+                  formData.vestingEndDate !== ""
+                    ? formData.vestingEndDate
+                    : null
+                }
+              />
+            </div>
           </div>
-        </div>
+          {vestingEndDateInvalid && (
+            <Alert type="error">
+              Vesting End date must be after Vesting Start date
+            </Alert>
+          )}
+        </>
       )}
 
       {formData.campaignType === "stealth" && (

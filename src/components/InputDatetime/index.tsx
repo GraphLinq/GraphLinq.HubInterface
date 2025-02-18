@@ -6,12 +6,14 @@ import Datetime from "@assets/icons/datetime.svg?react";
 interface InputDatetimeProps {
   placeholder?: string;
   value: string | null;
+  min?: string;
   onChange?: (value: string) => void;
 }
 
 const InputDatetime: React.FC<InputDatetimeProps> = ({
   placeholder,
   value,
+  min,
   onChange,
   ...props
 }) => {
@@ -34,9 +36,7 @@ const InputDatetime: React.FC<InputDatetimeProps> = ({
   return (
     <div className="inputDatetime" {...props}>
       <div className="inputDatetime-label">
-        {value
-          ? new Date(value).toLocaleString()
-          : placeholder}
+        {value ? new Date(value).toLocaleString() : placeholder}
       </div>
       <div className="inputDatetime-actions">
         <Button onClick={handleButtonClick}>
@@ -47,11 +47,12 @@ const InputDatetime: React.FC<InputDatetimeProps> = ({
           ref={inputRef}
           onChange={handleInputChange}
           className="inputDatetime-input"
+          min={min}
           value={value ?? undefined}
         />
       </div>
     </div>
   );
-}
+};
 
 export default InputDatetime;

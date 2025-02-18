@@ -33,6 +33,8 @@ function LaunchpadStepCampaign() {
       ? endTimeEmpty || minimumGoalEmpty || pricePerTokenEmpty
       : maximumGoalEmpty || pricePerTokenEmpty;
 
+  const minEndTime = new Date(Date.now() + 86400000).toISOString().slice(0, 16);
+
   const updateField = (field: keyof typeof formData, value: any) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -69,6 +71,7 @@ function LaunchpadStepCampaign() {
           <div className="launchpadStep-input">
             <InputDatetime
               placeholder="Pick a date and time"
+              min={minEndTime}
               onChange={(val) => updateField("endTime", val)}
               value={formData.endTime !== "" ? formData.endTime : null}
             />

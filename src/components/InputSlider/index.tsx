@@ -27,11 +27,13 @@ const InputSlider: React.FC<InputSliderProps> = ({
     <div className="inputSlider">
       <ReactSlider
         className="inputSlider-input"
-        value={value}
+        value={parseInt(value)}
         min={min}
         max={max}
         onChange={handleInputChange}
-        renderThumb={(props, state) => <div {...props}></div>}
+        renderThumb={({ key, ...restProps }) => (
+          <div key={key} {...restProps}></div>
+        )}
       />
 
       <div className="inputSlider-extra">{value}%</div>

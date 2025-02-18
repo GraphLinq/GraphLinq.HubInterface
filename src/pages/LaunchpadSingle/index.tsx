@@ -26,6 +26,7 @@ import useLaunchpad from "../../composables/useLaunchpad";
 import {
   getFundraiser,
   getFundraiserRefresh,
+  getFundraisersRefresh,
   getTokenInfo,
 } from "../../queries/api";
 import { FundraiserManager } from "../../services/FundraiserManager";
@@ -70,6 +71,12 @@ function LaunchpadSinglePage() {
   const qFundraiserRefresh = useQuery({
     queryKey: ["fundraiserRefresh", fundraiserAddr],
     queryFn: () => getFundraiserRefresh(fundraiserAddr!),
+    enabled: () => false,
+  });
+
+  const qFundraisersRefresh = useQuery({
+    queryKey: ["fundraisersRefresh"],
+    queryFn: () => getFundraisersRefresh(),
     enabled: () => false,
   });
 
@@ -192,7 +199,7 @@ function LaunchpadSinglePage() {
 
   if (isFairLaunch) {
     // in case of fair launch we know the end date since the beginning
-    endDate = formatTimestampToDate(Number(fundraiserState.config[0]));
+    endDate = formatTimestampToDate(Number(fundraiserState.config[0]) / 1000);
   }
   if (isStealthLaunch && !isFinalized && !isClaimable) {
     // no end date
@@ -214,6 +221,15 @@ function LaunchpadSinglePage() {
       fundraiserState.raisedAmount >= fundraiserState.config[1]) ||
     isStealthLaunch;
 
+  const formattedPricePerToken = formatTokenDecimals(
+    BigInt(fundraiserState.pricePerToken),
+    parseInt(raiseTokenInfo.decimals)
+  );
+  const contributeEquivalent =
+    !isNaN(parseFloat(contributeAmount)) && parseFloat(contributeAmount) !== 0
+      ? parseFloat(contributeAmount) * parseFloat(formattedPricePerToken)
+      : null;
+
   const isVerified = false; // @TODO
 
   const fail = async () => {
@@ -226,6 +242,8 @@ function LaunchpadSinglePage() {
       await fundraiserManager.failFundraiser(fundraiserAddr!);
       await qFundraiserRefresh.refetch();
       await qFundraiser.refetch();
+
+      qFundraisersRefresh.refetch();
 
       resetFeedback();
       setSuccess("The fundraiser has been set to failed.");
@@ -254,6 +272,8 @@ function LaunchpadSinglePage() {
       await qFundraiserRefresh.refetch();
       await qFundraiser.refetch();
 
+      qFundraisersRefresh.refetch();
+
       resetFeedback();
       setSuccess("The fundraiser has been finalized.");
     } catch (error) {
@@ -264,32 +284,34 @@ function LaunchpadSinglePage() {
     }
   };
 
-  const createPair = async () => {
-    resetFeedback();
+  // const createPair = async () => {
+  //   resetFeedback();
 
-    try {
-      setFormInProgress("createPair");
+  //   try {
+  //     setFormInProgress("createPair");
 
-      setPending("Waiting for confirmations...");
-      await fundraiserManager.createSwapPair(
-        fundraiserAddr!,
-        fundraiserState.saleToken,
-        fundraiserState.raiseToken,
-        parseInt(raiseTokenInfo.decimals),
-        raiseTokenInfo.symbol
-      );
-      await qFundraiserRefresh.refetch();
-      await qFundraiser.refetch();
+  //     setPending("Waiting for confirmations...");
+  //     await fundraiserManager.createSwapPair(
+  //       fundraiserAddr!,
+  //       fundraiserState.saleToken,
+  //       fundraiserState.raiseToken,
+  //       parseInt(raiseTokenInfo.decimals),
+  //       raiseTokenInfo.symbol
+  //     );
+  //     await qFundraiserRefresh.refetch();
+  //     await qFundraiser.refetch();
 
-      resetFeedback();
-      setSuccess("The pair has been initialized.");
-    } catch (error) {
-      resetFeedback();
-      setError(getErrorMessage(error));
-    } finally {
-      setFormInProgress(null);
-    }
-  };
+  // qFundraisersRefresh.refetch();
+
+  //     resetFeedback();
+  //     setSuccess("The pair has been initialized.");
+  //   } catch (error) {
+  //     resetFeedback();
+  //     setError(getErrorMessage(error));
+  //   } finally {
+  //     setFormInProgress(null);
+  //   }
+  // };
 
   const contribute = async () => {
     resetFeedback();
@@ -314,6 +336,8 @@ function LaunchpadSinglePage() {
       await qContribution.refetch();
       await qFundraiser.refetch();
 
+      qFundraisersRefresh.refetch();
+
       resetFeedback();
       setSuccess("Your contribution is confirmed.");
       setContributeAmount("");
@@ -336,6 +360,8 @@ function LaunchpadSinglePage() {
       await qFundraiserRefresh.refetch();
       await qFundraiser.refetch();
 
+      qFundraisersRefresh.refetch();
+
       resetFeedback();
       setSuccess("Your tokens has been successfully claimed.");
     } catch (error) {
@@ -357,6 +383,8 @@ function LaunchpadSinglePage() {
       await qFundraiserRefresh.refetch();
       await qFundraiser.refetch();
 
+      qFundraisersRefresh.refetch();
+
       resetFeedback();
       setSuccess("Your tokens has been successfully claimed.");
     } catch (error) {
@@ -377,6 +405,8 @@ function LaunchpadSinglePage() {
       await fundraiserManager.claimVestedTokens(fundraiserAddr!);
       await qFundraiserRefresh.refetch();
       await qFundraiser.refetch();
+
+      qFundraisersRefresh.refetch();
 
       resetFeedback();
       setSuccess("Your vested tokens has been successfully claimed.");
@@ -463,6 +493,16 @@ function LaunchpadSinglePage() {
                     )}/${formatTokenSymbol(raiseTokenInfo.symbol)}`}
                   </div>
                 </div>
+                <div className="launchpadSingle-details-row">
+                  <div className="launchpadSingle-details-label">
+                    Price per token
+                  </div>
+                  <div className="launchpadSingle-details-value">
+                    {formattedPricePerToken}{" "}
+                    {formatTokenSymbol(saleTokenInfo.symbol)} per{" "}
+                    {formatTokenSymbol(raiseTokenInfo.symbol)}
+                  </div>
+                </div>
                 {hardCapDecimals !== 0 && (
                   <div className="launchpadSingle-details-row">
                     <div className="launchpadSingle-details-label">
@@ -488,6 +528,7 @@ function LaunchpadSinglePage() {
                     </div>
                   </div>
                 )}
+
                 <div className="launchpadSingle-details-row">
                   <div className="launchpadSingle-details-label">
                     Pool Address
@@ -514,7 +555,7 @@ function LaunchpadSinglePage() {
                     </div>
                   </div>
                 )}
-                {fundraiserState.poolLiquidity && (
+                {fundraiserState.poolLiquidity !== null && (
                   <div className="launchpadSingle-details-row">
                     <div className="launchpadSingle-details-label">
                       Pool liquidity percentage
@@ -524,15 +565,17 @@ function LaunchpadSinglePage() {
                     </div>
                   </div>
                 )}
-                {fundraiserState.liquidityLockDuration && (
+                {fundraiserState.liquidityLockDuration !== null && (
                   <div className="launchpadSingle-details-row">
                     <div className="launchpadSingle-details-label">
                       Liquidity lock duration
                     </div>
                     <div className="launchpadSingle-details-value">
-                      {formatSecondsToReadableTime(
-                        parseInt(fundraiserState.liquidityLockDuration)
-                      )}
+                      {parseInt(fundraiserState.liquidityLockDuration) === 0
+                        ? "None"
+                        : formatSecondsToReadableTime(
+                            parseInt(fundraiserState.liquidityLockDuration)
+                          )}
                     </div>
                   </div>
                 )}
@@ -561,7 +604,7 @@ function LaunchpadSinglePage() {
                   Sold:{" "}
                   {formatTokenDecimals(
                     BigInt(fundraiserState.soldAmount),
-                    parseInt(saleTokenInfo.decimals)
+                    parseInt(raiseTokenInfo.decimals)
                   )}{" "}
                   {saleTokenInfo.symbol}
                 </div>
@@ -614,6 +657,20 @@ function LaunchpadSinglePage() {
                       onChange={(val) => setContributeAmount(val)}
                       icon={<TokenIcon tokenKey={"GLQ"} />}
                     />
+                    {contributeEquivalent && (
+                      <div className="launchpadSingle-equivalent">
+                        Invest{" "}
+                        <span>
+                          {contributeAmount}{" "}
+                          {formatTokenSymbol(raiseTokenInfo.symbol)}
+                        </span>{" "}
+                        for{" "}
+                        <span>
+                          {contributeEquivalent}{" "}
+                          {formatTokenSymbol(saleTokenInfo.symbol)}
+                        </span>
+                      </div>
+                    )}
                     <Button
                       onClick={contribute}
                       disabled={
@@ -664,7 +721,7 @@ function LaunchpadSinglePage() {
                     Finalize
                   </Button>
                 )}
-                {isOwner && isFinalized && (
+                {/* {isOwner && isFinalized && (
                   <Button
                     onClick={createPair}
                     disabled={formInProgress != null}
@@ -672,7 +729,7 @@ function LaunchpadSinglePage() {
                   >
                     Init pair
                   </Button>
-                )}
+                )} */}
 
                 {(error || pending || success) && (
                   <div className="popin-alert">

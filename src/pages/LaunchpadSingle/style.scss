@@ -258,4 +258,14 @@
       color: var(--c-lavender);
     }
   }
+
+  &-equivalent {
+    text-align: center;
+    color: var(--c-lavender);
+
+    span {
+      font-weight: 700;
+      color: var(--c-white);
+    }
+  }
 }

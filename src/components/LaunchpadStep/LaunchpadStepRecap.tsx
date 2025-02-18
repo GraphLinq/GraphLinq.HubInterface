@@ -45,6 +45,7 @@ function LaunchpadStepRecap() {
   };
 
   const reloadData = async () => {
+    console.log("reloadData");
     const activeFundraisers: string[] = await library.getAllFundraisers(
       0,
       0,
@@ -70,7 +71,6 @@ function LaunchpadStepRecap() {
 
       setPending("Waiting for confirmations...");
       await submitFundraiser(formData);
-
       qFundraisersRefresh.refetch();
     } catch (error) {
       resetFeedback();
