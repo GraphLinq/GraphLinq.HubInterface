@@ -153,7 +153,7 @@ function LaunchpadSinglePage() {
   const isActive = fundraiserState.stateString === "Active";
   const isFailed = fundraiserState.stateString === "Failed";
   const isFinalized = fundraiserState.stateString === "Finalized";
-  const isClaimable = fundraiserState.stateString === "SwapPairCreated";
+  // const isClaimable = fundraiserState.stateString === "SwapPairCreated";
   const hasClaimableContribution =
     qContribution.data &&
     parseFloat(qContribution.data) > 0 &&
@@ -693,7 +693,7 @@ function LaunchpadSinglePage() {
                     Claim back
                   </Button>
                 )}
-                {isClaimable && hasClaimableContribution && (
+                {isFinalized && hasClaimableContribution && (
                   <Button
                     onClick={claimTokens}
                     disabled={formInProgress != null}
