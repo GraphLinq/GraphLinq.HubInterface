@@ -201,7 +201,7 @@ function LaunchpadSinglePage() {
     // in case of fair launch we know the end date since the beginning
     endDate = formatTimestampToDate(Number(fundraiserState.config[0]) / 1000);
   }
-  if (isStealthLaunch && !isFinalized && !isClaimable) {
+  if (isStealthLaunch && !isFinalized) {
     // no end date
     endDate = null;
   }
