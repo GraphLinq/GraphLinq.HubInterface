@@ -2332,10 +2332,9 @@ class FundraiserWeb3Connect {
             return await this.addTx(tx);
         });
     }
-    async checkClaimed(signer, fundraiserAddr) {
+    async checkClaimed(userAddr, fundraiserAddr) {
         return this.safeExecute(async () => {
-            const fundraiser = Fundraiser__factory.connect(fundraiserAddr, signer);
-            const userAddr = await signer.getAddress();
+            const fundraiser = Fundraiser__factory.connect(fundraiserAddr, this.provider);
             return await fundraiser.claimed(userAddr);
         });
     }
@@ -2346,9 +2345,8 @@ class FundraiserWeb3Connect {
             return await this.addTx(tx);
         });
     }
-    async getVestingInfo(signer, fundraiserAddr) {
+    async getVestingInfo(userAddr, fundraiserAddr) {
         return this.safeExecute(async () => {
-            const userAddr = await signer.getAddress();
             const fundraiser = Fundraiser__factory.connect(fundraiserAddr, this.provider);
             const vestingAddr = await fundraiser.vesting();
             const vesting = IVesting__factory.connect(vestingAddr, this.provider);

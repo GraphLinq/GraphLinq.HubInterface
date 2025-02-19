@@ -16,12 +16,12 @@ import {
   formatTokenDecimals,
   formatTokenSymbol,
 } from "@utils/launchpad";
+import { formatSecondsToReadableTime } from "@utils/number";
 import { ethers } from "ethers";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAccount, useWalletClient } from "wagmi";
 
-import { useEthersSigner } from "../../composables/useEthersProvider";
 import useLaunchpad from "../../composables/useLaunchpad";
 import {
   getFundraiser,
@@ -31,7 +31,6 @@ import {
 } from "../../queries/api";
 import { FundraiserManager } from "../../services/FundraiserManager";
 import { useStore } from "../../store";
-import { formatSecondsToReadableTime } from "@utils/number";
 
 const seoTitle =
   "Launchpad | GLQ GraphLinq Chain Smart Contract | GraphLinq.io";
@@ -42,7 +41,6 @@ function LaunchpadSinglePage() {
   const { id: fundraiserAddr } = useParams();
   const navigate = useNavigate();
   const { address: account } = useAccount();
-  const provider = useEthersSigner();
   const store: any = useStore();
   const library = store.getState().library;
   const { data: walletClient } = useWalletClient();
@@ -106,13 +104,13 @@ function LaunchpadSinglePage() {
 
   const { data: hasClaimed }: { data?: boolean } = useQuery({
     queryKey: ["hasClaimed", fundraiserAddr],
-    queryFn: () => library.checkClaimed(provider, fundraiserAddr),
+    queryFn: () => library.checkClaimed(account, fundraiserAddr),
     enabled: !!library,
   });
 
   const qVestingInfo = useQuery({
     queryKey: ["vestingInfo", fundraiserAddr],
-    queryFn: () => library.getVestingInfo(provider, fundraiserAddr),
+    queryFn: () => library.getVestingInfo(account, fundraiserAddr),
     enabled:
       !!library &&
       fundraiserState &&
@@ -153,7 +151,6 @@ function LaunchpadSinglePage() {
   const isActive = fundraiserState.stateString === "Active";
   const isFailed = fundraiserState.stateString === "Failed";
   const isFinalized = fundraiserState.stateString === "Finalized";
-  // const isClaimable = fundraiserState.stateString === "SwapPairCreated";
   const hasClaimableContribution =
     qContribution.data &&
     parseFloat(qContribution.data) > 0 &&
