@@ -40,11 +40,16 @@ function useLaunchpad() {
 
     const signer = await ethersProvider.getSigner();
     const raiseTokenInfo = await library.getTokenInfo(formData.raiseToken);
+    const saleTokenInfo = await library.getTokenInfo(formData.saleToken);
 
-    const pricePerTokenDecimals = ethers.utils.parseUnits(
-      formData.pricePerToken.toString(),
-      raiseTokenInfo.decimals
-    );
+    const decimalsDiff = ethers.BigNumber.from(18)
+      .add(ethers.BigNumber.from(raiseTokenInfo.decimals))
+      .sub(ethers.BigNumber.from(saleTokenInfo.decimals));
+
+    const pricePerTokenDecimals = ethers.BigNumber.from(
+      formData.pricePerToken
+    ).mul(ethers.BigNumber.from(10).pow(decimalsDiff));
+
     const maxCapDecimals = ethers.utils.parseUnits(
       formData.maximumGoal.toString(),
       raiseTokenInfo.decimals
