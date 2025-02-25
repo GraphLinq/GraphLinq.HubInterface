@@ -8,6 +8,7 @@ import Select from "@components/Select";
 import { useLaunchpadCreateContext } from "@context/LaunchpadCreateContext";
 import { useState } from "react";
 import InputSlider from "@components/InputSlider";
+import InputToggle from "@components/InputToggle";
 
 const durationLabels = ["days", "hours"];
 const durations = [86400, 3600];
@@ -17,6 +18,7 @@ function LaunchpadStepVesting() {
   const [activeDurationOption, setActiveDurationOption] = useState(0);
   const [activeDeltaOption, setActiveDeltaOption] = useState(0);
   const [activeLockOption, setActiveLockOption] = useState(0);
+  const [disableVesting, setDisableVesting] = useState(false);
 
   const vestingStartDateEmpty = formData.vestingStartDate === "";
   const vestingStartDateInvalid =
@@ -28,13 +30,9 @@ function LaunchpadStepVesting() {
     !vestingStartDateEmpty &&
     !vestingEndDateEmpty &&
     new Date(formData.vestingEndDate) < new Date(formData.vestingStartDate);
-  const vestingDurationEmpty = formData.vestingDuration === 0;
-  const vestingDeltaEmpty = formData.vestingDelta === 0;
   const disableForm =
-    formData.campaignType === "stealth"
-      ? vestingDurationEmpty || vestingDeltaEmpty
-      : vestingStartDateEmpty || vestingStartDateInvalid || vestingEndDateEmpty;
-  console.log(formData.endTime);
+    formData.campaignType === "fair" &&
+    (vestingStartDateEmpty || vestingStartDateInvalid || vestingEndDateEmpty);
   const minVestingStart = new Date(
     new Date(formData.endTime).getTime() + 86400000
   )
@@ -59,6 +57,15 @@ function LaunchpadStepVesting() {
     }
 
     setActiveStep("recap");
+  };
+
+  const handleDisableVesting = (checked: boolean) => {
+    if (checked) {
+      updateField("vestingDuration", 0);
+      updateField("vestingDelta", 0);
+    }
+
+    setDisableVesting(checked);
   };
 
   const transformToSeconds = (val: string, ratio: number) => {
@@ -124,6 +131,18 @@ function LaunchpadStepVesting() {
 
       {formData.campaignType === "stealth" && (
         <div className="launchpadStep-field">
+          <div className="launchpadStep-input">
+            <InputToggle
+              label="Disable vesting"
+              checked={disableVesting}
+              onChange={handleDisableVesting}
+            />
+          </div>
+        </div>
+      )}
+
+      {formData.campaignType === "stealth" && !disableVesting && (
+        <div className="launchpadStep-field">
           <div className="launchpadStep-label">Vesting duration</div>
           <div className="launchpadStep-input launchpadStep-row">
             <InputNumber
@@ -153,7 +172,7 @@ function LaunchpadStepVesting() {
         </div>
       )}
 
-      {formData.campaignType === "stealth" && (
+      {formData.campaignType === "stealth" && !disableVesting && (
         <div className="launchpadStep-field">
           <div className="launchpadStep-label">Cliff duration</div>
           <div className="launchpadStep-sublabel">
