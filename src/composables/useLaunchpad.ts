@@ -47,7 +47,7 @@ function useLaunchpad() {
       .sub(ethers.BigNumber.from(saleTokenInfo.decimals));
 
     const pricePerTokenDecimals = ethers.BigNumber.from(
-      formData.pricePerToken
+      formData.pricePerToken.toString()
     ).mul(ethers.BigNumber.from(10).pow(decimalsDiff));
 
     const maxCapDecimals = ethers.utils.parseUnits(

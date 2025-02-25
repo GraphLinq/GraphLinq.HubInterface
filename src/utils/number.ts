@@ -51,7 +51,7 @@ const formatSecondsToReadableTime = (seconds: number) => {
   const duration = intervalToDuration({ start: 0, end: seconds * 1000 });
 
   if (Object.keys(duration).length === 0) {
-    return "Unknown";
+    return "None";
   }
 
   return formatDuration(duration, {
