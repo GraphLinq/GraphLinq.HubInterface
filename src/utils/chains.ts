@@ -1,4 +1,4 @@
-import { isTestnet } from "@constants/index";
+import { isTestnet, MAINNET_RPC_URL } from "@constants/index";
 
 export enum Chain {
   MAINNET,
@@ -17,7 +17,7 @@ interface ExampleConfig {
 export const CurrentConfig: ExampleConfig = {
   chain: Chain.MAINNET,
   rpc: {
-    mainnet: "https://eth.llamarpc.com",
+    mainnet: MAINNET_RPC_URL,
     glqchain: "https://glq-dataseed.graphlinq.io/",
   },
 };

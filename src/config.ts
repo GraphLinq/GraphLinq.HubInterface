@@ -1,10 +1,15 @@
 import { GLQ_CHAIN_ID } from "@utils/chains";
-import { defineChain } from "viem";
+import { defineChain, fallback } from "viem";
 import { http, createConfig } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import { walletConnect } from "wagmi/connectors";
 
-import { GLQ_EXPLORER_URL, GLQ_RPC_URL } from "./constants";
+import {
+  GLQ_EXPLORER_URL,
+  GLQ_RPC_URL,
+  MAINNET_RPC_FALLBACK_URLS,
+  MAINNET_RPC_URL,
+} from "./constants";
 
 declare module "wagmi" {
   interface Register {
@@ -31,7 +36,7 @@ export const mainnet = /*#__PURE__*/ defineChain({
   nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
   rpcUrls: {
     default: {
-      http: ['https://eth.llamarpc.com'],
+      http: [MAINNET_RPC_URL, ...MAINNET_RPC_FALLBACK_URLS],
     },
   },
   blockExplorers: {
@@ -62,7 +67,9 @@ export const config = createConfig({
     walletConnect({ projectId: "efd5e1a329c80052873b2af65f09cbed" }),
   ],
   transports: {
-    [mainnet.id]: http(''),
+    [mainnet.id]: fallback(
+      [MAINNET_RPC_URL, ...MAINNET_RPC_FALLBACK_URLS].map((url) => http(url))
+    ),
     [glqchain.id]: http(),
     [sepolia.id]: http(),
   },
